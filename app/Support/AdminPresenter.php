@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Enums\OrderStatus;
 use App\Models\Category;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductAddOn;
@@ -99,6 +100,20 @@ class AdminPresenter
             'isActive' => $category->is_active,
             'sortOrder' => $category->sort_order,
             'productsCount' => $category->products_count ?? null,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public static function customer(Customer $customer): array
+    {
+        return [
+            'id' => $customer->id,
+            'name' => $customer->name,
+            'email' => $customer->email,
+            'phone' => $customer->phone,
+            'ordersCount' => $customer->orders_count ?? null,
+            'lastOrderAt' => $customer->last_order_at?->toIso8601String(),
+            'createdAt' => $customer->created_at->toIso8601String(),
         ];
     }
 

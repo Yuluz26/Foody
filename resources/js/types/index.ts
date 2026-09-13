@@ -87,7 +87,7 @@ export type CustomerOrder = {
     paymentProofUrl: string | null;
 };
 
-export type StaffRole = 'admin' | 'staff';
+export type StaffRole = 'admin' | 'chef';
 
 export type AuthUser = {
     id: number;
@@ -157,6 +157,16 @@ export type AdminCategory = {
     isActive: boolean;
     sortOrder: number;
     productsCount: number | null;
+};
+
+export type AdminCustomer = {
+    id: number;
+    name: string;
+    email: string | null;
+    phone: string;
+    ordersCount: number | null;
+    lastOrderAt: string | null;
+    createdAt: string;
 };
 
 export type AdminStaff = {

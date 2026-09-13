@@ -16,64 +16,64 @@ class AdminRoleAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $staff;
+    private User $chef;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->staff = User::factory()->staff()->create();
+        $this->chef = User::factory()->chef()->create();
     }
 
-    public function test_staff_can_run_the_order_screens(): void
+    public function test_chef_can_run_the_order_screens(): void
     {
         $order = $this->placeOrder();
 
-        $this->actingAs($this->staff, 'web')->get('/admin')
+        $this->actingAs($this->chef, 'web')->get('/admin')
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->where('auth.user.role', 'staff'));
-        $this->actingAs($this->staff, 'web')->get('/admin/orders')->assertOk();
-        $this->actingAs($this->staff, 'web')->get("/admin/orders/{$order->id}")->assertOk();
-        $this->actingAs($this->staff, 'web')
+            ->assertInertia(fn ($page) => $page->where('auth.user.role', 'chef'));
+        $this->actingAs($this->chef, 'web')->get('/admin/orders')->assertOk();
+        $this->actingAs($this->chef, 'web')->get("/admin/orders/{$order->id}")->assertOk();
+        $this->actingAs($this->chef, 'web')
             ->patch("/admin/orders/{$order->id}/status", ['status' => OrderStatus::Confirmed->value])
             ->assertSessionHasNoErrors();
 
         $this->assertSame(OrderStatus::Confirmed, $order->fresh()->status);
     }
 
-    public function test_staff_can_open_reports(): void
+    public function test_chef_can_open_reports(): void
     {
-        $this->actingAs($this->staff, 'web')->get('/admin/reports')->assertOk();
+        $this->actingAs($this->chef, 'web')->get('/admin/reports')->assertOk();
     }
 
-    public function test_staff_are_kept_out_of_the_menu_customers_accounts_and_settings(): void
+    public function test_chef_are_kept_out_of_the_menu_customers_accounts_and_settings(): void
     {
         foreach (['/admin/products', '/admin/categories', '/admin/banners', '/admin/customers', '/admin/staff', '/admin/settings'] as $url) {
-            $this->actingAs($this->staff, 'web')->get($url)->assertForbidden();
+            $this->actingAs($this->chef, 'web')->get($url)->assertForbidden();
         }
 
-        $this->actingAs($this->staff, 'web')->put('/admin/settings', ['name' => 'Diubah'])->assertForbidden();
+        $this->actingAs($this->chef, 'web')->put('/admin/settings', ['name' => 'Diubah'])->assertForbidden();
     }
 
-    public function test_staff_cannot_delete_orders_one_by_one_or_in_bulk(): void
+    public function test_chef_cannot_delete_orders_one_by_one_or_in_bulk(): void
     {
         $order = $this->placeOrder();
 
-        $this->actingAs($this->staff, 'web')->delete("/admin/orders/{$order->id}")->assertForbidden();
-        $this->actingAs($this->staff, 'web')->post('/admin/orders/bulk', ['ids' => [$order->id], 'action' => 'delete'])->assertForbidden();
+        $this->actingAs($this->chef, 'web')->delete("/admin/orders/{$order->id}")->assertForbidden();
+        $this->actingAs($this->chef, 'web')->post('/admin/orders/bulk', ['ids' => [$order->id], 'action' => 'delete'])->assertForbidden();
         $this->assertModelExists($order);
 
-        $this->actingAs($this->staff, 'web')->post('/admin/orders/bulk', ['ids' => [$order->id], 'action' => 'approve'])->assertSessionHas('success');
+        $this->actingAs($this->chef, 'web')->post('/admin/orders/bulk', ['ids' => [$order->id], 'action' => 'approve'])->assertSessionHas('success');
     }
 
     public function test_a_password_change_signs_the_account_out_of_its_other_sessions(): void
     {
-        $this->actingAs($this->staff, 'web')->get('/admin')->assertOk();
+        $this->actingAs($this->chef, 'web')->get('/admin')->assertOk();
 
-        $this->staff->password = 'kata-laluan-baharu-99';
-        $this->staff->save();
+        $this->chef->password = 'kata-laluan-baharu-99';
+        $this->chef->save();
 
-        $this->actingAs($this->staff, 'web')->get('/admin')->assertRedirect('/admin/login');
+        $this->actingAs($this->chef, 'web')->get('/admin')->assertRedirect('/admin/login');
     }
 
     private function placeOrder(): Order

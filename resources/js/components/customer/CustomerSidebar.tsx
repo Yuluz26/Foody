@@ -25,7 +25,7 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
         <aside aria-label="Maklumat kedai dan kategori" className="hidden shrink-0 lg:block lg:w-64">
             <div className="no-scrollbar sticky top-8 grid max-h-[calc(100vh-4rem)] gap-5 overflow-y-auto pb-2">
                 <div className="on-module rounded-(--radius-panel) bg-module p-5 shadow-(--shadow-module)">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                         {restaurant.logoUrl ? (
                             <img src={restaurant.logoUrl} alt="" className="size-12 shrink-0 rounded-(--radius-module) border-2 border-white/15 object-cover" />
                         ) : (
@@ -33,8 +33,8 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
                                 <StorefrontIcon size={22} weight="bold" className="text-amber" aria-hidden />
                             </div>
                         )}
-                        <div className="min-w-0">
-                            <p className="truncate text-lg font-extrabold text-white">{restaurant.name}</p>
+                        <div className="min-w-0 pt-0.5">
+                            <p className="line-clamp-2 text-xl leading-tight font-extrabold text-balance break-words text-white">{restaurant.name}</p>
                             <p className={cn('mt-0.5 flex items-center gap-1.5 text-sm font-semibold', taking ? 'text-leaf' : 'text-white/60')}>
                                 <span className={cn('size-2 shrink-0 rounded-full', taking ? 'bg-leaf shadow-[0_0_0_3px_theme(colors.leaf/25%)]' : 'bg-white/30')} aria-hidden />
                                 {label}
