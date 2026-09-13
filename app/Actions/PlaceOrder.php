@@ -173,6 +173,23 @@ class PlaceOrder
             ];
         }
 
+        $tableNumber = $type === OrderType::DineIn ? trim((string) $data['table_number']) : null;
+
+        if ($tableNumber !== null) {
+            // Re-check inside the transaction (with a row lock) so two checkouts racing for the
+            // last free table can't both win — the form's own validation already ran, but that
+            // read is stale by the time we get here.
+            $taken = Order::query()->active()
+                ->where('type', OrderType::DineIn)
+                ->where('table_number', $tableNumber)
+                ->lockForUpdate()
+                ->exists();
+
+            if ($taken) {
+                throw OrderRejected::tableTaken($tableNumber);
+            }
+        }
+
         $phone = Customer::normalizePhone($data['customer_phone']);
         $name = trim($data['customer_name']);
 
@@ -198,7 +215,7 @@ class PlaceOrder
             'customer_name' => $name,
             'customer_phone' => $phone,
             'type' => $type,
-            'table_number' => $type === OrderType::DineIn ? trim((string) $data['table_number']) : null,
+            'table_number' => $tableNumber,
             'notes' => filled($data['notes'] ?? null) ? trim($data['notes']) : null,
             'status' => OrderStatus::Pending,
             'subtotal' => $subtotal,

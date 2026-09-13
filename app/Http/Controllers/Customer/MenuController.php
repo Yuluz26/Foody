@@ -31,6 +31,7 @@ class MenuController extends Controller
                 'name' => $category->name,
                 'slug' => $category->slug,
                 'description' => $category->description,
+                'imageUrl' => $category->image_url,
                 'products' => $category->products->map(MenuPresenter::product(...))->all(),
             ])->all(),
             // A QR code on the table links to /?meja=12 so the table number is prefilled at checkout.

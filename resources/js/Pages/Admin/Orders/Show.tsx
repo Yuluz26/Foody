@@ -116,24 +116,26 @@ function EditOrderForm({ order, onDone }: { order: OrderDetail; onDone: () => vo
 
                         return (
                             <li key={item.id} className="grid gap-1.5 py-2.5">
-                                <div className="flex items-center gap-3">
-                                    <span className="min-w-0 flex-1 text-base font-semibold">{item.name}</span>
-                                    <span className="shrink-0 text-sm text-ink-muted">{formatPrice(item.unitPrice)} seunit</span>
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                                    <span className="min-w-0 flex-1 basis-40 text-base font-semibold">{item.name}</span>
+                                    <span className="shrink-0 whitespace-nowrap text-sm text-ink-muted">{formatPrice(item.unitPrice)} seunit</span>
                                     <label htmlFor={inputId} className="sr-only">
                                         Kuantiti {item.name}
                                     </label>
-                                    <input
-                                        id={inputId}
-                                        type="number"
-                                        inputMode="numeric"
-                                        min={1}
-                                        max={50}
-                                        className={`${inputClass} w-20 shrink-0 text-center`}
-                                        aria-invalid={error ? true : undefined}
-                                        value={quantity}
-                                        onChange={(event) => setQuantity(index, Math.max(1, Math.min(50, Number(event.target.value) || 1)))}
-                                    />
-                                    <span className="w-24 shrink-0 text-right font-semibold tabular-nums">
+                                    <div className="w-20 shrink-0">
+                                        <input
+                                            id={inputId}
+                                            type="number"
+                                            inputMode="numeric"
+                                            min={1}
+                                            max={50}
+                                            className={`${inputClass} text-center`}
+                                            aria-invalid={error ? true : undefined}
+                                            value={quantity}
+                                            onChange={(event) => setQuantity(index, Math.max(1, Math.min(50, Number(event.target.value) || 1)))}
+                                        />
+                                    </div>
+                                    <span className="w-24 shrink-0 whitespace-nowrap text-right font-semibold tabular-nums">
                                         {formatPrice(item.unitPrice * quantity + item.addOnsTotal)}
                                     </span>
                                 </div>

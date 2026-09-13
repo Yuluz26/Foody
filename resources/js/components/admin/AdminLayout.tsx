@@ -4,6 +4,7 @@ import {
     BellIcon,
     BellSlashIcon,
     BowlFoodIcon,
+    ChartLineUpIcon,
     GearSixIcon,
     HouseIcon,
     IdentificationBadgeIcon,
@@ -28,6 +29,7 @@ type NavItem = { href: string; label: string; Icon: Icon; exact?: boolean; count
 const NAV: NavItem[] = [
     { href: '/admin', label: 'Ringkasan', Icon: HouseIcon, exact: true },
     { href: '/admin/orders', label: 'Pesanan', Icon: ReceiptIcon, countKey: 'activeOrders' },
+    { href: '/admin/reports', label: 'Laporan', Icon: ChartLineUpIcon },
     { href: '/admin/products', label: 'Produk', Icon: BowlFoodIcon, adminOnly: true },
     { href: '/admin/categories', label: 'Kategori', Icon: SquaresFourIcon, adminOnly: true },
     { href: '/admin/customers', label: 'Pelanggan', Icon: UsersIcon, adminOnly: true },

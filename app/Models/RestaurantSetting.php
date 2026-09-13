@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'name', 'logo', 'description', 'phone', 'address', 'opens_at', 'closes_at',
-    'currency', 'ordering_enabled', 'dine_in_enabled', 'takeaway_enabled',
+    'currency', 'ordering_enabled', 'dine_in_enabled', 'takeaway_enabled', 'table_count',
     'qr_code', 'payment_instructions',
 ])]
 class RestaurantSetting extends Model
@@ -22,6 +22,7 @@ class RestaurantSetting extends Model
         'ordering_enabled' => true,
         'dine_in_enabled' => true,
         'takeaway_enabled' => true,
+        'table_count' => 12,
     ];
 
     protected function casts(): array
@@ -30,6 +31,7 @@ class RestaurantSetting extends Model
             'ordering_enabled' => 'boolean',
             'dine_in_enabled' => 'boolean',
             'takeaway_enabled' => 'boolean',
+            'table_count' => 'integer',
         ];
     }
 

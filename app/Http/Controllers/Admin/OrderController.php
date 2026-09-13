@@ -9,10 +9,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateOrderRequest;
 use App\Mail\OrderStatusUpdatedMail;
 use App\Models\Order;
+use App\Models\RestaurantSetting;
 use App\Support\AdminPresenter;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -30,7 +33,8 @@ class OrderController extends Controller
             'q' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', Rule::in(['active', 'all', ...array_column(OrderStatus::cases(), 'value')])],
             'type' => ['nullable', Rule::enum(OrderType::class)],
-            'date' => ['nullable', 'date_format:Y-m-d'],
+            'date_from' => ['nullable', 'date_format:Y-m-d'],
+            'date_to' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
         $status = $filters['status'] ?? 'active';
@@ -52,7 +56,8 @@ class OrderController extends Controller
             ->when($status === 'active', fn (Builder $query) => $query->active())
             ->when(! in_array($status, ['active', 'all'], true), fn (Builder $query) => $query->where('status', $status))
             ->when($filters['type'] ?? null, fn (Builder $query, string $type) => $query->where('type', $type))
-            ->when($filters['date'] ?? null, fn (Builder $query, string $date) => $query->whereDate('created_at', $date))
+            ->when($filters['date_from'] ?? null, fn (Builder $query, string $date) => $query->whereDate('created_at', '>=', $date))
+            ->when($filters['date_to'] ?? null, fn (Builder $query, string $date) => $query->whereDate('created_at', '<=', $date))
             // Active queue reads oldest first, like a kitchen docket rail; history reads newest first.
             ->when($status === 'active', fn (Builder $query) => $query->oldest(), fn (Builder $query) => $query->latest())
             ->paginate(20)
@@ -65,7 +70,8 @@ class OrderController extends Controller
                 'q' => $filters['q'] ?? '',
                 'status' => $status,
                 'type' => $filters['type'] ?? '',
-                'date' => $filters['date'] ?? '',
+                'date_from' => $filters['date_from'] ?? '',
+                'date_to' => $filters['date_to'] ?? '',
             ],
             'statusOptions' => AdminPresenter::statusOptions(OrderStatus::cases()),
             'activeCount' => Order::query()->active()->count(),
@@ -247,5 +253,40 @@ class OrderController extends Controller
         ];
 
         return back()->with($affected > 0 ? 'success' : 'error', $affected > 0 ? $messages[$action] : 'Tiada pesanan yang boleh dikemas kini dengan tindakan ini.');
+    }
+
+    /** Any staff may reprint any order's receipt — unlike the customer-facing route, this isn't scoped to an owner. */
+    public function receipt(Order $order): HttpResponse
+    {
+        $order->loadMissing('items.addOns');
+        $restaurant = RestaurantSetting::current();
+
+        $pdf = Pdf::loadView('receipts.order', ['order' => $order, 'restaurant' => $restaurant])
+            ->setPaper('a5', 'portrait');
+
+        return $pdf->download("resit-{$order->order_number}.pdf");
+    }
+
+    public function receipts(Request $request): HttpResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1', 'max:100'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $orders = Order::query()
+            ->with('items.addOns')
+            ->whereIn('id', $validated['ids'])
+            ->oldest()
+            ->get();
+
+        abort_if($orders->isEmpty(), 404);
+
+        $restaurant = RestaurantSetting::current();
+
+        $pdf = Pdf::loadView('receipts.bulk', ['orders' => $orders, 'restaurant' => $restaurant])
+            ->setPaper('a5', 'portrait');
+
+        return $pdf->download('resit-pukal-'.now()->format('Y-m-d-His').'.pdf');
     }
 }

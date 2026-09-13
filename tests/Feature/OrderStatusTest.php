@@ -345,4 +345,22 @@ class OrderStatusTest extends TestCase
 
         Carbon::setTestNow();
     }
+
+    public function test_orders_index_can_be_filtered_by_a_date_range(): void
+    {
+        $inRange = $this->placeOrder();
+        $inRange->forceFill(['created_at' => '2026-06-15 10:00:00'])->save();
+
+        $before = $this->placeOrder();
+        $before->forceFill(['created_at' => '2026-06-01 10:00:00'])->save();
+
+        $after = $this->placeOrder();
+        $after->forceFill(['created_at' => '2026-06-30 10:00:00'])->save();
+
+        $this->actingAs($this->admin, 'web')
+            ->get('/admin/orders?status=all&date_from=2026-06-10&date_to=2026-06-20')
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('orders.data', 1)
+                ->where('orders.data.0.id', $inRange->id));
+    }
 }

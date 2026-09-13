@@ -9,8 +9,13 @@ export function RestaurantBoard({ restaurant }: { restaurant: Restaurant }) {
     const opens = formatClock(restaurant.opensAt);
     const closes = formatClock(restaurant.closesAt);
 
+    // When open, the lamp already says "Buka hingga <closes>" — repeating the same range
+    // below would be noise. The full range only earns its own row once the lamp can't say it
+    // (closed, or ordering off), so a diner still learns when the kitchen is next open.
+    const lampCoversHours = restaurant.acceptingOrders && closes;
+
     return (
-        <header className="border-b-2 border-rule bg-ground">
+        <header className="border-b-2 border-rule bg-gradient-to-b from-ground to-ground-deep">
             <div className="mx-auto max-w-6xl px-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-6 sm:px-10 sm:pt-9 sm:pb-7 lg:pt-8 lg:pb-6">
                 {customerAuth.user && (
                     <div className="-mt-1 mb-3 flex items-center justify-end gap-4 text-sm font-semibold text-ink-soft">
@@ -44,7 +49,7 @@ export function RestaurantBoard({ restaurant }: { restaurant: Restaurant }) {
                 </div>
 
                 <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[15px] text-ink-muted">
-                    {opens && closes && (
+                    {opens && closes && !lampCoversHours && (
                         <div className="flex items-center gap-2">
                             <dt>
                                 <ClockIcon size={18} weight="bold" aria-hidden />

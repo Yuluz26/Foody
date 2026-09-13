@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\RestaurantSetting;
 use App\Support\MenuPresenter;
+use App\Support\TableAvailability;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,6 +17,7 @@ class CheckoutController extends Controller
     {
         return Inertia::render('Customer/Checkout', [
             'restaurant' => MenuPresenter::restaurant(RestaurantSetting::current()),
+            'availableTables' => TableAvailability::available(),
             // The cart lives in the browser; current prices and availability let it reconcile before submit.
             'products' => Product::query()
                 ->with(['category:id,is_active', 'addOns'])

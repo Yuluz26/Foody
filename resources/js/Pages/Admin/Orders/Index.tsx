@@ -12,7 +12,7 @@ import { inputClass } from '@/components/ui/Field';
 import { cn } from '@/lib/format';
 import type { AdminOrderRow, Paginated, StatusOption } from '@/types';
 
-type Filters = { q: string; status: string; type: string; date: string };
+type Filters = { q: string; status: string; type: string; date_from: string; date_to: string };
 
 type OrdersIndexProps = {
     orders: Paginated<AdminOrderRow>;
@@ -21,7 +21,7 @@ type OrdersIndexProps = {
     activeCount: number;
 };
 
-const EMPTY: Filters = { q: '', status: 'active', type: '', date: '' };
+const EMPTY: Filters = { q: '', status: 'active', type: '', date_from: '', date_to: '' };
 
 export default function OrdersIndex({ orders, filters: initial, statusOptions, activeCount }: OrdersIndexProps) {
     const { filters, set, reset } = useFilters('/admin/orders', initial);
@@ -76,7 +76,7 @@ export default function OrdersIndex({ orders, filters: initial, statusOptions, a
         ...statusOptions.map((option) => ({ value: option.value, label: ADMIN_STATUS[option.value].label })),
     ];
 
-    const filtered = filters.q !== '' || filters.type !== '' || filters.date !== '' || filters.status !== 'active';
+    const filtered = filters.q !== '' || filters.type !== '' || filters.date_from !== '' || filters.date_to !== '' || filters.status !== 'active';
 
     return (
         <AdminLayout title="Pesanan">
@@ -102,7 +102,7 @@ export default function OrdersIndex({ orders, filters: initial, statusOptions, a
                 })}
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_11rem]">
+            <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem_9.5rem_9.5rem]">
                 <label className="relative block">
                     <span className="sr-only">Cari nombor pesanan, nama atau telefon</span>
                     <MagnifyingGlassIcon size={20} weight="bold" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-muted" aria-hidden />
@@ -123,8 +123,24 @@ export default function OrdersIndex({ orders, filters: initial, statusOptions, a
                     </select>
                 </label>
                 <label className="block">
-                    <span className="sr-only">Tarikh</span>
-                    <input type="date" value={filters.date} onChange={(event) => set('date', event.target.value)} className={inputClass} />
+                    <span className="sr-only">Dari tarikh</span>
+                    <input
+                        type="date"
+                        value={filters.date_from}
+                        max={filters.date_to || undefined}
+                        onChange={(event) => set('date_from', event.target.value)}
+                        className={inputClass}
+                    />
+                </label>
+                <label className="block">
+                    <span className="sr-only">Hingga tarikh</span>
+                    <input
+                        type="date"
+                        value={filters.date_to}
+                        min={filters.date_from || undefined}
+                        onChange={(event) => set('date_to', event.target.value)}
+                        className={inputClass}
+                    />
                 </label>
             </div>
 

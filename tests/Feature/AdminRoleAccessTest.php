@@ -41,6 +41,11 @@ class AdminRoleAccessTest extends TestCase
         $this->assertSame(OrderStatus::Confirmed, $order->fresh()->status);
     }
 
+    public function test_staff_can_open_reports(): void
+    {
+        $this->actingAs($this->staff, 'web')->get('/admin/reports')->assertOk();
+    }
+
     public function test_staff_are_kept_out_of_the_menu_customers_accounts_and_settings(): void
     {
         foreach (['/admin/products', '/admin/categories', '/admin/banners', '/admin/customers', '/admin/staff', '/admin/settings'] as $url) {

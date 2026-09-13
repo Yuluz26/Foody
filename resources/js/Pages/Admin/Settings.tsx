@@ -20,6 +20,7 @@ type SettingsProps = {
         orderingEnabled: boolean;
         dineInEnabled: boolean;
         takeawayEnabled: boolean;
+        tableCount: number;
         logoUrl: string | null;
         qrCodeUrl: string | null;
         paymentInstructions: string;
@@ -38,6 +39,7 @@ type SettingFields = {
     ordering_enabled: boolean;
     dine_in_enabled: boolean;
     takeaway_enabled: boolean;
+    table_count: number;
     logo: File | null;
     remove_logo: boolean;
     qr_code: File | null;
@@ -73,6 +75,7 @@ export default function Settings({ settings }: SettingsProps) {
         ordering_enabled: settings.orderingEnabled,
         dine_in_enabled: settings.dineInEnabled,
         takeaway_enabled: settings.takeawayEnabled,
+        table_count: settings.tableCount,
         logo: null,
         remove_logo: false,
         qr_code: null,
@@ -171,14 +174,36 @@ export default function Settings({ settings }: SettingsProps) {
                         label="Terima pesanan dalam talian"
                         description="Matikan untuk tutup pesanan sementara. Menu masih boleh dilihat."
                     />
-                    <Switch checked={form.data.dine_in_enabled} onChange={(checked) => form.setData('dine_in_enabled', checked)} label="Makan di sini" description="Pelanggan beri nombor meja." />
+                    <Switch checked={form.data.dine_in_enabled} onChange={(checked) => form.setData('dine_in_enabled', checked)} label="Makan di sini" description="Pelanggan pilih daripada meja yang tersedia." />
                     {form.errors.dine_in_enabled && <p className="-mt-3 text-sm font-semibold text-alert">{form.errors.dine_in_enabled}</p>}
+                    {form.data.dine_in_enabled && (
+                        <Field
+                            id="table_count"
+                            label="Bilangan meja"
+                            error={form.errors.table_count}
+                            hint="Meja dinomborkan 1 hingga bilangan ini. Meja yang sedang ada pesanan aktif disembunyikan sehingga pesanan itu selesai atau dibatalkan."
+                            className="max-w-40"
+                        >
+                            {(control) => (
+                                <input
+                                    {...control}
+                                    type="number"
+                                    inputMode="numeric"
+                                    min={0}
+                                    max={200}
+                                    value={form.data.table_count}
+                                    onChange={(event) => form.setData('table_count', Math.max(0, Math.min(200, Number(event.target.value) || 0)))}
+                                    className={cn(inputClass, 'tabular')}
+                                />
+                            )}
+                        </Field>
+                    )}
                     <Switch checked={form.data.takeaway_enabled} onChange={(checked) => form.setData('takeaway_enabled', checked)} label="Bungkus" description="Pelanggan ambil di kaunter." />
                     <div className="flex gap-3 border-t border-rule pt-5 text-[15px]">
                         <QrCodeIcon size={24} weight="bold" className="shrink-0 text-ink-soft" aria-hidden />
                         <p className="text-ink-soft">
                             Untuk kod QR meja, gunakan pautan menu dengan nombor meja di hujung, contohnya{' '}
-                            <code className="rounded-(--radius-module) bg-amber-tint px-1.5 py-0.5 font-semibold text-ink">{origin}/?meja=12</code>. Nombor meja akan diisi sendiri semasa pelanggan memesan.
+                            <code className="rounded-(--radius-module) bg-amber-tint px-1.5 py-0.5 font-semibold text-ink">{origin}/?meja=12</code>. Nombor meja akan dipilih sendiri semasa pelanggan memesan, jika ia tersedia.
                         </p>
                     </div>
                 </Panel>

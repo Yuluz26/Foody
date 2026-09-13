@@ -133,6 +133,7 @@ class PaymentTest extends TestCase
             'ordering_enabled' => '1',
             'dine_in_enabled' => '1',
             'takeaway_enabled' => '1',
+            'table_count' => '10',
             'qr_code' => UploadedFile::fake()->image('qr.jpg'),
             'payment_instructions' => 'Sila sertakan nombor pesanan sebagai rujukan.',
         ])->assertSessionHasNoErrors();
@@ -157,6 +158,7 @@ class PaymentTest extends TestCase
             'ordering_enabled' => '1',
             'dine_in_enabled' => '1',
             'takeaway_enabled' => '1',
+            'table_count' => '10',
             'remove_qr_code' => '1',
         ])->assertSessionHasNoErrors();
 

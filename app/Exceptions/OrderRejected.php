@@ -32,4 +32,9 @@ class OrderRejected extends RuntimeException
     {
         return new self("Add-on untuk {$productName} sudah tidak sah. Sila buang dan tambah semula item tersebut.");
     }
+
+    public static function tableTaken(string $table): self
+    {
+        return new self("Meja {$table} baru sahaja diambil pelanggan lain. Sila pilih meja lain.");
+    }
 }

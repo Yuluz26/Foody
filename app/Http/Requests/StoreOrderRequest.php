@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\OrderType;
 use App\Enums\PaymentMethod;
 use App\Models\Customer;
+use App\Support\TableAvailability;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,7 +26,7 @@ class StoreOrderRequest extends FormRequest
             'type' => ['required', Rule::enum(OrderType::class)],
             'table_number' => [
                 'exclude_unless:type,'.OrderType::DineIn->value,
-                'required', 'string', 'max:10', 'regex:/^[A-Za-z0-9 -]+$/',
+                'required', 'string', Rule::in(TableAvailability::available()),
             ],
             'customer_name' => ['required', 'string', 'min:2', 'max:100'],
             'customer_phone' => ['required', 'string', 'max:20', function (string $attribute, mixed $value, Closure $fail) {
@@ -55,9 +56,8 @@ class StoreOrderRequest extends FormRequest
         return [
             'type.required' => 'Pilih Makan di sini atau Bungkus.',
             'type.enum' => 'Jenis pesanan tidak sah.',
-            'table_number.required' => 'Masukkan nombor meja anda.',
-            'table_number.max' => 'Nombor meja terlalu panjang.',
-            'table_number.regex' => 'Nombor meja hanya boleh mengandungi huruf dan nombor.',
+            'table_number.required' => 'Pilih nombor meja anda.',
+            'table_number.in' => 'Meja ini baru sahaja diambil pelanggan lain. Sila pilih meja lain.',
             'customer_name.required' => 'Masukkan nama anda.',
             'customer_name.min' => 'Nama terlalu pendek.',
             'customer_name.max' => 'Nama terlalu panjang.',

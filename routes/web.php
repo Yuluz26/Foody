@@ -50,10 +50,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
         Route::post('orders/bulk', [Admin\OrderController::class, 'bulk'])->name('orders.bulk');
+        Route::get('orders/receipts', [Admin\OrderController::class, 'receipts'])->name('orders.receipts');
         Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
+        Route::get('orders/{order}/receipt', [Admin\OrderController::class, 'receipt'])->name('orders.receipt');
         Route::patch('orders/{order}/status', [Admin\OrderController::class, 'updateStatus'])->name('orders.status');
         Route::patch('orders/{order}/payment', [Admin\OrderController::class, 'confirmPayment'])->name('orders.payment');
         Route::patch('orders/{order}', [Admin\OrderController::class, 'update'])->name('orders.update');
+
+        Route::get('reports', [Admin\ReportController::class, 'index'])->name('reports.index');
 
         Route::get('profile', [Admin\ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('profile', [Admin\ProfileController::class, 'update'])->name('profile.update');

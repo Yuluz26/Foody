@@ -1,6 +1,8 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { ClockIcon, MapPinIcon, PhoneIcon, ReceiptIcon, SignOutIcon, StorefrontIcon } from '@phosphor-icons/react';
-import { cn, formatClock } from '@/lib/format';
+import { motion, useReducedMotion } from 'framer-motion';
+import { cn, formatClock, imageSrc } from '@/lib/format';
+import { duration, ease } from '@/lib/motion';
 import type { MenuCategory, Restaurant } from '@/types';
 
 type CustomerSidebarProps = {
@@ -13,6 +15,7 @@ type CustomerSidebarProps = {
 /** The desktop-only standing rail: who this shop is, its numbered categories, how to reach it, and the signed-in diner's own account links. */
 export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: CustomerSidebarProps) {
     const { customerAuth } = usePage().props;
+    const reduce = useReducedMotion();
     const taking = restaurant.acceptingOrders;
     const label = taking ? 'Buka' : restaurant.isOpen ? 'Tutup pesanan' : 'Tutup';
     const opens = formatClock(restaurant.opensAt);
@@ -40,7 +43,7 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
                     </div>
                 </div>
 
-                <nav aria-label="Kategori menu" className="grid gap-1 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-2">
+                <nav aria-label="Kategori menu" className="grid gap-1.5 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-2">
                     {categories.map((category) => {
                         const active = category.id === activeId;
 
@@ -54,11 +57,29 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
                                     onSelect(category);
                                 }}
                                 className={cn(
-                                    'rounded-(--radius-control) px-3.5 py-2.5 font-semibold transition-colors duration-150',
-                                    active ? 'bg-ink text-white' : 'text-ink-soft hover:bg-ground hover:text-ink',
+                                    'relative flex items-center gap-2.5 rounded-(--radius-control) py-1.5 pr-3.5 font-semibold transition-colors duration-150',
+                                    category.imageUrl ? 'pl-1.5' : 'pl-3.5',
+                                    active ? 'text-white' : 'text-ink-soft hover:bg-ground hover:text-ink',
                                 )}
                             >
-                                {category.name}
+                                {active && (
+                                    <motion.span
+                                        layoutId="sidebar-fill"
+                                        className="absolute inset-0 rounded-(--radius-control) bg-ink"
+                                        transition={reduce ? { duration: 0 } : { duration: duration.base, ease: ease.inOut }}
+                                    />
+                                )}
+                                {category.imageUrl && (
+                                    <img
+                                        src={imageSrc(category.imageUrl, 72)}
+                                        alt=""
+                                        className={cn(
+                                            'relative z-10 size-9 shrink-0 rounded-(--radius-module) border-2 object-cover',
+                                            active ? 'border-white/25' : 'border-rule-strong',
+                                        )}
+                                    />
+                                )}
+                                <span className="relative z-10 min-w-0 truncate">{category.name}</span>
                             </a>
                         );
                     })}

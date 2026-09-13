@@ -43,6 +43,7 @@ export type MenuCategory = {
     name: string;
     slug: string;
     description: string | null;
+    imageUrl: string | null;
     products: MenuProduct[];
 };
 

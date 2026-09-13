@@ -29,6 +29,7 @@ type CheckoutProps = {
     restaurant: Restaurant;
     products: Record<string, MenuProduct>;
     table: string | null;
+    availableTables: string[];
 };
 
 type FormFields = {
@@ -116,7 +117,7 @@ function validateField(field: keyof FormFields, data: FormFields): string | unde
         case 'type':
             return data.type ? undefined : 'Pilih Makan di sini atau Bungkus.';
         case 'table_number':
-            return data.type === 'dine_in' && !data.table_number.trim() ? 'Masukkan nombor meja anda.' : undefined;
+            return data.type === 'dine_in' && !data.table_number.trim() ? 'Pilih meja anda.' : undefined;
         case 'customer_name':
             return data.customer_name.trim().length < 2 ? 'Masukkan nama anda supaya kami boleh panggil.' : undefined;
         case 'customer_phone': {
@@ -152,7 +153,7 @@ function QrCodeLightbox({ open, onClose, qrCodeUrl }: { open: boolean; onClose: 
     );
 }
 
-function CheckoutScreen({ restaurant, products, table }: CheckoutProps) {
+function CheckoutScreen({ restaurant, products, table, availableTables }: CheckoutProps) {
     const cart = useCart();
     const reduce = useReducedMotion();
     const [notices, setNotices] = useState<string[]>([]);
@@ -230,7 +231,9 @@ function CheckoutScreen({ restaurant, products, table }: CheckoutProps) {
     }, []);
 
     const saved = useMemo(readSavedCustomer, []);
-    const initialTable = useMemo(() => readTable(table), [table]);
+    const rememberedTable = useMemo(() => readTable(table), [table]);
+    // A remembered/QR table only pre-selects if it's still free — otherwise the customer picks again.
+    const initialTable = availableTables.includes(rememberedTable) ? rememberedTable : '';
 
     const defaultType: FormFields['type'] =
         initialTable && restaurant.dineInEnabled
@@ -441,22 +444,33 @@ function CheckoutScreen({ restaurant, products, table }: CheckoutProps) {
                                         transition={{ duration: duration.fast, ease: ease.out }}
                                         className="mt-5 max-w-48"
                                     >
-                                        <Field id="medan-table_number" label="Nombor meja" error={form.errors.table_number} hint="Tertera pada meja anda">
-                                            {(control) => (
-                                                <input
-                                                    {...control}
-                                                    type="text"
-                                                    inputMode="text"
-                                                    autoCapitalize="characters"
-                                                    autoComplete="off"
-                                                    maxLength={10}
-                                                    value={form.data.table_number}
-                                                    onChange={(event) => form.setData('table_number', event.target.value)}
-                                                    onBlur={() => checkField('table_number')}
-                                                    className={cn(inputClass, 'font-mono text-2xl font-bold tracking-wide')}
-                                                />
-                                            )}
-                                        </Field>
+                                        {availableTables.length === 0 ? (
+                                            <p className="flex items-start gap-1.5 text-sm font-semibold text-alert">
+                                                <WarningCircleIcon size={18} weight="bold" className="mt-px shrink-0" aria-hidden />
+                                                Semua meja sedang digunakan buat masa ini. Sila cuba lagi sebentar, atau pilih Bungkus.
+                                            </p>
+                                        ) : (
+                                            <Field id="medan-table_number" label="Nombor meja" error={form.errors.table_number} hint="Hanya meja yang tiada pesanan aktif dipaparkan">
+                                                {(control) => (
+                                                    <select
+                                                        {...control}
+                                                        value={form.data.table_number}
+                                                        onChange={(event) => form.setData('table_number', event.target.value)}
+                                                        onBlur={() => checkField('table_number')}
+                                                        className={cn(inputClass, 'font-mono text-2xl font-bold tracking-wide')}
+                                                    >
+                                                        <option value="" disabled>
+                                                            Pilih meja
+                                                        </option>
+                                                        {availableTables.map((tableNumber) => (
+                                                            <option key={tableNumber} value={tableNumber}>
+                                                                Meja {tableNumber}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                )}
+                                            </Field>
+                                        )}
                                     </motion.div>
                                 )}
                             </AnimatePresence>
