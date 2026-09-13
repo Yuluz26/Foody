@@ -38,6 +38,7 @@ function orderNumber(id: number): string {
  */
 export function useNewOrderAlert() {
     const { props } = usePage();
+    const restaurantName = props.restaurantName;
     const toast = useToast();
     const [soundEnabled, setSoundEnabled] = useState(() => readFlag(SOUND_KEY, true));
     const [notifyEnabled, setNotifyEnabled] = useState(
@@ -97,7 +98,7 @@ export function useNewOrderAlert() {
         }
 
         if (notifyEnabled && document.hidden && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-            const notification = new Notification('Pesanan baru di Foody', {
+            const notification = new Notification(`Pesanan baru di ${restaurantName}`, {
                 body: newCount === 1 ? `Pesanan ${orderNumber(latestId)} baru masuk.` : `${newCount} pesanan baru masuk.`,
                 tag: 'foody-new-order',
             });
@@ -138,7 +139,7 @@ export function useNewOrderAlert() {
         }
 
         if (notifyEnabled && document.hidden && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-            const notification = new Notification('Pesanan dibatalkan di Foody', {
+            const notification = new Notification(`Pesanan dibatalkan di ${restaurantName}`, {
                 body: `Pesanan ${orderNumber(latestCancelledId)} dibatalkan oleh pelanggan.`,
                 tag: 'foody-order-cancelled',
             });

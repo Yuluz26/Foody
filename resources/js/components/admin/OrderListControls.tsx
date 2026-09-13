@@ -90,15 +90,17 @@ type SelectionToolbarProps = {
     onToggleAll: () => void;
     onClear: () => void;
     children: ReactNode;
+    /** The noun counted in "N ... dipilih" — defaults to "pesanan" for the Orders/Reports pages. */
+    noun?: string;
 };
 
-/** The "N pesanan dipilih" bar shared by the admin Orders and Reports list pages; each page supplies its own bulk-action buttons. */
-export function SelectionToolbar({ count, allSelected, bulkPending, onToggleAll, onClear, children }: SelectionToolbarProps) {
+/** The "N <noun> dipilih" bar shared by the admin Orders, Reports and Customers list pages; each page supplies its own bulk-action buttons. */
+export function SelectionToolbar({ count, allSelected, bulkPending, onToggleAll, onClear, children, noun = 'pesanan' }: SelectionToolbarProps) {
     return (
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-t-(--radius-panel) border-2 border-b-0 border-rule-strong bg-ground px-4 py-2.5">
             <label className="flex items-center gap-2.5 text-[15px] font-semibold text-ink-soft">
                 <input type="checkbox" checked={allSelected} onChange={onToggleAll} className="size-5 shrink-0 rounded-sm border-2 border-rule-strong accent-ink" />
-                {count > 0 ? `${count} pesanan dipilih` : 'Pilih semua di halaman ini'}
+                {count > 0 ? `${count} ${noun} dipilih` : 'Pilih semua di halaman ini'}
             </label>
             {count > 0 && (
                 <div className="flex flex-wrap items-center gap-2">

@@ -2,7 +2,12 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Customer;
+use App\Http\Controllers\ManifestController;
 use Illuminate\Support\Facades\Route;
+
+// The name/short_name/description follow the restaurant's own name, so this can't be a static
+// public/ file — it must go through the router on every request.
+Route::get('/manifest.webmanifest', ManifestController::class)->name('manifest');
 
 /*
 | Customer ordering panel — every page needs a diner account, so a customer can
@@ -80,7 +85,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('banners', [Admin\BannerController::class, 'store'])->name('banners.store');
             Route::delete('banners/{banner}', [Admin\BannerController::class, 'destroy'])->name('banners.destroy');
 
-            Route::get('customers', Admin\CustomerController::class)->name('customers.index');
+            Route::post('customers/bulk', [Admin\CustomerController::class, 'bulk'])->name('customers.bulk');
+            Route::resource('customers', Admin\CustomerController::class)->except('show');
 
             Route::post('staff/bulk', [Admin\StaffController::class, 'bulk'])->name('staff.bulk');
             Route::patch('staff/{staff}/approve', [Admin\StaffController::class, 'approve'])->name('staff.approve');

@@ -159,6 +159,16 @@ export type AdminCategory = {
     productsCount: number | null;
 };
 
+export type AdminCustomer = {
+    id: number;
+    name: string;
+    email: string | null;
+    phone: string;
+    ordersCount: number | null;
+    lastOrderAt: string | null;
+    createdAt: string;
+};
+
 export type AdminStaff = {
     id: number;
     name: string;
