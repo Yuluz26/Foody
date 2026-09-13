@@ -207,7 +207,7 @@ function AdminShell({ title, actions, children }: AdminLayoutProps) {
                             <ArrowSquareOutIcon size={20} weight="bold" aria-hidden className="transition-transform duration-200 ease-out group-hover:scale-110 group-hover:rotate-6" />
                             Lihat menu
                         </a>
-                        <div className="mt-2 flex items-center justify-between gap-1 px-1">
+                        <div className="mt-2 flex min-w-0 items-center justify-between gap-1 px-1">
                             <Link
                                 href="/admin/profile"
                                 className="group flex h-10 min-w-0 flex-1 items-center gap-2 rounded-(--radius-control) px-2 text-sm font-semibold text-ink-soft hover:bg-rule/60 hover:text-ink"
