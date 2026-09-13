@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-12T00:00:00Z",
+  "title": "Design System: Foody",
+  "extensions": {
+    "colorMeta": {
+      "amber": { "role": "primary", "displayName": "Lit Amber", "canonical": "#ff9f3d", "tonalRamp": ["#331a00", "#5c2f00", "#8a4a00", "#b96703", "#e0821c", "#ff9f3d", "#ffc27f", "#ffe3c2"] },
+      "amber-deep": { "role": "primary", "displayName": "Deep Amber", "canonical": "#e07f1e", "tonalRamp": ["#2b1500", "#4e2600", "#763a00", "#a3520a", "#c66818", "#e07f1e", "#f4a458", "#fbcf9c"] },
+      "amber-tint": { "role": "primary", "displayName": "Amber Tint", "canonical": "#fff2de", "tonalRamp": ["#2e2210", "#4c3a1c", "#6f5730", "#94794c", "#b99e6f", "#dcc79c", "#f0e2c8", "#fff2de"] },
+      "amber-ghost": { "role": "primary", "displayName": "Amber Ghost", "canonical": "#4a3a22", "tonalRamp": ["#100c06", "#241c11", "#3a2d19", "#4a3a22", "#6b5732", "#8f7a4f", "#b6a578", "#dfd6b6"] },
+      "module": { "role": "neutral", "displayName": "Instrument Module", "canonical": "#211d17", "tonalRamp": ["#0a0806", "#14110d", "#211d17", "#3a342a", "#59503f", "#7c715c", "#a89d84", "#d7cfb9"] },
+      "module-deep": { "role": "neutral", "displayName": "Deep Module", "canonical": "#14110d", "tonalRamp": ["#050403", "#0c0a08", "#14110d", "#221e18", "#382f24", "#544838", "#786a51", "#a89870"] },
+      "leaf": { "role": "tertiary", "displayName": "Kedai Leaf", "canonical": "#2fa562", "tonalRamp": ["#00220f", "#003d1c", "#0e5f30", "#227a49", "#2fa562", "#5cc088", "#94dab0", "#d0f0dd"] },
+      "leaf-deep": { "role": "tertiary", "displayName": "Deep Leaf", "canonical": "#227a49", "tonalRamp": ["#001a0d", "#003018", "#0a4a29", "#227a49", "#3d9863", "#68b686", "#9cd4b3", "#d5eee0"] },
+      "leaf-tint": { "role": "tertiary", "displayName": "Leaf Tint", "canonical": "#e8f6ee", "tonalRamp": ["#0d1f16", "#1c3a2a", "#305943", "#4c7862", "#719b85", "#a1c1ae", "#cee3d7", "#e8f6ee"] },
+      "alert": { "role": "error", "displayName": "Alert Red", "canonical": "#d6432b", "tonalRamp": ["#2b0700", "#4f0e00", "#7c1c0a", "#a92e18", "#d6432b", "#ea6b55", "#f59d8c", "#fbcdc3"] },
+      "alert-tint": { "role": "error", "displayName": "Alert Tint", "canonical": "#fbeae5", "tonalRamp": ["#2b1310", "#4a221c", "#6f382e", "#975246", "#c1766a", "#e0a498", "#f2cac0", "#fbeae5"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#211d17", "tonalRamp": ["#0a0806", "#14110d", "#211d17", "#3a342a", "#59503f", "#7c715c", "#a89d84", "#d7cfb9"] },
+      "ink-soft": { "role": "neutral", "displayName": "Soft Ink", "canonical": "#5b5549", "tonalRamp": ["#100e0b", "#221f1a", "#39352c", "#5b5549", "#7c7568", "#9e968a", "#c2bcae", "#e6e2d8"] },
+      "ink-muted": { "role": "neutral", "displayName": "Muted Ink", "canonical": "#6f6858", "tonalRamp": ["#141210", "#282420", "#403a30", "#5b5346", "#6f6858", "#8f8877", "#b3ac9c", "#dad4c6" ] },
+      "ground": { "role": "neutral", "displayName": "Cream Ground", "canonical": "#fbf6ec", "tonalRamp": ["#20190e", "#3d2f1a", "#5f4c2c", "#8a744a", "#b39d6f", "#d3c39d", "#ecdfc4", "#fbf6ec"] },
+      "ground-deep": { "role": "neutral", "displayName": "Deep Cream", "canonical": "#f3ead4", "tonalRamp": ["#1e1808", "#3a2f13", "#5c4c22", "#867138", "#b09a5c", "#d1bd85", "#ead9b3", "#f3ead4"] },
+      "panel": { "role": "neutral", "displayName": "Panel White", "canonical": "#ffffff", "tonalRamp": ["#0b0b0b", "#242424", "#424242", "#636363", "#868686", "#ababab", "#cecece", "#ffffff"] },
+      "rule": { "role": "neutral", "displayName": "Rule", "canonical": "#e8e0cd", "tonalRamp": ["#1a1608", "#332c14", "#524526", "#756540", "#9a8a62", "#bcae8c", "#dbd0b4", "#e8e0cd"] },
+      "rule-strong": { "role": "neutral", "displayName": "Strong Rule", "canonical": "#d4c9ac", "tonalRamp": ["#181307", "#302710", "#4d4021", "#6f5e39", "#93805a", "#b6a37e", "#d4c9ac", "#ece5d2"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Shop name in the header." },
+      "headline": { "displayName": "Headline", "purpose": "Category section headings, admin page titles, product sheet name line." },
+      "title": { "displayName": "Title", "purpose": "Cart, checkout, order-status and dashboard section titles." },
+      "body": { "displayName": "Body", "purpose": "Sheet descriptions and helper copy, max ~60ch." },
+      "body-compact": { "displayName": "Body Compact", "purpose": "Dish descriptions (2-line clamp, 52ch), notices, banners." },
+      "label": { "displayName": "Label", "purpose": "Field labels, rail tabs, navigation, button text." },
+      "digit": { "displayName": "Digit", "purpose": "The only monospace role; used exclusively inside DigitDisplay for every number the product owns." }
+    },
+    "shadows": [
+      { "name": "sheet", "value": "0 -12px 32px -12px rgb(20 17 13 / 0.28)", "purpose": "Upward cast of the phone bottom sheet." },
+      { "name": "lift", "value": "0 10px 28px -14px rgb(20 17 13 / 0.32)", "purpose": "Centred dialog from 768px, toasts, floating quick-add tile." },
+      { "name": "module", "value": "0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 -1px 0 0 rgb(0 0 0 / 0.3) inset", "purpose": "The dark instrument housing's own inset highlight/shadow; not a cast shadow." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Default for entrances, digit flips, press feedback." },
+      { "name": "ease-in-out", "value": "cubic-bezier(0.77, 0, 0.175, 1)", "purpose": "Elements moving between on-screen positions: rail underline." },
+      { "name": "ease-drawer", "value": "cubic-bezier(0.32, 0.72, 0, 1)", "purpose": "Bottom sheet and cart strip rising/falling." },
+      { "name": "duration-press", "value": "120ms", "purpose": "Press feedback." },
+      { "name": "duration-fast", "value": "180ms", "purpose": "Digit flips on steppers, quick-add, cart count." },
+      { "name": "duration-base", "value": "240ms", "purpose": "Crossfades, centred dialog, rail underline." },
+      { "name": "duration-sheet", "value": "380ms", "purpose": "Bottom sheet and cart strip travel." },
+      { "name": "duration-exit", "value": "200ms", "purpose": "Exits, slightly faster than entrances." },
+      { "name": "spring-settle", "value": "spring, duration 0.42s, bounce 0.14", "purpose": "Drag release only; no bounce outside gestures." },
+      { "name": "press-scale", "value": "scale(0.97) over 150ms ease-out; 0.9-0.92 on small square tiles", "purpose": "Tactile press on buttons and tiles." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Digit Display (chip)",
+      "kind": "custom",
+      "refersTo": "digit-module",
+      "description": "The signature primitive: an amber LED-style digit readout inside a dark module, with a faint ghost \"8\" behind every lit position.",
+      "html": "<span class=\"ds-digit\"><span class=\"ds-digit-cell\"><span class=\"ds-digit-ghost\">8</span><span class=\"ds-digit-lit\">1</span></span><span class=\"ds-digit-cell\"><span class=\"ds-digit-ghost\">8</span><span class=\"ds-digit-lit\">2</span></span></span>",
+      "css": ".ds-digit { display: inline-flex; align-items: baseline; border-radius: 8px; background: #211d17; box-shadow: 0 1px 0 0 rgba(255,255,255,0.06) inset, 0 -1px 0 0 rgba(0,0,0,0.3) inset; padding: 4px 8px; font-family: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; font-size: 1.25rem; } .ds-digit-cell { position: relative; display: inline-block; width: 0.62em; text-align: center; } .ds-digit-ghost { position: absolute; inset: 0; color: #4a3a22; } .ds-digit-lit { position: relative; color: #ff9f3d; text-shadow: 0 0 6px currentColor; }"
+    },
+    {
+      "name": "Digit Display (inline)",
+      "kind": "custom",
+      "refersTo": "digit-inline",
+      "description": "Non-chip mode: plain tabular digit-face numerals riding inline with body text, e.g. a dish-row price.",
+      "html": "<span class=\"ds-digit-inline\">6.50</span>",
+      "css": ".ds-digit-inline { font-family: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: #211d17; }"
+    },
+    {
+      "name": "Ink Button",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "Primary action: solid ink fill, 12px corner.",
+      "html": "<button class=\"ds-btn-ink\">Teruskan pesanan</button>",
+      "css": ".ds-btn-ink { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 16px; border: 0; border-radius: 12px; background: #211d17; color: #fff; font-family: Inter, ui-sans-serif, sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 150ms cubic-bezier(0.23,1,0.32,1), background-color 150ms; } .ds-btn-ink:hover { background: #5b5549; } .ds-btn-ink:active { transform: scale(0.97); } .ds-btn-ink:focus-visible { outline: 3px solid #211d17; outline-offset: 2px; }"
+    },
+    {
+      "name": "Amber Button",
+      "kind": "button",
+      "refersTo": "button-amber",
+      "description": "Secondary emphasis action in the digit-face accent color.",
+      "html": "<button class=\"ds-btn-amber\">Tambah</button>",
+      "css": ".ds-btn-amber { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 16px; border: 0; border-radius: 12px; background: #ff9f3d; color: #211d17; font-family: Inter, ui-sans-serif, sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 150ms cubic-bezier(0.23,1,0.32,1), background-color 150ms; } .ds-btn-amber:hover { background: #e07f1e; } .ds-btn-amber:active { transform: scale(0.97); } .ds-btn-amber:focus-visible { outline: 3px solid #211d17; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Label above, 2px rule-strong bordered field with a 12px corner, hint or error below.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-name\">Nama</label><input id=\"ds-name\" class=\"ds-input\" type=\"text\" placeholder=\"012-345 6789\"><p class=\"ds-field-hint\">Untuk kami hubungi jika perlu</p></div>",
+      "css": ".ds-field { display: grid; gap: 6px; max-width: 320px; font-family: Inter, ui-sans-serif, sans-serif; } .ds-field-label { font-size: 15px; font-weight: 600; color: #211d17; } .ds-input { display: block; width: 100%; padding: 12px 14px; font: inherit; font-size: 16px; color: #211d17; background: #fff; border: 2px solid #d4c9ac; border-radius: 12px; caret-color: #e07f1e; transition: border-color 150ms; } .ds-input::placeholder { color: #6f6858; } .ds-input:hover, .ds-input:focus { border-color: #211d17; } .ds-input:focus-visible { outline: 3px solid #211d17; outline-offset: 2px; } .ds-input[aria-invalid='true'] { border-color: #d6432b; background: rgba(251,234,229,0.4); } .ds-field-hint { margin: 0; font-size: 14px; color: #6f6858; }"
+    },
+    {
+      "name": "Category Rail",
+      "kind": "nav",
+      "refersTo": "category-tab",
+      "description": "Sticky plain-label tabs (no coded tile) with a rounded amber underline under the active tab, auto-centering as the page scrolls.",
+      "html": "<nav class=\"ds-rail\" aria-label=\"Kategori menu\"><a class=\"ds-rail-tab is-active\" href=\"#\" aria-current=\"true\">Nasi</a><a class=\"ds-rail-tab\" href=\"#\">Mi &amp; Kuey Teow</a><a class=\"ds-rail-tab\" href=\"#\">Minuman</a></nav>",
+      "css": ".ds-rail { display: flex; gap: 4px; padding: 0 12px; background: rgba(255,255,255,0.95); border-bottom: 2px solid #e8e0cd; overflow-x: auto; font-family: Inter, ui-sans-serif, sans-serif; } .ds-rail-tab { position: relative; display: flex; align-items: center; height: 56px; padding: 0 12px; font-weight: 600; white-space: nowrap; text-decoration: none; color: #6f6858; transition: color 150ms; } .ds-rail-tab:hover { color: #5b5549; } .ds-rail-tab:focus-visible { outline: 3px solid #211d17; outline-offset: 2px; } .ds-rail-tab.is-active { color: #211d17; } .ds-rail-tab.is-active::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -2px; height: 4px; border-radius: 9999px; background: #ff9f3d; }"
+    },
+    {
+      "name": "Dish Row",
+      "kind": "custom",
+      "refersTo": "dish-row",
+      "description": "Signature menu line: an amber digit-face code, dish name, dotted leader to an inline digit-face price, rounded photo with an overlapping quick-add tile.",
+      "html": "<article class=\"ds-row\"><div class=\"ds-row-main\"><div class=\"ds-row-head\"><span class=\"ds-digit ds-row-code\"><span class=\"ds-digit-cell\"><span class=\"ds-digit-ghost\">8</span><span class=\"ds-digit-lit\">0</span></span><span class=\"ds-digit-cell\"><span class=\"ds-digit-ghost\">8</span><span class=\"ds-digit-lit\">2</span></span></span><h3 class=\"ds-row-name\">Nasi Lemak Biasa</h3><span class=\"ds-row-leader\"></span><span class=\"ds-digit-inline\">6.50</span></div><p class=\"ds-row-desc\">Nasi santan, sambal tumis, telur rebus, kacang dan ikan bilis goreng.</p></div><div class=\"ds-row-photo\"><div class=\"ds-row-img\"></div><button class=\"ds-quick-add\" aria-label=\"Tambah\">+</button></div></article>",
+      "css": ".ds-row { display: flex; gap: 16px; padding: 20px 0; max-width: 640px; font-family: Inter, ui-sans-serif, sans-serif; } .ds-row-main { flex: 1; min-width: 0; } .ds-row-head { display: flex; align-items: baseline; gap: 8px 12px; flex-wrap: wrap; } .ds-row-name { margin: 0; font-size: 1.15rem; font-weight: 700; color: #211d17; } .ds-row-leader { flex: 1; min-width: 24px; height: 0; transform: translateY(-6px); border-bottom: 2px dotted #d4c9ac; } .ds-row-desc { margin: 6px 0 0; max-width: 52ch; font-size: 15px; line-height: 1.375; color: #5b5549; } .ds-row-photo { position: relative; flex-shrink: 0; align-self: flex-start; } .ds-row-img { width: 96px; height: 96px; border-radius: 16px; background: #fff2de; } .ds-quick-add { position: absolute; right: 8px; bottom: -8px; display: grid; place-items: center; width: 44px; height: 44px; border: 2px solid #fff; border-radius: 12px; background: #211d17; color: #fff; font-size: 20px; cursor: pointer; transition: transform 150ms cubic-bezier(0.23,1,0.32,1), background-color 150ms; box-shadow: 0 10px 28px -14px rgba(20,17,13,0.32); } .ds-quick-add:hover { background: #5b5549; } .ds-quick-add:active { transform: scale(0.9); }"
+    },
+    {
+      "name": "Status Lamp",
+      "kind": "custom",
+      "refersTo": "open-lamp",
+      "description": "Dark instrument module in the header showing open/closed state as a dot, a written amber/white label and glow.",
+      "html": "<p class=\"ds-lamp\"><span class=\"ds-lamp-dot\"></span><span class=\"ds-lamp-text\">Buka <small>hingga 11:00 malam</small></span></p>",
+      "css": ".ds-lamp { display: inline-flex; align-items: center; gap: 8px; border-radius: 8px; background: #211d17; padding: 8px 12px; box-shadow: 0 1px 0 0 rgba(255,255,255,0.06) inset, 0 -1px 0 0 rgba(0,0,0,0.3) inset; font-family: Inter, ui-sans-serif, sans-serif; } .ds-lamp-dot { width: 10px; height: 10px; border-radius: 9999px; background: #2fa562; box-shadow: 0 0 0 4px rgba(47,165,98,0.25); } .ds-lamp-text { text-align: right; font-size: 14px; font-weight: 700; color: #2fa562; text-shadow: 0 0 6px currentColor; } .ds-lamp-text small { display: block; font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.7); text-shadow: none; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Square (8px module radius) status tag, always word plus icon, squared during finish review from an initial rounded-full pass.",
+      "html": "<span class=\"ds-badge ds-badge-ready\">&#10003; Siap</span> <span class=\"ds-badge ds-badge-pending\">Baru</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 8px; font-family: Inter, ui-sans-serif, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; } .ds-badge-ready { background: #2fa562; color: #fff; } .ds-badge-pending { background: #ff9f3d; color: #211d17; }"
+    },
+    {
+      "name": "Cart Bar",
+      "kind": "custom",
+      "refersTo": "cart-bar",
+      "description": "Dark module strip pinned to the bottom on phones/tablets, count in the digit face, total in amber digit face.",
+      "html": "<button class=\"ds-cartbar\"><span class=\"ds-cartbar-left\"><span class=\"ds-digit ds-cartbar-count\"><span class=\"ds-digit-cell\"><span class=\"ds-digit-ghost\">8</span><span class=\"ds-digit-lit\">3</span></span></span><span>Lihat troli</span></span><span class=\"ds-digit-inline ds-cartbar-total\">34.30</span></button>",
+      "css": ".ds-cartbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; height: 64px; padding: 0 20px; border: 0; background: #211d17; color: #fff; font-family: Inter, ui-sans-serif, sans-serif; font-size: 16px; font-weight: 600; cursor: pointer; } .ds-cartbar:active { background: #14110d; } .ds-cartbar-left { display: flex; align-items: center; gap: 12px; } .ds-cartbar-total { color: #ff9f3d; font-size: 1.5rem; text-shadow: 0 0 6px currentColor; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Papan Digit Gerai (Stall Digit Board)",
+    "overview": "The product reads like the digital number board bolted above a hawker stall's counter: every number it owns — order numbers, table numbers, prices, quantities, cart counts, admin KPI tiles — glows as a real LED digit, amber on a dark instrument housing, with a faint ghost \"8\" behind each lit position the way an unlit seven-segment cell still shows its shape. Everything else — names, descriptions, labels, navigation — is set in a plain, confident grotesk (Inter), self-hosted and deliberately workhorse for this Operate-mode product. This build replaces a prior world (\"Papan Menu Kedai Makan\": signboard red, Big Shoulders Display, square corners), and the break is total: warm cream replaces enamel white as the ground, rounded panels replace square ones, and plain sequential two-digit numbering (01, 02...) replaces lettered menu codes.\n\nDensity stays menu density: a single scrolling column of dish lines with a sticky numbered rail and, on phones, a pinned dark cart strip; wide screens add a standing order chit beside the same single column rather than a card grid. The admin panel is a quieter operate console built from the same instrument-module vocabulary — KPI tiles and order numbers glow the same amber digits staff see on the customer-facing board. Amber is reserved for the digit face and its housing, plus the rail underline and section rules; leaf green marks only open/ready/success state; alert red is reserved for errors.\n\nMotion is fast and decelerating: digits flip like a real number board when a count changes, sheets rise like a drawer, and a rounded amber underline slides between category tabs. Reduced motion collapses every move to a crossfade.",
+    "keyCharacteristics": [
+      "Every number in the product — order/table numbers, prices, quantities, cart counts, KPIs — renders through the `DigitDisplay` primitive: IBM Plex Mono, tabular, a ghost \"8\" behind lit positions inside a dark module housing.",
+      "Warm cream ground (`#fbf6ec`) with a dark instrument-module counterpoint (`#211d17`); amber for lit digits, leaf green for open/ready/success only, alert red for errors only.",
+      "Inter for all reading and UI text; IBM Plex Mono exclusively for digits. No other display face.",
+      "Rounded panels and controls throughout (8-16px radius family); no pill/stadium shapes except genuine toggle switches and thin decorative line-caps (the rail underline, a timeline connector).",
+      "Category and dish numbering is plain sequential two digits (01, 02...) running across the whole menu, not per-category letter codes."
+    ],
+    "rules": [
+      { "name": "The Digit Face Rule", "body": "Every number the product owns (order number, table number, price, quantity, cart count, KPI) renders through DigitDisplay, never as plain UI type. Sentences and labels never use the digit face, even when they contain a number that isn't one of these roles.", "section": "colors" },
+      { "name": "The One Ornament Rule", "body": "Amber is the only \"glow\" color; it appears on the digit face, its housing, the rail underline, and section rules. Leaf green is reserved for positive state (open, ready, done, on) and never used decoratively. Alert red is reserved for errors.", "section": "colors" },
+      { "name": "The Grotesk-Or-Digit Rule", "body": "If it's a number the product owns as an instrument reading (order number, table, price, quantity, count, KPI), it is set in the digit face. Everything else — names, sentences, labels, headings — is set in Inter. Never mix: no digit-face sentences, no monospace body text.", "section": "typography" },
+      { "name": "The Floating-Only Shadow Rule", "body": "Cast shadows (sheet, lift) belong only to layers above the page. Resting surfaces read through fill, border and the module's own inset highlight, never a cast shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do render every order number, table number, price, quantity, cart count and KPI through DigitDisplay, never as plain UI type.",
+      "Do show the ghost \"8\" behind lit digit positions whenever DigitDisplay is in chip (module) mode; suppress it only in inline mode.",
+      "Do keep amber as the only glow/ornament color; reserve leaf green strictly for open/ready/done/on state and alert red strictly for errors.",
+      "Do give panels a 16px radius and controls/fields a 12px radius; give the dark digit/status module its own tighter 8px radius.",
+      "Do write status in words and an icon as well as color (StatusBadge, the open/closed lamp, switches).",
+      "Do number dishes and categories sequentially (01, 02...) across the whole menu, not per-category letter codes.",
+      "Do keep every tap target at least 44px and press controls with a 0.9-0.97 scale over 150ms ease-out."
+    ],
+    "donts": [
+      "Don't set a digit-owning value (price, count, order/table number, KPI) in plain Inter type; it must go through the digit face.",
+      "Don't use pill/stadium shapes for panels, cards, buttons, or tags — the rounded family stops at 16px. The only rounded-full exceptions are the toggle switch and thin line-caps (rail underline, timeline connector); do not read those as license for pill badges or chips elsewhere.",
+      "Don't invent kicker/eyebrow labels above headings; none exist in the shipped system and none should be added — this build carries no such device to canonize.",
+      "Don't use leaf green decoratively, or alert red for anything but an actual error state.",
+      "Don't add a system-display or signage typeface; Inter carries every reading and UI role, IBM Plex Mono is reserved for the digit face alone.",
+      "Don't put a cast shadow on a resting surface; cast shadows belong only to sheets, dialogs, toasts and the floating quick-add tile."
+    ]
+  }
+}

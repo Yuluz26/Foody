@@ -1,0 +1,19 @@
+{
+    "version": "0.0.1",
+    "configurations": [
+        {
+            "name": "foody",
+            "runtimeExecutable": "C:\\laragon\\bin\\php\\php-8.3.14\\php.exe",
+            "runtimeArgs": ["artisan", "serve", "--host=127.0.0.1", "--port=8123"],
+            "port": 8123,
+            "autoPort": false
+        },
+        {
+            "name": "foody-verify",
+            "runtimeExecutable": "C:\\laragon\\bin\\php\\php-8.3.14\\php.exe",
+            "runtimeArgs": ["artisan", "serve", "--host=127.0.0.1", "--port=8129"],
+            "port": 8129,
+            "autoPort": false
+        }
+    ]
+}

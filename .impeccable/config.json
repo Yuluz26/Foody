@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "sfmono-regular",
+        "files": [
+          "public/offline.html"
+        ],
+        "createdAt": "2026-09-12T03:04:01.509Z",
+        "reason": "public/offline.html is a static file served by the service worker with zero network access; it cannot load the self-hosted IBM Plex Mono webfont, so it uses the same system-monospace fallback chain already declared as --font-mono's own fallback in app.css, just without the custom face."
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "resources/js/components/Sheet.tsx"
+        ],
+        "createdAt": "2026-09-12T03:23:03.452Z",
+        "reason": "Confirmed false positive: Sheet.tsx's amber border-t-4 sits only on the bottom sheet's rounded TOP edge (rounded-t-(--radius-panel), top corners only, no side border to clash with) — border-radius clips a same-edge border cleanly. Verified in m-product-sheet.png and m-cart-sheet.png: the amber stripe curves smoothly into both rounded corners, no miter or notch. This is the world's own signature top-edge device (amber, inherited from the prior world's red top edge), not accidental drift."
+      }
+    ]
+  }
+}
