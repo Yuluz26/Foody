@@ -118,6 +118,41 @@ class TableAvailabilityTest extends TestCase
         ])->assertSessionHasErrors('table_number');
     }
 
+    public function test_editing_an_order_to_a_table_taken_by_another_active_order_is_rejected(): void
+    {
+        RestaurantSetting::current()->update(['table_count' => 5]);
+        $this->occupyTable('3');
+        $other = $this->occupyTable('4');
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin, 'web')
+            ->patch("/admin/orders/{$other->id}", [
+                'customer_name' => $other->customer_name,
+                'customer_phone' => $other->customer_phone,
+                'table_number' => '3',
+                'notes' => null,
+            ])
+            ->assertSessionHasErrors('table_number');
+
+        $this->assertSame('4', $other->fresh()->table_number);
+    }
+
+    public function test_editing_an_order_keeps_its_own_table_number_without_error(): void
+    {
+        RestaurantSetting::current()->update(['table_count' => 5]);
+        $order = $this->occupyTable('3');
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin, 'web')
+            ->patch("/admin/orders/{$order->id}", [
+                'customer_name' => $order->customer_name,
+                'customer_phone' => $order->customer_phone,
+                'table_number' => '3',
+                'notes' => null,
+            ])
+            ->assertSessionHasNoErrors();
+    }
+
     public function test_admin_can_configure_the_number_of_tables(): void
     {
         $admin = User::factory()->admin()->create();

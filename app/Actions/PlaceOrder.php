@@ -176,13 +176,15 @@ class PlaceOrder
         $tableNumber = $type === OrderType::DineIn ? trim((string) $data['table_number']) : null;
 
         if ($tableNumber !== null) {
-            // Re-check inside the transaction (with a row lock) so two checkouts racing for the
-            // last free table can't both win — the form's own validation already ran, but that
-            // read is stale by the time we get here.
+            // A free table has no order row yet, so lockForUpdate() on the availability query
+            // alone would lock nothing — two racing checkouts could both see it as free. Lock
+            // the single settings row instead: it always exists, so every dine-in checkout
+            // serializes through it, and the availability check below becomes race-free.
+            RestaurantSetting::query()->lockForUpdate()->first();
+
             $taken = Order::query()->active()
                 ->where('type', OrderType::DineIn)
                 ->where('table_number', $tableNumber)
-                ->lockForUpdate()
                 ->exists();
 
             if ($taken) {

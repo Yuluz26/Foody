@@ -346,6 +346,22 @@ class OrderStatusTest extends TestCase
         Carbon::setTestNow();
     }
 
+    public function test_order_search_treats_percent_and_underscore_as_literal_characters(): void
+    {
+        $match = $this->placeOrder();
+        $match->update(['customer_name' => 'Ali_Baba']);
+
+        // Would also match "Ali_Baba" if the "_" wildcard weren't escaped (it matches any one character).
+        $decoy = $this->placeOrder();
+        $decoy->update(['customer_name' => 'AliXBaba']);
+
+        $this->actingAs($this->admin, 'web')
+            ->get('/admin/orders?status=all&q=Ali_Baba')
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('orders.data', 1)
+                ->where('orders.data.0.id', $match->id));
+    }
+
     public function test_orders_index_can_be_filtered_by_a_date_range(): void
     {
         $inRange = $this->placeOrder();

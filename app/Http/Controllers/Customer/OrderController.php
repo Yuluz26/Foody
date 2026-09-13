@@ -11,7 +11,7 @@ use App\Mail\OrderCancelledStaffMail;
 use App\Models\Order;
 use App\Models\RestaurantSetting;
 use App\Support\MenuPresenter;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Support\ReceiptPdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Log;
@@ -95,13 +95,7 @@ class OrderController extends Controller
     {
         $this->authorizeOwner($order);
 
-        $order->loadMissing('items.addOns');
-        $restaurant = RestaurantSetting::current();
-
-        $pdf = Pdf::loadView('receipts.order', ['order' => $order, 'restaurant' => $restaurant])
-            ->setPaper('a5', 'portrait');
-
-        return $pdf->download("resit-{$order->order_number}.pdf");
+        return ReceiptPdf::for($order)->download("resit-{$order->order_number}.pdf");
     }
 
     private function authorizeOwner(Order $order): void

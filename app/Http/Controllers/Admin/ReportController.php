@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatus;
-use App\Enums\OrderType;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Support\AdminPresenter;
-use Illuminate\Database\Eloquent\Builder;
+use App\Support\OrderSearch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -22,35 +21,16 @@ class ReportController extends Controller
     public function index(Request $request): Response
     {
         $filters = $request->validate([
-            'q' => ['nullable', 'string', 'max:100'],
+            ...OrderSearch::rules(),
             'status' => ['nullable', Rule::in(['completed', 'all', ...array_column(OrderStatus::cases(), 'value')])],
-            'type' => ['nullable', Rule::enum(OrderType::class)],
-            'date_from' => ['nullable', 'date_format:Y-m-d'],
-            'date_to' => ['nullable', 'date_format:Y-m-d'],
             'period' => ['nullable', Rule::in(self::PERIODS)],
         ]);
 
         $status = $filters['status'] ?? 'completed';
         $period = $filters['period'] ?? 'day';
 
-        $orders = Order::query()
-            ->withCount('items')
-            ->when($filters['q'] ?? null, function (Builder $query, string $term) {
-                $digits = preg_replace('/\D+/', '', $term);
-
-                $query->where(function (Builder $query) use ($term, $digits) {
-                    $query->where('order_number', 'like', "%{$term}%")
-                        ->orWhere('customer_name', 'like', "%{$term}%");
-
-                    if ($digits !== '') {
-                        $query->orWhere('customer_phone', 'like', "%{$digits}%");
-                    }
-                });
-            })
-            ->when($status !== 'all', fn (Builder $query) => $query->where('status', $status))
-            ->when($filters['type'] ?? null, fn (Builder $query, string $type) => $query->where('type', $type))
-            ->when($filters['date_from'] ?? null, fn (Builder $query, string $date) => $query->whereDate('created_at', '>=', $date))
-            ->when($filters['date_to'] ?? null, fn (Builder $query, string $date) => $query->whereDate('created_at', '<=', $date))
+        $orders = OrderSearch::apply(Order::query()->withCount('items'), $filters)
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
             ->latest()
             ->paginate(20)
             ->withQueryString()
@@ -71,30 +51,29 @@ class ReportController extends Controller
         ]);
     }
 
-    /** @return list<array{label: string, count: int, revenue: int}> */
+    /**
+     * One aggregate query per bucket rather than pulling every matching order into PHP — the
+     * result stays a handful of rows regardless of how many years of order history accumulate.
+     *
+     * @return list<array{label: string, count: int, revenue: int}>
+     */
     private static function completedTrend(string $period): array
     {
-        $buckets = self::buckets($period);
-        $from = $buckets->first();
+        return self::buckets($period)
+            ->map(function (Carbon $bucketStart) use ($period) {
+                $bucketEnd = self::bucketEnd($period, $bucketStart);
 
-        // Grouped in PHP (not a raw SQL date/week function) so this behaves the same on every
-        // database driver — the test suite runs on SQLite, production on MySQL.
-        $rows = Order::query()
-            ->where('status', OrderStatus::Completed)
-            ->whereNotNull('completed_at')
-            ->where('completed_at', '>=', $from)
-            ->get(['completed_at', 'total']);
-
-        $grouped = $rows->groupBy(fn (Order $order) => self::bucketKey($period, $order->completed_at));
-
-        return $buckets
-            ->map(function (Carbon $bucketStart) use ($period, $grouped) {
-                $matching = $grouped->get(self::bucketKey($period, $bucketStart), collect());
+                $row = Order::query()
+                    ->where('status', OrderStatus::Completed)
+                    ->whereBetween('completed_at', [$bucketStart, $bucketEnd])
+                    ->selectRaw('count(*) as count, coalesce(sum(total), 0) as revenue')
+                    ->toBase()
+                    ->first();
 
                 return [
                     'label' => self::bucketLabel($period, $bucketStart),
-                    'count' => $matching->count(),
-                    'revenue' => (int) $matching->sum('total'),
+                    'count' => (int) $row->count,
+                    'revenue' => (int) $row->revenue,
                 ];
             })
             ->values()
@@ -114,13 +93,13 @@ class ReportController extends Controller
         };
     }
 
-    private static function bucketKey(string $period, Carbon $date): string
+    private static function bucketEnd(string $period, Carbon $start): Carbon
     {
         return match ($period) {
-            'week' => $date->copy()->startOfWeek()->format('Y-m-d'),
-            'month' => $date->format('Y-m'),
-            'year' => $date->format('Y'),
-            default => $date->format('Y-m-d'),
+            'week' => $start->copy()->endOfWeek(),
+            'month' => $start->copy()->endOfMonth(),
+            'year' => $start->copy()->endOfYear(),
+            default => $start->copy()->endOfDay(),
         };
     }
 

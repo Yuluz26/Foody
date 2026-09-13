@@ -457,7 +457,7 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
                                                         value={form.data.table_number}
                                                         onChange={(event) => form.setData('table_number', event.target.value)}
                                                         onBlur={() => checkField('table_number')}
-                                                        className={cn(inputClass, 'font-mono text-2xl font-bold tracking-wide')}
+                                                        className={inputClass}
                                                     >
                                                         <option value="" disabled>
                                                             Pilih meja

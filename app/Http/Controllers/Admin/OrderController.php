@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatus;
-use App\Enums\OrderType;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateOrderRequest;
 use App\Mail\OrderStatusUpdatedMail;
 use App\Models\Order;
-use App\Models\RestaurantSetting;
 use App\Support\AdminPresenter;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Support\OrderSearch;
+use App\Support\ReceiptPdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,34 +29,15 @@ class OrderController extends Controller
     public function index(Request $request): Response
     {
         $filters = $request->validate([
-            'q' => ['nullable', 'string', 'max:100'],
+            ...OrderSearch::rules(),
             'status' => ['nullable', Rule::in(['active', 'all', ...array_column(OrderStatus::cases(), 'value')])],
-            'type' => ['nullable', Rule::enum(OrderType::class)],
-            'date_from' => ['nullable', 'date_format:Y-m-d'],
-            'date_to' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
         $status = $filters['status'] ?? 'active';
 
-        $orders = Order::query()
-            ->withCount('items')
-            ->when($filters['q'] ?? null, function (Builder $query, string $term) {
-                $digits = preg_replace('/\D+/', '', $term);
-
-                $query->where(function (Builder $query) use ($term, $digits) {
-                    $query->where('order_number', 'like', "%{$term}%")
-                        ->orWhere('customer_name', 'like', "%{$term}%");
-
-                    if ($digits !== '') {
-                        $query->orWhere('customer_phone', 'like', "%{$digits}%");
-                    }
-                });
-            })
+        $orders = OrderSearch::apply(Order::query()->withCount('items'), $filters)
             ->when($status === 'active', fn (Builder $query) => $query->active())
             ->when(! in_array($status, ['active', 'all'], true), fn (Builder $query) => $query->where('status', $status))
-            ->when($filters['type'] ?? null, fn (Builder $query, string $type) => $query->where('type', $type))
-            ->when($filters['date_from'] ?? null, fn (Builder $query, string $date) => $query->whereDate('created_at', '>=', $date))
-            ->when($filters['date_to'] ?? null, fn (Builder $query, string $date) => $query->whereDate('created_at', '<=', $date))
             // Active queue reads oldest first, like a kitchen docket rail; history reads newest first.
             ->when($status === 'active', fn (Builder $query) => $query->oldest(), fn (Builder $query) => $query->latest())
             ->paginate(20)
@@ -258,13 +238,7 @@ class OrderController extends Controller
     /** Any staff may reprint any order's receipt — unlike the customer-facing route, this isn't scoped to an owner. */
     public function receipt(Order $order): HttpResponse
     {
-        $order->loadMissing('items.addOns');
-        $restaurant = RestaurantSetting::current();
-
-        $pdf = Pdf::loadView('receipts.order', ['order' => $order, 'restaurant' => $restaurant])
-            ->setPaper('a5', 'portrait');
-
-        return $pdf->download("resit-{$order->order_number}.pdf");
+        return ReceiptPdf::for($order)->download("resit-{$order->order_number}.pdf");
     }
 
     public function receipts(Request $request): HttpResponse
@@ -282,11 +256,6 @@ class OrderController extends Controller
 
         abort_if($orders->isEmpty(), 404);
 
-        $restaurant = RestaurantSetting::current();
-
-        $pdf = Pdf::loadView('receipts.bulk', ['orders' => $orders, 'restaurant' => $restaurant])
-            ->setPaper('a5', 'portrait');
-
-        return $pdf->download('resit-pukal-'.now()->format('Y-m-d-His').'.pdf');
+        return ReceiptPdf::forMany($orders)->download('resit-pukal-'.now()->format('Y-m-d-His').'.pdf');
     }
 }
