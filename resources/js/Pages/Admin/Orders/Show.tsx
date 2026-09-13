@@ -1,4 +1,4 @@
-import { Link, router, useForm } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeftIcon, ArrowSquareOutIcon, PencilSimpleIcon, PhoneIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react';
 import { useState, type FormEvent } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
@@ -167,6 +167,7 @@ function EditOrderForm({ order, onDone }: { order: OrderDetail; onDone: () => vo
 
 export default function OrderShow({ order }: { order: OrderDetail }) {
     const [editing, setEditing] = useState(false);
+    const isAdmin = usePage().props.auth.user?.role === 'admin';
 
     return (
         <AdminLayout
@@ -185,14 +186,16 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                         )}
                         {editing ? 'Tutup edit' : 'Edit'}
                     </button>
-                    <ConfirmButton
-                        label="Padam"
-                        size="sm"
-                        title={`Padam ${order.number}?`}
-                        message={`Pesanan ${order.customerName} akan dipadam selama-lamanya bersama semua itemnya. Tindakan ini tidak boleh diundur.`}
-                        confirmLabel="Ya, padam"
-                        onConfirm={() => router.delete(`/admin/orders/${order.id}`)}
-                    />
+                    {isAdmin && (
+                        <ConfirmButton
+                            label="Padam"
+                            size="sm"
+                            title={`Padam ${order.number}?`}
+                            message={`Pesanan ${order.customerName} akan dipadam selama-lamanya bersama semua itemnya. Tindakan ini tidak boleh diundur.`}
+                            confirmLabel="Ya, padam"
+                            onConfirm={() => router.delete(`/admin/orders/${order.id}`)}
+                        />
+                    )}
                     <Link href="/admin/orders" className="flex h-11 items-center gap-2 rounded-(--radius-control) px-3 font-semibold text-ink-soft hover:bg-rule/60 hover:text-ink">
                         <ArrowLeftIcon size={18} weight="bold" aria-hidden />
                         Semua pesanan

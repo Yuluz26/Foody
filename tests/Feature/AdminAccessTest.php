@@ -28,7 +28,7 @@ class AdminAccessTest extends TestCase
 
     public function test_admin_can_log_in_and_out(): void
     {
-        $admin = User::factory()->create(['is_admin' => true, 'approved_at' => now(), 'password' => 'rahsia-kedai-99']);
+        $admin = User::factory()->admin()->create(['password' => 'rahsia-kedai-99']);
 
         $this->post('/admin/login', ['email' => $admin->email, 'password' => 'rahsia-kedai-99'])
             ->assertRedirect('/admin');
@@ -42,7 +42,7 @@ class AdminAccessTest extends TestCase
 
     public function test_wrong_password_is_rejected(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->admin()->create();
 
         $this->post('/admin/login', ['email' => $admin->email, 'password' => 'salah'])
             ->assertSessionHasErrors('email');
@@ -60,7 +60,7 @@ class AdminAccessTest extends TestCase
 
     public function test_login_is_rate_limited(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->admin()->create();
 
         foreach (range(1, 5) as $attempt) {
             $this->post('/admin/login', ['email' => $admin->email, 'password' => "salah-{$attempt}"]);
@@ -69,5 +69,15 @@ class AdminAccessTest extends TestCase
         $this->post('/admin/login', ['email' => $admin->email, 'password' => 'password'])
             ->assertSessionHasErrors('email');
         $this->assertGuest();
+    }
+
+    public function test_a_leftover_menu_redirect_does_not_pull_staff_out_of_the_panel(): void
+    {
+        $admin = User::factory()->admin()->create(['password' => 'rahsia-kedai-99']);
+
+        $this->get('/')->assertRedirect('/log-masuk');
+
+        $this->post('/admin/login', ['email' => $admin->email, 'password' => 'rahsia-kedai-99'])
+            ->assertRedirect('/admin');
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\EnsureAdminRole;
+use App\Http\Middleware\EnsurePanelAccess;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,7 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'admin' => EnsureUserIsAdmin::class,
+            'panel' => EnsurePanelAccess::class,
+            'admin' => EnsureAdminRole::class,
         ]);
 
         // Two separate identities share this app: staff (the `web` guard, under /admin) and

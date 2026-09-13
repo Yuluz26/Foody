@@ -48,7 +48,7 @@ class OrderEmailTest extends TestCase
     {
         Mail::fake();
 
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->admin()->create();
         $customer = Customer::factory()->create(['email' => 'diner@example.com']);
         $product = Product::factory()->create();
 
@@ -72,7 +72,7 @@ class OrderEmailTest extends TestCase
 
     public function test_bulk_approve_emails_every_transitioned_customer(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->admin()->create();
         $customerA = Customer::factory()->create(['email' => 'a@example.com']);
         $customerB = Customer::factory()->create(['email' => 'b@example.com']);
         $product = Product::factory()->create();
@@ -104,7 +104,7 @@ class OrderEmailTest extends TestCase
 
     public function test_staff_cancelling_an_order_does_not_duplicate_the_staff_notification(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->admin()->create();
         $customer = Customer::factory()->create();
         $product = Product::factory()->create();
         $order = $this->placeOrderAs($customer, $product);

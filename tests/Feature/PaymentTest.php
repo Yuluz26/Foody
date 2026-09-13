@@ -29,7 +29,7 @@ class PaymentTest extends TestCase
         Storage::fake('public');
 
         $this->customer = Customer::factory()->create();
-        $this->admin = User::factory()->create(['is_admin' => true]);
+        $this->admin = User::factory()->admin()->create();
     }
 
     /** @param array<string, mixed> $overrides */

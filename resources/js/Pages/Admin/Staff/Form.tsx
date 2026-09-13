@@ -1,22 +1,31 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { FormFooter } from '@/components/admin/FormFooter';
 import { Field, inputClass } from '@/components/ui/Field';
 import { PasswordInput } from '@/components/ui/PasswordInput';
-import type { AdminStaff } from '@/types';
+import type { AdminStaff, SharedProps, StaffRole } from '@/types';
 
 type StaffFields = {
     name: string;
     email: string;
+    role: StaffRole;
     password: string;
     password_confirmation: string;
 };
 
+const ROLE_HINTS: Record<StaffRole, string> = {
+    staff: 'Ringkasan dan pesanan sahaja. Tidak boleh memadam pesanan.',
+    admin: 'Akses penuh: menu, slaid, pelanggan, kakitangan dan tetapan kedai.',
+};
+
 export default function StaffForm({ staff }: { staff: AdminStaff | null }) {
+    const { auth } = usePage<SharedProps>().props;
+    const isSelf = staff !== null && staff.id === auth.user?.id;
     const form = useForm<StaffFields>({
         name: staff?.name ?? '',
         email: staff?.email ?? '',
+        role: staff?.role ?? 'staff',
         password: '',
         password_confirmation: '',
     });
@@ -63,11 +72,30 @@ export default function StaffForm({ staff }: { staff: AdminStaff | null }) {
                         )}
                     </Field>
                     <Field
+                        id="role"
+                        label="Peranan"
+                        error={form.errors.role}
+                        hint={isSelf ? 'Anda tidak boleh menukar peranan akaun anda sendiri.' : ROLE_HINTS[form.data.role]}
+                    >
+                        {(control) => (
+                            <select
+                                {...control}
+                                value={form.data.role}
+                                disabled={isSelf}
+                                onChange={(event) => form.setData('role', event.target.value as StaffRole)}
+                                className={inputClass}
+                            >
+                                <option value="staff">Staf</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        )}
+                    </Field>
+                    <Field
                         id="password"
                         label="Kata laluan"
                         optional={Boolean(staff)}
                         error={form.errors.password}
-                        hint={staff ? 'Biarkan kosong untuk kekalkan kata laluan sedia ada.' : undefined}
+                        hint={staff ? 'Biarkan kosong untuk kekalkan kata laluan sedia ada. Menukarnya melog keluar sesi akaun ini di peranti lain.' : undefined}
                     >
                         {(control) => (
                             <PasswordInput
@@ -88,7 +116,7 @@ export default function StaffForm({ staff }: { staff: AdminStaff | null }) {
                             />
                         )}
                     </Field>
-                    {!staff && <p className="text-sm text-ink-muted">Akaun baharu akan menunggu kelulusan sebelum boleh log masuk ke panel ini.</p>}
+                    {!staff && <p className="text-sm text-ink-muted">Akaun baharu perlu diluluskan di senarai kakitangan sebelum boleh log masuk.</p>}
                 </div>
                 <FormFooter cancelHref="/admin/staff" processing={form.processing} isDirty={form.isDirty} saveLabel={staff ? 'Simpan perubahan' : 'Tambah kakitangan'} />
             </form>

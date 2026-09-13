@@ -86,10 +86,13 @@ export type CustomerOrder = {
     paymentProofUrl: string | null;
 };
 
+export type StaffRole = 'admin' | 'staff';
+
 export type AuthUser = {
     id: number;
     name: string;
     email: string;
+    role: StaffRole;
 };
 
 export type CustomerAuthUser = {
@@ -159,6 +162,8 @@ export type AdminStaff = {
     id: number;
     name: string;
     email: string;
+    role: StaffRole;
+    roleLabel: string;
     isApproved: boolean;
     createdAt: string;
 };

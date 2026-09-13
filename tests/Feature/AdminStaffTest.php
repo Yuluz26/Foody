@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\StaffRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,25 +17,26 @@ class AdminStaffTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['is_admin' => true, 'approved_at' => now()]);
+        $this->admin = User::factory()->admin()->create(['name' => 'Zaid Pentadbir']);
     }
 
     public function test_admin_can_see_the_staff_list(): void
     {
-        User::factory()->create(['is_admin' => true, 'approved_at' => now(), 'name' => 'Aina']);
+        User::factory()->staff()->create(['name' => 'Aina']);
 
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin, 'web')
             ->get('/admin/staff')
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->has('staff', 2));
+            ->assertInertia(fn ($page) => $page->has('staff', 2)->where('staff.0.name', 'Aina')->where('staff.0.role', 'staff'));
     }
 
-    public function test_a_new_staff_account_starts_pending_and_cannot_log_in(): void
+    public function test_a_new_account_gets_the_chosen_role_and_stays_inactive_until_approved(): void
     {
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin, 'web')
             ->post('/admin/staff', [
                 'name' => 'Aina Kasih',
                 'email' => 'aina@example.com',
+                'role' => 'staff',
                 'password' => 'kata-laluan-99',
                 'password_confirmation' => 'kata-laluan-99',
             ])
@@ -42,108 +44,162 @@ class AdminStaffTest extends TestCase
 
         $staff = User::query()->where('email', 'aina@example.com')->sole();
         $this->assertTrue($staff->is_admin);
+        $this->assertSame(StaffRole::Staff, $staff->role);
         $this->assertFalse($staff->isApproved());
 
         $this->post('/admin/logout');
 
-        $this->post('/admin/login', ['email' => $staff->email, 'password' => 'kata-laluan-99'])
+        $this->post('/admin/login', ['email' => 'aina@example.com', 'password' => 'kata-laluan-99'])
             ->assertSessionHasErrors('email');
-        $this->assertGuest();
+        $this->assertGuest('web');
     }
 
-    public function test_admin_can_approve_a_pending_staff_account_individually(): void
+    public function test_approving_an_account_lets_it_log_in(): void
     {
-        $staff = User::factory()->create(['is_admin' => true, 'approved_at' => null, 'password' => 'kata-laluan-99']);
+        $staff = User::factory()->staff()->inactive()->create(['password' => 'kata-laluan-99']);
 
-        $this->actingAs($this->admin)->patch("/admin/staff/{$staff->id}/approve")->assertRedirect();
-
+        $this->actingAs($this->admin, 'web')->patch("/admin/staff/{$staff->id}/approve")->assertSessionHas('success');
         $this->assertTrue($staff->fresh()->isApproved());
 
         $this->post('/admin/logout');
 
-        $this->post('/admin/login', ['email' => $staff->email, 'password' => 'kata-laluan-99'])
-            ->assertRedirect('/admin');
-        $this->assertAuthenticatedAs($staff->fresh());
+        $this->post('/admin/login', ['email' => $staff->email, 'password' => 'kata-laluan-99'])->assertRedirect('/admin');
+        $this->assertAuthenticatedAs($staff->fresh(), 'web');
     }
 
-    public function test_admin_can_bulk_approve_pending_staff(): void
+    public function test_admin_can_bulk_approve_inactive_accounts(): void
     {
-        $pendingOne = User::factory()->create(['is_admin' => true, 'approved_at' => null]);
-        $pendingTwo = User::factory()->create(['is_admin' => true, 'approved_at' => null]);
+        $one = User::factory()->staff()->inactive()->create();
+        $two = User::factory()->staff()->inactive()->create();
 
-        $this->actingAs($this->admin)
-            ->post('/admin/staff/bulk', ['ids' => [$pendingOne->id, $pendingTwo->id], 'action' => 'approve'])
-            ->assertRedirect();
+        $this->actingAs($this->admin, 'web')
+            ->post('/admin/staff/bulk', ['ids' => [$one->id, $two->id], 'action' => 'approve'])
+            ->assertSessionHas('success');
 
-        $this->assertTrue($pendingOne->fresh()->isApproved());
-        $this->assertTrue($pendingTwo->fresh()->isApproved());
+        $this->assertTrue($one->fresh()->isApproved());
+        $this->assertTrue($two->fresh()->isApproved());
     }
 
-    public function test_admin_can_edit_another_staff_members_details(): void
+    public function test_admin_can_edit_another_accounts_details_and_role(): void
     {
-        $staff = User::factory()->create(['is_admin' => true, 'approved_at' => now(), 'name' => 'Old Name']);
+        $staff = User::factory()->staff()->create(['name' => 'Nama Lama']);
 
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin, 'web')
             ->put("/admin/staff/{$staff->id}", [
-                'name' => 'New Name',
+                'name' => 'Nama Baharu',
                 'email' => $staff->email,
+                'role' => 'admin',
                 'password' => '',
                 'password_confirmation' => '',
             ])
             ->assertRedirect('/admin/staff');
 
-        $this->assertSame('New Name', $staff->fresh()->name);
+        $staff->refresh();
+        $this->assertSame('Nama Baharu', $staff->name);
+        $this->assertSame(StaffRole::Admin, $staff->role);
     }
 
-    public function test_admin_can_delete_another_staff_member(): void
+    public function test_admin_cannot_change_their_own_role(): void
     {
-        $staff = User::factory()->create(['is_admin' => true, 'approved_at' => now()]);
+        $this->actingAs($this->admin, 'web')
+            ->put("/admin/staff/{$this->admin->id}", [
+                'name' => $this->admin->name,
+                'email' => $this->admin->email,
+                'role' => 'staff',
+            ])
+            ->assertSessionHasErrors('role');
 
-        $this->actingAs($this->admin)->delete("/admin/staff/{$staff->id}")->assertRedirect('/admin/staff');
+        $this->assertSame(StaffRole::Admin, $this->admin->fresh()->role);
+    }
+
+    public function test_changing_your_own_password_from_the_staff_form_keeps_you_signed_in(): void
+    {
+        $admin = User::factory()->admin()->create(['password' => 'kata-laluan-lama']);
+        $this->post('/admin/login', ['email' => $admin->email, 'password' => 'kata-laluan-lama']);
+
+        $this->put("/admin/staff/{$admin->id}", [
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'role' => 'admin',
+            'password' => 'kata-laluan-baharu-99',
+            'password_confirmation' => 'kata-laluan-baharu-99',
+        ])->assertRedirect('/admin/staff');
+
+        // Reload the user from the database, as a real next request would.
+        $this->app['auth']->guard('web')->forgetUser();
+
+        $this->get('/admin/staff')->assertOk();
+    }
+
+    public function test_admin_can_delete_another_account(): void
+    {
+        $staff = User::factory()->staff()->create();
+
+        $this->actingAs($this->admin, 'web')->delete("/admin/staff/{$staff->id}")->assertRedirect('/admin/staff');
 
         $this->assertModelMissing($staff);
     }
 
-    public function test_admin_cannot_delete_their_own_account(): void
+    public function test_admin_cannot_delete_or_suspend_their_own_account(): void
     {
-        $this->actingAs($this->admin)->delete("/admin/staff/{$this->admin->id}")->assertRedirect();
+        $this->actingAs($this->admin, 'web')->delete("/admin/staff/{$this->admin->id}")->assertSessionHas('error');
+        $this->actingAs($this->admin, 'web')->patch("/admin/staff/{$this->admin->id}/revoke")->assertSessionHas('error');
 
         $this->assertModelExists($this->admin);
+        $this->assertTrue($this->admin->fresh()->isApproved());
     }
 
-    public function test_the_last_approved_admin_cannot_be_deleted(): void
+    public function test_suspending_an_account_ends_its_access_immediately(): void
     {
-        // Two approved admins exist here, so $actor deleting $this->admin is not deleting the
-        // last one — that leaves $actor as the sole approved account to exercise the guard on.
-        $actor = User::factory()->create(['is_admin' => true, 'approved_at' => now()]);
+        $staff = User::factory()->staff()->create(['remember_token' => 'token-lama']);
 
-        $this->actingAs($actor)->delete("/admin/staff/{$this->admin->id}")->assertRedirect('/admin/staff');
-        $this->assertModelMissing($this->admin);
+        $this->actingAs($this->admin, 'web')->patch("/admin/staff/{$staff->id}/revoke")->assertSessionHas('success');
 
-        $pendingActor = User::factory()->create(['is_admin' => true, 'approved_at' => null]);
-        $this->actingAs($pendingActor)->delete("/admin/staff/{$actor->id}")->assertRedirect();
+        $staff->refresh();
+        $this->assertFalse($staff->isApproved());
+        $this->assertNotSame('token-lama', $staff->getRememberToken());
 
-        $this->assertModelExists($actor);
+        $this->actingAs($staff, 'web')->get('/admin')
+            ->assertRedirect('/admin/login')
+            ->assertSessionHasErrors(['email' => 'Akaun anda tidak aktif. Sila hubungi admin kedai.']);
+        $this->assertGuest('web');
     }
 
-    public function test_bulk_delete_respects_the_self_and_last_admin_guards(): void
+    public function test_bulk_suspend_and_delete_skip_the_acting_admin(): void
     {
-        $other = User::factory()->create(['is_admin' => true, 'approved_at' => now()]);
+        $other = User::factory()->staff()->create();
+        $another = User::factory()->staff()->create();
 
-        $this->actingAs($this->admin)
-            ->post('/admin/staff/bulk', ['ids' => [$this->admin->id, $other->id], 'action' => 'delete'])
-            ->assertRedirect();
+        $this->actingAs($this->admin, 'web')->post('/admin/staff/bulk', ['ids' => [$this->admin->id, $other->id], 'action' => 'revoke']);
+        $this->assertTrue($this->admin->fresh()->isApproved());
+        $this->assertFalse($other->fresh()->isApproved());
 
+        $this->actingAs($this->admin, 'web')->post('/admin/staff/bulk', ['ids' => [$this->admin->id, $another->id], 'action' => 'delete']);
         $this->assertModelExists($this->admin);
-        $this->assertModelMissing($other);
+        $this->assertModelMissing($another);
     }
 
-    public function test_guests_and_non_admins_cannot_access_staff_routes(): void
+    public function test_the_last_active_admin_survives_even_if_the_acting_admin_was_demoted_mid_request(): void
+    {
+        $lastAdmin = User::factory()->admin()->create();
+        User::query()->whereKey($this->admin->id)->update(['role' => 'staff']);
+
+        $this->actingAs($this->admin, 'web')->delete("/admin/staff/{$lastAdmin->id}")->assertSessionHas('error');
+        $this->actingAs($this->admin, 'web')->patch("/admin/staff/{$lastAdmin->id}/revoke")->assertSessionHas('error');
+        $this->actingAs($this->admin, 'web')->post('/admin/staff/bulk', ['ids' => [$lastAdmin->id], 'action' => 'delete'])->assertSessionHas('error');
+
+        $this->assertModelExists($lastAdmin);
+        $this->assertTrue($lastAdmin->fresh()->isApproved());
+    }
+
+    public function test_staff_role_and_guests_cannot_manage_accounts(): void
     {
         $this->get('/admin/staff')->assertRedirect('/admin/login');
 
-        $this->actingAs(User::factory()->create())
-            ->get('/admin/staff')
-            ->assertForbidden();
+        $staff = User::factory()->staff()->create();
+        $this->actingAs($staff, 'web')->get('/admin/staff')->assertForbidden();
+        $this->actingAs($staff, 'web')->post('/admin/staff/bulk', ['ids' => [$this->admin->id], 'action' => 'delete'])->assertForbidden();
+
+        $this->assertModelExists($this->admin);
     }
 }

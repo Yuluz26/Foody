@@ -58,7 +58,7 @@ class AuthController extends Controller
         RateLimiter::clear($throttleKey);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('menu'));
+        return $this->redirectAfterSignIn($request);
     }
 
     public function createRegister(): Response
@@ -78,7 +78,17 @@ class AuthController extends Controller
         Auth::guard('customer')->login($customer);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('menu'));
+        return $this->redirectAfterSignIn($request);
+    }
+
+    // Staff and diners share one session, so a leftover "return here" from the admin panel must not send a diner there.
+    private function redirectAfterSignIn(Request $request): RedirectResponse
+    {
+        $intended = (string) $request->session()->pull('url.intended', '');
+        $path = '/'.trim((string) parse_url($intended, PHP_URL_PATH), '/');
+        $isPanel = $path === '/admin' || str_starts_with($path, '/admin/');
+
+        return redirect()->to($intended !== '' && ! $isPanel ? $intended : route('menu'));
     }
 
     public function destroy(Request $request): RedirectResponse

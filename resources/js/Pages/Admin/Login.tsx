@@ -1,5 +1,5 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { BellRingingIcon, ChartLineUpIcon, CheckCircleIcon, ReceiptIcon } from '@phosphor-icons/react';
+import { BellRingingIcon, ChartLineUpIcon, CheckCircleIcon, ReceiptIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Field, inputClass } from '@/components/ui/Field';
@@ -88,7 +88,7 @@ function ConsolePanel({ brandName }: { brandName: string }) {
 }
 
 export default function Login() {
-    const { restaurantName } = usePage().props;
+    const { restaurantName, flash } = usePage().props;
     const form = useForm({ email: '', password: '', remember: false });
 
     const submit = (event: FormEvent) => {
@@ -106,6 +106,12 @@ export default function Login() {
                     <div className="w-full max-w-sm">
                         <h1 className="text-2xl font-extrabold text-ink">Log masuk panel kedai</h1>
                         <p className="mt-1 text-[15px] text-ink-muted">Untuk kakitangan sahaja.</p>
+                        {flash.error && (
+                            <p role="alert" className="mt-5 flex gap-2 rounded-(--radius-panel) border-2 border-alert bg-alert-tint p-4 text-[15px] font-semibold text-alert">
+                                <WarningCircleIcon size={22} weight="bold" className="shrink-0" aria-hidden />
+                                {flash.error}
+                            </p>
+                        )}
                         <form onSubmit={submit} className="mt-6 grid gap-5" noValidate>
                             <Field id="email" label="Emel" error={form.errors.email}>
                                 {(control) => (

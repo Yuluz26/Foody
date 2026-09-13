@@ -1,4 +1,4 @@
-import { router, usePoll } from '@inertiajs/react';
+import { router, usePage, usePoll } from '@inertiajs/react';
 import { MagnifyingGlassIcon, TrayIcon } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
@@ -30,6 +30,7 @@ export default function OrdersIndex({ orders, filters: initial, statusOptions, a
 
     const [selected, setSelected] = useState<Set<number>>(new Set());
     const [bulkPending, setBulkPending] = useState(false);
+    const isAdmin = usePage().props.auth.user?.role === 'admin';
     const pageIds = orders.data.map((order) => order.id);
 
     // The visible page of orders changes under selection (poll, filter, page nav) — drop
@@ -175,15 +176,17 @@ export default function OrdersIndex({ orders, filters: initial, statusOptions, a
                                     confirmLabel="Ya, tolak"
                                     onConfirm={() => runBulk('reject')}
                                 />
-                                <ConfirmButton
-                                    label="Padam"
-                                    size="sm"
-                                    disabled={bulkPending}
-                                    title={`Padam ${selected.size} pesanan?`}
-                                    message="Pesanan yang dipilih akan dipadam selama-lamanya bersama semua itemnya. Tindakan ini tidak boleh diundur."
-                                    confirmLabel="Ya, padam"
-                                    onConfirm={() => runBulk('delete')}
-                                />
+                                {isAdmin && (
+                                    <ConfirmButton
+                                        label="Padam"
+                                        size="sm"
+                                        disabled={bulkPending}
+                                        title={`Padam ${selected.size} pesanan?`}
+                                        message="Pesanan yang dipilih akan dipadam selama-lamanya bersama semua itemnya. Tindakan ini tidak boleh diundur."
+                                        confirmLabel="Ya, padam"
+                                        onConfirm={() => runBulk('delete')}
+                                    />
+                                )}
                                 <Button variant="quiet" size="sm" disabled={bulkPending} onClick={() => setSelected(new Set())}>
                                     Nyahpilih
                                 </Button>

@@ -198,6 +198,8 @@ class OrderController extends Controller
             'action' => ['required', Rule::in(['approve', 'reject', 'delete'])],
         ]);
 
+        abort_if($validated['action'] === 'delete' && ! $request->user('web')->hasAdminRole(), 403, 'Hanya admin boleh memadam pesanan.');
+
         $action = $validated['action'];
         $affected = 0;
         $transitioned = [];

@@ -9,7 +9,7 @@ class ProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user('web')?->hasAdminRole();
     }
 
     /** @return array<string, mixed> */

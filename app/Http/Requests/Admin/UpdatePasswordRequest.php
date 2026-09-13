@@ -10,7 +10,7 @@ class UpdatePasswordRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user('web')?->canAccessPanel();
     }
 
     /** @return array<string, mixed> */
@@ -18,7 +18,7 @@ class UpdatePasswordRequest extends FormRequest
     {
         return [
             'current_password' => ['required', 'string', function ($attribute, $value, $fail) {
-                if (! Hash::check((string) $value, $this->user()->password)) {
+                if (! Hash::check((string) $value, $this->user('web')->password)) {
                     $fail('Kata laluan semasa tidak betul.');
                 }
             }],

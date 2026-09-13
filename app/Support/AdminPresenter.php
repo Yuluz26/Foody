@@ -109,6 +109,8 @@ class AdminPresenter
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'role' => $user->role->value,
+            'roleLabel' => $user->role->label(),
             'isApproved' => $user->isApproved(),
             'createdAt' => $user->created_at->toIso8601String(),
         ];

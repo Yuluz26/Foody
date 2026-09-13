@@ -40,7 +40,9 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => fn () => $request->user('web')?->only('id', 'name', 'email'),
+                'user' => fn () => ($user = $request->user('web'))
+                    ? [...$user->only('id', 'name', 'email'), 'role' => $user->role?->value]
+                    : null,
             ],
             // Separate from `auth` above (the staff/admin guard) — a diner's identity never
             // rides on the same key, so a page can't accidentally read the wrong guard's user.
@@ -56,7 +58,7 @@ class HandleInertiaRequests extends Middleware
             // than guessing from activeOrders, which also moves when staff change a status.
             // latestCustomerCancelledOrderId is the same trick for self-cancels: staff already know
             // when they cancel an order themselves, so only customer-initiated cancellations alert.
-            'adminCounts' => fn () => $request->user('web')?->is_admin
+            'adminCounts' => fn () => $request->user('web')?->canAccessPanel()
                 ? [
                     'activeOrders' => Order::query()->active()->count(),
                     'latestOrderId' => Order::query()->max('id'),

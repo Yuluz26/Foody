@@ -1,4 +1,5 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { WarningCircleIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { imageSrc, imageSrcSet } from '@/lib/format';
 
@@ -21,6 +22,8 @@ type AuthSplitScreenProps = {
  * otherwise squeeze the form unusably narrow.
  */
 export function AuthSplitScreen({ imageUrl, imageAlt, brandName, homeHref, heroTitle, heroSubtitle, children }: AuthSplitScreenProps) {
+    const { flash } = usePage().props;
+
     return (
         <div className="grid min-h-dvh bg-ground lg:grid-cols-2">
             <div className="relative h-[38vh] min-h-64 overflow-hidden lg:h-auto lg:min-h-dvh">
@@ -43,7 +46,15 @@ export function AuthSplitScreen({ imageUrl, imageAlt, brandName, homeHref, heroT
             </div>
 
             <div className="flex items-center justify-center px-5 py-10 sm:px-10 lg:px-16">
-                <div className="w-full max-w-sm">{children}</div>
+                <div className="w-full max-w-sm">
+                    {flash.error && (
+                        <p role="alert" className="mb-6 flex gap-2 rounded-(--radius-panel) border-2 border-alert bg-alert-tint p-4 text-[15px] font-semibold text-alert">
+                            <WarningCircleIcon size={22} weight="bold" className="shrink-0" aria-hidden />
+                            {flash.error}
+                        </p>
+                    )}
+                    {children}
+                </div>
             </div>
         </div>
     );

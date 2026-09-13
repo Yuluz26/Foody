@@ -6,12 +6,11 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserIsAdmin
+class EnsureAdminRole
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Explicit 'web' guard — never the unguarded default, which a customer session can shift.
-        abort_unless($request->user('web')?->is_admin, 403, 'Akses admin sahaja.');
+        abort_unless($request->user('web')?->hasAdminRole(), 403, 'Akses admin sahaja.');
 
         return $next($request);
     }

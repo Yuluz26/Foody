@@ -23,16 +23,16 @@ import { ToastProvider, useToast } from '@/components/Toaster';
 import { cn } from '@/lib/format';
 import { useNewOrderAlert } from './useNewOrderAlert';
 
-type NavItem = { href: string; label: string; Icon: Icon; exact?: boolean; countKey?: 'activeOrders' };
+type NavItem = { href: string; label: string; Icon: Icon; exact?: boolean; countKey?: 'activeOrders'; adminOnly?: boolean };
 
 const NAV: NavItem[] = [
     { href: '/admin', label: 'Ringkasan', Icon: HouseIcon, exact: true },
     { href: '/admin/orders', label: 'Pesanan', Icon: ReceiptIcon, countKey: 'activeOrders' },
-    { href: '/admin/products', label: 'Produk', Icon: BowlFoodIcon },
-    { href: '/admin/categories', label: 'Kategori', Icon: SquaresFourIcon },
-    { href: '/admin/customers', label: 'Pelanggan', Icon: UsersIcon },
-    { href: '/admin/staff', label: 'Kakitangan', Icon: IdentificationBadgeIcon },
-    { href: '/admin/settings', label: 'Tetapan', Icon: GearSixIcon },
+    { href: '/admin/products', label: 'Produk', Icon: BowlFoodIcon, adminOnly: true },
+    { href: '/admin/categories', label: 'Kategori', Icon: SquaresFourIcon, adminOnly: true },
+    { href: '/admin/customers', label: 'Pelanggan', Icon: UsersIcon, adminOnly: true },
+    { href: '/admin/staff', label: 'Kakitangan', Icon: IdentificationBadgeIcon, adminOnly: true },
+    { href: '/admin/settings', label: 'Tetapan', Icon: GearSixIcon, adminOnly: true },
 ];
 
 type AdminLayoutProps = {
@@ -130,6 +130,7 @@ function AdminShell({ title, actions, children }: AdminLayoutProps) {
     const toast = useToast();
     const { flash, restaurantName, auth, adminCounts } = props;
     const alert = useNewOrderAlert();
+    const nav = NAV.filter((item) => !item.adminOnly || auth.user?.role === 'admin');
 
     // Every server response carries a fresh flash object, so repeated messages still show.
     useEffect(() => {
@@ -182,7 +183,7 @@ function AdminShell({ title, actions, children }: AdminLayoutProps) {
                     </div>
                     <nav aria-label="Navigasi admin" className="flex-1 overflow-y-auto px-3 py-4">
                         <ul className="grid gap-1">
-                            {NAV.map((item) => (
+                            {nav.map((item) => (
                                 <li key={item.href}>{navLink(item, false)}</li>
                             ))}
                         </ul>
@@ -238,7 +239,7 @@ function AdminShell({ title, actions, children }: AdminLayoutProps) {
                             </div>
                         </div>
                         <nav aria-label="Navigasi admin" className="no-scrollbar flex gap-1 overflow-x-auto border-b-2 border-rule bg-panel px-2 py-1">
-                            {NAV.map((item) => (
+                            {nav.map((item) => (
                                 <span key={item.href} className="shrink-0">
                                     {navLink(item, true)}
                                 </span>

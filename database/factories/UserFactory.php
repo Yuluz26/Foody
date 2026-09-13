@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\StaffRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => StaffRole::Staff,
         ];
     }
 
@@ -40,6 +42,33 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /** An active panel account with full admin permissions. */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => true,
+            'role' => StaffRole::Admin,
+            'approved_at' => now(),
+        ]);
+    }
+
+    /** An active panel account limited to the dashboard and order screens. */
+    public function staff(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => true,
+            'role' => StaffRole::Staff,
+            'approved_at' => now(),
+        ]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'approved_at' => null,
         ]);
     }
 }

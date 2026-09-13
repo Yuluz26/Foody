@@ -9,7 +9,7 @@ class ProfileRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user('web')?->canAccessPanel();
     }
 
     /** @return array<string, mixed> */
@@ -17,7 +17,7 @@ class ProfileRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user()?->id)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user('web')?->id)],
         ];
     }
 

@@ -25,7 +25,7 @@ class OrderStatusTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['is_admin' => true]);
+        $this->admin = User::factory()->admin()->create();
     }
 
     /** The 'customer' guard is independent of the 'web' guard the admin tests act as, so acting

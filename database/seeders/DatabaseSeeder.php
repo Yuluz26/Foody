@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\StaffRole;
 use App\Models\RestaurantSetting;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,14 +18,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Local demo credentials. Change the password in production.
-        User::query()->firstOrNew(['email' => 'admin@foody.test'])
-            ->forceFill([
-                'name' => 'Pentadbir Foody',
-                'password' => 'password',
-                'is_admin' => true,
-            ])
-            ->save();
+        if (app()->isProduction()) {
+            throw new RuntimeException('The demo seeder creates admin@foody.test with the password "password" and must not run in production. Create the first admin with: php artisan app:create-admin');
+        }
+
+        $admin = User::query()->firstOrNew(['email' => 'admin@foody.test']);
+        $admin->forceFill([
+            'name' => 'Pentadbir Foody',
+            'password' => 'password',
+            'is_admin' => true,
+            'role' => StaffRole::Admin,
+            'approved_at' => $admin->approved_at ?? now(),
+        ])->save();
 
         RestaurantSetting::query()->updateOrCreate(['id' => 1], [
             'name' => 'Foody',

@@ -12,7 +12,7 @@ class UpdateOrderRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user('web')?->canAccessPanel();
     }
 
     /** @return array<string, mixed> */

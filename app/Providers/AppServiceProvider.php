@@ -27,5 +27,6 @@ class AppServiceProvider extends ServiceProvider
         Model::preventLazyLoading(! $this->app->isProduction());
 
         RateLimiter::for('orders', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+        RateLimiter::for('register', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
     }
 }

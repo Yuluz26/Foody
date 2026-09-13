@@ -44,6 +44,30 @@ class CustomerAuthTest extends TestCase
         $this->assertSame(1, Customer::query()->where('email', 'aina@example.com')->count());
     }
 
+    public function test_two_accounts_can_share_a_phone_number(): void
+    {
+        Customer::factory()->create(['phone' => '0123456789']);
+
+        $this->post('/daftar', [
+            'name' => 'Adik Aina',
+            'email' => 'adik@example.com',
+            'phone' => '012-345 6789',
+            'password' => 'kata-laluan-99',
+            'password_confirmation' => 'kata-laluan-99',
+        ])->assertRedirect('/');
+
+        $this->assertSame(2, Customer::query()->where('phone', '0123456789')->count());
+    }
+
+    public function test_registration_is_rate_limited(): void
+    {
+        foreach (range(1, 10) as $attempt) {
+            $this->post('/daftar', ['email' => "bukan-emel-{$attempt}"]);
+        }
+
+        $this->post('/daftar', ['email' => 'bukan-emel'])->assertStatus(429);
+    }
+
     public function test_a_customer_can_log_in_and_out(): void
     {
         $customer = Customer::factory()->create(['email' => 'aina@example.com', 'password' => 'rahsia-99']);
@@ -87,7 +111,7 @@ class CustomerAuthTest extends TestCase
 
     public function test_an_admin_session_alone_is_still_a_guest_on_the_customer_guard(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)->get('/')->assertRedirect('/log-masuk');
     }
@@ -97,5 +121,15 @@ class CustomerAuthTest extends TestCase
         $customer = Customer::factory()->create();
 
         $this->actingAs($customer, 'customer')->get('/admin')->assertRedirect('/admin/login');
+    }
+
+    public function test_a_leftover_admin_redirect_does_not_send_a_diner_to_the_panel(): void
+    {
+        Customer::factory()->create(['email' => 'aina@example.com', 'password' => 'rahsia-99']);
+
+        $this->get('/admin')->assertRedirect('/admin/login');
+
+        $this->post('/log-masuk', ['email' => 'aina@example.com', 'password' => 'rahsia-99'])
+            ->assertRedirect('/');
     }
 }

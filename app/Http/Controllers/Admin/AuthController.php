@@ -55,10 +55,10 @@ class AuthController extends Controller
         if ($authenticated && ! $request->user('web')->isApproved()) {
             Auth::guard('web')->logout();
             RateLimiter::hit($throttleKey);
-            Log::warning('Admin login blocked: account pending approval', ['email' => $credentials['email'], 'ip' => $request->ip()]);
+            Log::warning('Admin login blocked: account inactive', ['email' => $credentials['email'], 'ip' => $request->ip()]);
 
             throw ValidationException::withMessages([
-                'email' => 'Akaun anda belum diluluskan oleh admin. Sila hubungi admin kedai.',
+                'email' => 'Akaun anda tidak aktif. Sila hubungi admin kedai.',
             ]);
         }
 
@@ -74,7 +74,17 @@ class AuthController extends Controller
         RateLimiter::clear($throttleKey);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard'));
+        return $this->redirectAfterSignIn($request);
+    }
+
+    // Staff and diners share one session, so a leftover "return here" from the menu must not pull staff out of the panel.
+    private function redirectAfterSignIn(Request $request): RedirectResponse
+    {
+        $intended = (string) $request->session()->pull('url.intended', '');
+        $path = '/'.trim((string) parse_url($intended, PHP_URL_PATH), '/');
+        $isPanel = $path === '/admin' || str_starts_with($path, '/admin/');
+
+        return redirect()->to($isPanel ? $intended : route('admin.dashboard'));
     }
 
     public function destroy(Request $request): RedirectResponse

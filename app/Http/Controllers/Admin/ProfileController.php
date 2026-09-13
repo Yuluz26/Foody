@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdatePasswordRequest;
 use App\Support\AdminPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,7 +26,12 @@ class ProfileController extends Controller
         $user = $request->user('web');
         $user->name = $request->validated('name');
         $user->email = $request->validated('email');
+        $changed = array_keys($user->getDirty());
         $user->save();
+
+        if ($changed !== []) {
+            Log::info('Staff profile updated', ['user_id' => $user->id, 'changed' => $changed]);
+        }
 
         return back()->with('success', 'Profil anda dikemas kini.');
     }
@@ -36,6 +42,8 @@ class ProfileController extends Controller
         $user->password = $request->validated('password');
         $user->save();
 
-        return back()->with('success', 'Kata laluan anda dikemas kini.');
+        Log::info('Staff password changed', ['user_id' => $user->id]);
+
+        return back()->with('success', 'Kata laluan anda dikemas kini. Sesi di peranti lain telah dilog keluar.');
     }
 }

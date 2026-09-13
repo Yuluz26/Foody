@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { CheckIcon, HourglassIcon, IdentificationBadgeIcon, PencilSimpleIcon, PlusIcon } from '@phosphor-icons/react';
+import { CheckIcon, IdentificationBadgeIcon, PauseCircleIcon, PencilSimpleIcon, PlusIcon, ShieldCheckIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { ConfirmButton } from '@/components/ConfirmButton';
@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/format';
 import type { AdminStaff, SharedProps } from '@/types';
 
+type BulkAction = 'approve' | 'revoke' | 'delete';
+
 const addLinkClass =
     'flex h-12 items-center gap-2 rounded-(--radius-control) bg-ink px-4 font-semibold text-white transition-[transform,background-color,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-ink-soft hover:shadow-(--shadow-lift) active:translate-y-0 active:scale-[0.97]';
 
-function ApprovalBadge({ isApproved }: { isApproved: boolean }) {
+function AccessBadge({ isApproved }: { isApproved: boolean }) {
     return (
         <span
             className={cn(
@@ -18,8 +20,8 @@ function ApprovalBadge({ isApproved }: { isApproved: boolean }) {
                 isApproved ? 'bg-leaf text-white' : 'bg-amber-tint text-ink ring-1 ring-ink/20 ring-inset',
             )}
         >
-            {isApproved ? <CheckIcon size={14} weight="bold" aria-hidden /> : <HourglassIcon size={14} weight="bold" aria-hidden />}
-            {isApproved ? 'Aktif' : 'Belum diluluskan'}
+            {isApproved ? <CheckIcon size={14} weight="bold" aria-hidden /> : <PauseCircleIcon size={14} weight="bold" aria-hidden />}
+            {isApproved ? 'Aktif' : 'Tidak aktif'}
         </span>
     );
 }
@@ -44,7 +46,7 @@ export default function StaffIndex({ staff }: { staff: AdminStaff[] }) {
             return next;
         });
 
-    const runBulk = (action: 'approve' | 'delete') => {
+    const runBulk = (action: BulkAction) => {
         setBulkPending(true);
         router.post(
             '/admin/staff/bulk',
@@ -57,6 +59,8 @@ export default function StaffIndex({ staff }: { staff: AdminStaff[] }) {
         );
     };
 
+    const setAccess = (member: AdminStaff, action: 'approve' | 'revoke') => router.patch(`/admin/staff/${member.id}/${action}`, {}, { preserveScroll: true });
+
     return (
         <AdminLayout
             title="Kakitangan"
@@ -68,7 +72,7 @@ export default function StaffIndex({ staff }: { staff: AdminStaff[] }) {
             }
         >
             <p className="-mt-2 max-w-[65ch] text-[15px] text-ink-muted">
-                Akaun baharu perlu diluluskan sebelum boleh log masuk ke panel ini. Akaun anda sendiri dan kakitangan diluluskan terakhir tidak boleh dipadam.
+                Admin mengurus menu, pelanggan, kakitangan dan tetapan. Staf hanya nampak ringkasan dan pesanan. Akaun baharu perlu diluluskan sebelum boleh log masuk, dan akaun yang digantung dilog keluar serta-merta.
             </p>
 
             {staff.length === 0 ? (
@@ -108,11 +112,20 @@ export default function StaffIndex({ staff }: { staff: AdminStaff[] }) {
                                     onConfirm={() => runBulk('approve')}
                                 />
                                 <ConfirmButton
+                                    label="Gantung"
+                                    size="sm"
+                                    disabled={bulkPending}
+                                    title={`Gantung ${selected.size} kakitangan?`}
+                                    message="Akaun yang dipilih akan dilog keluar serta-merta dan tidak boleh log masuk sehingga diluluskan semula. Akaun anda sendiri dan admin aktif terakhir tidak akan digantung."
+                                    confirmLabel="Ya, gantung"
+                                    onConfirm={() => runBulk('revoke')}
+                                />
+                                <ConfirmButton
                                     label="Padam"
                                     size="sm"
                                     disabled={bulkPending}
                                     title={`Padam ${selected.size} kakitangan?`}
-                                    message="Akaun yang dipilih akan dipadam selama-lamanya. Akaun anda sendiri dan kakitangan diluluskan terakhir tidak akan dipadam."
+                                    message="Akaun yang dipilih akan dipadam selama-lamanya. Akaun anda sendiri dan admin aktif terakhir tidak akan dipadam."
                                     confirmLabel="Ya, padam"
                                     onConfirm={() => runBulk('delete')}
                                 />
@@ -127,7 +140,10 @@ export default function StaffIndex({ staff }: { staff: AdminStaff[] }) {
                             const isSelf = member.id === auth.user?.id;
 
                             return (
-                                <li key={member.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-4 py-4 transition-colors duration-150 hover:bg-ground sm:px-5">
+                                <li
+                                    key={member.id}
+                                    className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-3 px-4 py-4 transition-colors duration-150 hover:bg-ground sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:px-5"
+                                >
                                     <input
                                         type="checkbox"
                                         checked={selected.has(member.id)}
@@ -136,16 +152,38 @@ export default function StaffIndex({ staff }: { staff: AdminStaff[] }) {
                                         className="size-5 shrink-0 rounded-sm border-2 border-rule-strong accent-ink"
                                     />
                                     <div className="min-w-0">
-                                        <Link href={`/admin/staff/${member.id}/edit`} className="font-semibold hover:text-ink-soft hover:underline">
-                                            {member.name}
-                                            {isSelf && <span className="ml-2 text-sm font-medium text-ink-muted">(anda)</span>}
-                                        </Link>
+                                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                            <Link href={`/admin/staff/${member.id}/edit`} className="font-semibold hover:text-ink-soft hover:underline">
+                                                {member.name}
+                                            </Link>
+                                            {isSelf && <span className="text-sm font-medium text-ink-muted">(anda)</span>}
+                                            <span className={cn('inline-flex items-center gap-1 self-center text-sm font-semibold', member.role === 'admin' ? 'text-ink' : 'text-ink-muted')}>
+                                                {member.role === 'admin' && <ShieldCheckIcon size={15} weight="bold" aria-hidden />}
+                                                {member.roleLabel}
+                                            </span>
+                                        </div>
                                         <p className="truncate text-sm text-ink-muted">{member.email}</p>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <ApprovalBadge isApproved={member.isApproved} />
+                                    <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-auto sm:justify-end">
+                                        <AccessBadge isApproved={member.isApproved} />
+                                        {!member.isApproved && (
+                                            <Button variant="leaf" size="sm" onClick={() => setAccess(member, 'approve')}>
+                                                Luluskan
+                                            </Button>
+                                        )}
+                                        {member.isApproved && !isSelf && (
+                                            <ConfirmButton
+                                                label="Gantung"
+                                                size="sm"
+                                                title={`Gantung akses ${member.name}?`}
+                                                message="Akaun ini akan dilog keluar serta-merta dan tidak boleh log masuk sehingga diluluskan semula."
+                                                confirmLabel="Ya, gantung"
+                                                onConfirm={() => setAccess(member, 'revoke')}
+                                            />
+                                        )}
                                         <Link
                                             href={`/admin/staff/${member.id}/edit`}
+                                            aria-label={`Edit ${member.name}`}
                                             className="group flex h-10 items-center gap-1.5 rounded-(--radius-control) px-3 text-sm font-semibold transition-colors duration-150 hover:bg-rule/60"
                                         >
                                             <PencilSimpleIcon size={16} weight="bold" aria-hidden className="transition-transform duration-150 ease-out group-hover:-rotate-12" />
