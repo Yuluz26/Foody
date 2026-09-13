@@ -131,25 +131,25 @@ class ReportTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->has('trend', 12)->where('filters.period', 'month'));
     }
 
-    public function test_staff_can_print_a_single_orders_receipt(): void
+    public function test_chef_can_print_a_single_orders_receipt(): void
     {
-        $staff = User::factory()->staff()->create();
+        $chef = User::factory()->chef()->create();
         $order = $this->placeOrder();
 
-        $response = $this->actingAs($staff, 'web')->get("/admin/orders/{$order->id}/receipt");
+        $response = $this->actingAs($chef, 'web')->get("/admin/orders/{$order->id}/receipt");
 
         $response->assertOk();
         $this->assertSame('application/pdf', $response->headers->get('Content-Type'));
         $this->assertStringStartsWith('%PDF', $response->getContent());
     }
 
-    public function test_staff_can_print_a_combined_receipt_for_several_orders(): void
+    public function test_chef_can_print_a_combined_receipt_for_several_orders(): void
     {
-        $staff = User::factory()->staff()->create();
+        $chef = User::factory()->chef()->create();
         $first = $this->placeOrder();
         $second = $this->placeOrder();
 
-        $response = $this->actingAs($staff, 'web')->get("/admin/orders/receipts?ids[]={$first->id}&ids[]={$second->id}");
+        $response = $this->actingAs($chef, 'web')->get("/admin/orders/receipts?ids[]={$first->id}&ids[]={$second->id}");
 
         $response->assertOk();
         $this->assertSame('application/pdf', $response->headers->get('Content-Type'));

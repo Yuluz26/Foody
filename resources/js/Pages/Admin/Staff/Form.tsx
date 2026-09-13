@@ -15,7 +15,7 @@ type StaffFields = {
 };
 
 const ROLE_HINTS: Record<StaffRole, string> = {
-    staff: 'Ringkasan dan pesanan sahaja. Tidak boleh memadam pesanan.',
+    chef: 'Ringkasan dan pesanan sahaja. Tidak boleh memadam pesanan.',
     admin: 'Akses penuh: menu, slaid, pelanggan, kakitangan dan tetapan kedai.',
 };
 
@@ -25,7 +25,7 @@ export default function StaffForm({ staff }: { staff: AdminStaff | null }) {
     const form = useForm<StaffFields>({
         name: staff?.name ?? '',
         email: staff?.email ?? '',
-        role: staff?.role ?? 'staff',
+        role: staff?.role ?? 'chef',
         password: '',
         password_confirmation: '',
     });
@@ -85,7 +85,7 @@ export default function StaffForm({ staff }: { staff: AdminStaff | null }) {
                                 onChange={(event) => form.setData('role', event.target.value as StaffRole)}
                                 className={inputClass}
                             >
-                                <option value="staff">Staf</option>
+                                <option value="chef">Chef</option>
                                 <option value="admin">Admin</option>
                             </select>
                         )}

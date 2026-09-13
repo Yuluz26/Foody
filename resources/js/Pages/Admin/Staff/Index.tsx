@@ -72,7 +72,7 @@ export default function StaffIndex({ staff }: { staff: AdminStaff[] }) {
             }
         >
             <p className="-mt-2 max-w-[65ch] text-[15px] text-ink-muted">
-                Admin mengurus menu, pelanggan, kakitangan dan tetapan. Staf hanya nampak ringkasan dan pesanan. Akaun baharu perlu diluluskan sebelum boleh log masuk, dan akaun yang digantung dilog keluar serta-merta.
+                Admin mengurus menu, pelanggan, kakitangan dan tetapan. Chef hanya nampak ringkasan dan pesanan. Akaun baharu perlu diluluskan sebelum boleh log masuk, dan akaun yang digantung dilog keluar serta-merta.
             </p>
 
             {staff.length === 0 ? (

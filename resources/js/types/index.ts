@@ -87,7 +87,7 @@ export type CustomerOrder = {
     paymentProofUrl: string | null;
 };
 
-export type StaffRole = 'admin' | 'staff';
+export type StaffRole = 'admin' | 'chef';
 
 export type AuthUser = {
     id: number;
