@@ -33,7 +33,7 @@ export function MenuSlider({ banners }: { banners: MenuBanner[] }) {
 
     return (
         <div
-            className="mx-auto mt-5 max-w-6xl px-5 sm:px-8"
+            className="mb-6"
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}
             onFocus={() => setHovering(true)}

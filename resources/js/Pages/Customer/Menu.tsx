@@ -157,7 +157,6 @@ function MenuScreen({ restaurant, banners, categories, table: tableFromLink }: M
             <div className="lg:hidden">
                 <RestaurantBoard restaurant={restaurant} />
             </div>
-            <MenuSlider banners={banners} />
 
             {table && (
                 <p className="border-b border-rule bg-amber-tint px-6 py-2.5 text-center text-[15px] font-semibold text-ink">
@@ -188,6 +187,8 @@ function MenuScreen({ restaurant, banners, categories, table: tableFromLink }: M
                         <CustomerSidebar restaurant={restaurant} categories={categories} activeId={activeId} onSelect={selectCategory} />
 
                         <main id="kandungan" className="min-w-0">
+                            <MenuSlider banners={banners} />
+
                             <label className="relative block">
                                 <span className="sr-only">Cari hidangan</span>
                                 <MagnifyingGlassIcon size={20} weight="bold" className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-ink-muted" aria-hidden />
