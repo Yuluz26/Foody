@@ -6,6 +6,7 @@ import { DigitDisplay } from '@/components/DigitDisplay';
 import { FoodImage } from '@/components/FoodImage';
 import { QuantityStepper } from '@/components/QuantityStepper';
 import { Sheet } from '@/components/Sheet';
+import { buttonClass } from '@/components/ui/Button';
 import { cn, formatPrice, priceDigits } from '@/lib/format';
 import { duration, ease } from '@/lib/motion';
 
@@ -14,7 +15,7 @@ export function CartLines() {
     const reduce = useReducedMotion();
 
     return (
-        <ul className="divide-y divide-rule">
+        <ul className="divide-y divide-rule/70">
             <AnimatePresence initial={false}>
                 {lines.map((line) => {
                     // Add-ons are a flat charge for the line, not per unit: quantity only scales the dish price.
@@ -29,14 +30,14 @@ export function CartLines() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0, transition: { duration: duration.exit } }}
                             transition={{ duration: duration.base, ease: ease.out }}
-                            className="flex gap-3 py-4"
+                            className="flex gap-3.5 py-4"
                         >
-                            <FoodImage url={line.imageUrl} alt="" sizes="64px" className="size-16 shrink-0 rounded-(--radius-module)" />
+                            <FoodImage url={line.imageUrl} alt="" sizes="64px" className="size-16 shrink-0 rounded-(--radius-control) shadow-(--shadow-raised-xs)" />
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-baseline gap-2">
                                     <p className="min-w-0 leading-snug font-semibold">{line.name}</p>
                                     {/* Dotted leader, as on a printed menu. */}
-                                    <span className="min-w-4 flex-1 -translate-y-1 border-b-2 border-dotted border-rule-strong" aria-hidden />
+                                    <span className="min-w-4 flex-1 -translate-y-1 border-b-2 border-dotted border-rule-strong/70" aria-hidden />
                                     <DigitDisplay value={priceDigits(lineTotal)} chip={false} size="sm" className="shrink-0" />
                                 </div>
                                 {line.addOns.length > 0 && (
@@ -46,11 +47,7 @@ export function CartLines() {
                                 )}
                                 <div className="mt-2 flex items-center justify-between gap-3">
                                     <QuantityStepper size="sm" min={0} value={line.quantity} onChange={(quantity) => setQuantity(line.id, quantity)} label={line.name} />
-                                    <button
-                                        type="button"
-                                        onClick={() => remove(line.id)}
-                                        className="-mr-2 h-10 px-2 text-sm font-semibold text-ink-muted underline decoration-rule-strong hover:text-alert hover:decoration-alert"
-                                    >
+                                    <button type="button" onClick={() => remove(line.id)} className={buttonClass({ variant: 'quiet', size: 'sm', className: 'hover:text-alert' })}>
                                         Buang
                                     </button>
                                 </div>
@@ -66,7 +63,9 @@ export function CartLines() {
 function CartEmpty() {
     return (
         <div className="py-10 text-center">
-            <BasketIcon size={40} weight="bold" className="mx-auto text-rule-strong" aria-hidden />
+            <span className="neu-well-sm mx-auto grid size-16 place-items-center [--neu-radius:9999px]">
+                <BasketIcon size={30} weight="bold" className="text-ink-muted" aria-hidden />
+            </span>
             <p className="mt-3 text-2xl font-extrabold text-ink">Troli masih kosong</p>
             <p className="mx-auto mt-1 max-w-[28ch] text-[15px] text-ink-muted">Tekan butang tambah pada hidangan untuk mula memesan.</p>
         </div>
@@ -75,19 +74,13 @@ function CartEmpty() {
 
 function CheckoutLink({ href, disabled }: { href: string; disabled: boolean }) {
     const { subtotal } = useCart();
-    const className =
-        'flex h-14 w-full items-center justify-between gap-3 rounded-(--radius-control) bg-ink px-5 font-semibold text-white transition-[transform,background-color] duration-150 ease-out hover:bg-ink-soft active:scale-[0.98]';
 
     if (disabled) {
-        return (
-            <p className="rounded-(--radius-control) bg-ground px-4 py-3 text-center text-[15px] font-semibold text-ink-soft">
-                Pesanan ditutup buat masa ini.
-            </p>
-        );
+        return <p className="neu-well-sm px-4 py-3 text-center text-[15px] font-semibold text-ink-soft">Pesanan ditutup buat masa ini.</p>;
     }
 
     return (
-        <Link href={href} className={cn(className, 'on-module')}>
+        <Link href={href} className={buttonClass({ variant: 'ink', size: 'lg', className: 'on-module w-full justify-between' })}>
             <span className="flex items-center gap-2">
                 Teruskan pesanan
                 <ArrowRightIcon size={18} weight="bold" aria-hidden />
@@ -104,16 +97,16 @@ export function CartPanel({ checkoutHref, canOrder }: CartSurfaceProps) {
     const { lines, count } = useCart();
 
     return (
-        <aside aria-labelledby="troli-tajuk" className="sticky top-20 flex max-h-[calc(100dvh-6rem)] flex-col rounded-(--radius-panel) border-2 border-rule-strong bg-panel">
-            <div className="flex items-baseline justify-between border-b-2 border-amber px-5 pt-4 pb-3">
-                <h2 id="troli-tajuk" className="text-2xl font-extrabold text-ink">
+        <aside aria-labelledby="troli-tajuk" className="neu-card sticky top-5 flex max-h-[calc(100dvh-2.5rem)] flex-col">
+            <div className="flex items-baseline justify-between px-5 pt-5">
+                <h2 id="troli-tajuk" className="section-title text-2xl font-extrabold text-ink">
                     Troli
                 </h2>
                 <p className="text-sm font-semibold text-ink-muted">{count} item</p>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-5">{lines.length ? <CartLines /> : <CartEmpty />}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 pt-1">{lines.length ? <CartLines /> : <CartEmpty />}</div>
             {lines.length > 0 && (
-                <div className="border-t border-rule p-4">
+                <div className="p-4 pt-3">
                     <CheckoutLink href={checkoutHref} disabled={!canOrder} />
                 </div>
             )}
@@ -131,7 +124,7 @@ export function CartBar({ checkoutHref, canOrder, open, onOpenChange }: CartSurf
             <AnimatePresence>
                 {count > 0 && (
                     <motion.div
-                        className="on-module fixed inset-x-0 bottom-0 z-40 bg-ink pb-safe shadow-(--shadow-lift) lg:hidden"
+                        className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 lg:hidden"
                         initial={reduce ? { opacity: 0 } : { transform: 'translateY(100%)' }}
                         animate={reduce ? { opacity: 1 } : { transform: 'translateY(0%)' }}
                         exit={reduce ? { opacity: 0 } : { transform: 'translateY(100%)' }}
@@ -140,7 +133,7 @@ export function CartBar({ checkoutHref, canOrder, open, onOpenChange }: CartSurf
                         <button
                             type="button"
                             onClick={() => onOpenChange(true)}
-                            className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between gap-4 px-5 text-white active:bg-ink-soft"
+                            className={buttonClass({ variant: 'ink', size: 'lg', className: 'on-module mx-auto h-16 w-full max-w-3xl justify-between px-5' })}
                             aria-haspopup="dialog"
                         >
                             <span className="flex items-center gap-3">

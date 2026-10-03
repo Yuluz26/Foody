@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
 import { ease } from '@/lib/motion';
 import type { HourlyPoint } from '@/types';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 const CHART_HEIGHT = 128;
 const BAR_MIN_HEIGHT = 2;
@@ -26,21 +27,19 @@ export function OrderVolumeChart({ hourly }: { hourly: HourlyPoint[] }) {
 
     if (total === 0) {
         return (
-            <div className="grid place-items-center gap-2 rounded-(--radius-panel) border-2 border-dashed border-rule-strong py-10 text-center">
-                <ChartBarIcon size={28} weight="bold" className="text-rule-strong" aria-hidden />
-                <p className="text-[15px] text-ink-muted">Belum ada pesanan hari ini untuk carta ini.</p>
-            </div>
+            <EmptyState centered Icon={ChartBarIcon} title="Belum ada pesanan hari ini untuk carta ini." />
         );
     }
 
     return (
-        <div className="rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5">
+        <div className="neu-card p-5">
             <div className="flex items-baseline justify-between gap-3">
                 <h3 className="font-heading text-lg font-extrabold text-ink">Aliran pesanan hari ini</h3>
                 <p className="text-sm text-ink-muted">mengikut jam</p>
             </div>
 
-            <div className="mt-6 flex items-end gap-2 border-b-2 border-rule pb-0" role="img" aria-label={`Carta bar pesanan mengikut jam, jumlah ${total} pesanan hari ini.`} style={{ height: CHART_HEIGHT }}>
+            <div className="neu-well-sm mt-5 px-3 pt-4 pb-2.5">
+            <div className="flex items-end gap-2" role="img" aria-label={`Carta bar pesanan mengikut jam, jumlah ${total} pesanan hari ini.`} style={{ height: CHART_HEIGHT }}>
                 {hourly.map((point, index) => {
                     const barHeight = point.count === 0 ? BAR_MIN_HEIGHT : Math.max(6, (point.count / max) * CHART_HEIGHT);
                     const isActive = active === point.hour;
@@ -81,15 +80,16 @@ export function OrderVolumeChart({ hourly }: { hourly: HourlyPoint[] }) {
                     </div>
                 ))}
             </div>
+            </div>
         </div>
     );
 }
 
 function barClass(hasValue: boolean, isActive: boolean): string {
-    const base = 'block w-full rounded-t-[3px] transition-colors duration-150';
+    const base = 'block w-full rounded-t-md transition-colors duration-150';
 
     if (!hasValue) {
-        return `${base} bg-rule`;
+        return `${base} bg-rule-strong/60`;
     }
 
     return isActive ? `${base} bg-amber-deep` : `${base} bg-amber`;

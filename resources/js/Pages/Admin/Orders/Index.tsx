@@ -5,10 +5,10 @@ import { ConfirmButton } from '@/components/ConfirmButton';
 import { EmptyOrdersState, OrderFilterBar, SelectionToolbar } from '@/components/admin/OrderListControls';
 import { OrderQueueRow, useMinuteTick } from '@/components/admin/OrderQueue';
 import { Pagination } from '@/components/Pagination';
-import { ADMIN_STATUS } from '@/components/admin/StatusBadge';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { ORDER_STATUS } from '@/components/StatusBadge';
 import { useFilters } from '@/components/admin/useFilters';
 import { useRowSelection } from '@/components/admin/useRowSelection';
-import { cn } from '@/lib/format';
 import type { AdminOrderRow, Paginated, StatusOption } from '@/types';
 
 type Filters = { q: string; status: string; type: string; date_from: string; date_to: string };
@@ -47,34 +47,14 @@ export default function OrdersIndex({ orders, filters: initial, statusOptions, a
     const tabs = [
         { value: 'active', label: `Aktif (${activeCount})` },
         { value: 'all', label: 'Semua' },
-        ...statusOptions.map((option) => ({ value: option.value, label: ADMIN_STATUS[option.value].label })),
+        ...statusOptions.map((option) => ({ value: option.value, label: ORDER_STATUS[option.value].label })),
     ];
 
     const filtered = filters.q !== '' || filters.type !== '' || filters.date_from !== '' || filters.date_to !== '' || filters.status !== 'active';
 
     return (
         <AdminLayout title="Pesanan">
-            <div role="tablist" aria-label="Tapis status" className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto border-b-2 border-rule px-4 sm:mx-0 sm:px-0">
-                {tabs.map((tab) => {
-                    const selected = filters.status === tab.value;
-
-                    return (
-                        <button
-                            key={tab.value}
-                            type="button"
-                            role="tab"
-                            aria-selected={selected}
-                            onClick={() => set('status', tab.value)}
-                            className={cn(
-                                'relative h-12 shrink-0 px-3 font-semibold whitespace-nowrap transition-colors duration-150',
-                                selected ? 'text-ink after:absolute after:inset-x-2 after:-bottom-0.5 after:h-1 after:rounded-full after:bg-amber' : 'text-ink-soft hover:text-ink',
-                            )}
-                        >
-                            {tab.label}
-                        </button>
-                    );
-                })}
-            </div>
+            <SegmentedTabs label="Tapis status" tabs={tabs} value={filters.status} onChange={(status) => set('status', status)} />
 
             <OrderFilterBar filters={filters} onChange={set} />
 
@@ -119,7 +99,7 @@ export default function OrdersIndex({ orders, filters: initial, statusOptions, a
                             />
                         )}
                     </SelectionToolbar>
-                    <ul className="divide-y divide-rule border-y border-rule bg-panel">
+                    <ul className="mt-4 grid gap-3">
                         {orders.data.map((order) => (
                             <OrderQueueRow key={order.id} order={order} now={now} selected={selected.has(order.id)} onToggleSelect={toggleSelect} />
                         ))}

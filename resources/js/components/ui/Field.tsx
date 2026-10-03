@@ -2,11 +2,7 @@ import { WarningCircleIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/format';
 
-export const inputClass = cn(
-    'block w-full rounded-(--radius-control) border-2 border-rule-strong bg-panel px-3.5 py-3 text-base text-ink',
-    'placeholder:text-ink-muted transition-colors duration-150 hover:border-ink-muted focus:border-ink',
-    'aria-invalid:border-alert aria-invalid:bg-alert-tint/40 disabled:cursor-not-allowed disabled:opacity-60',
-);
+export const inputClass = cn('neu-field block w-full px-4 py-3 text-base text-ink placeholder:text-ink-muted');
 
 type ControlProps = {
     id: string;

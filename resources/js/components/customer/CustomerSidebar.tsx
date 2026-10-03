@@ -1,6 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { ClockIcon, MapPinIcon, PhoneIcon, ReceiptIcon, SignOutIcon, StorefrontIcon } from '@phosphor-icons/react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { buttonClass } from '@/components/ui/Button';
 import { cn, formatClock, imageSrc } from '@/lib/format';
 import { duration, ease } from '@/lib/motion';
 import type { MenuCategory, Restaurant } from '@/types';
@@ -12,7 +13,7 @@ type CustomerSidebarProps = {
     onSelect: (category: MenuCategory) => void;
 };
 
-/** The desktop-only standing rail: who this shop is, its numbered categories, how to reach it, and the signed-in diner's own account links. */
+/** The desktop-only standing rail: who this shop is, its categories, how to reach it, and the signed-in diner's own account links. */
 export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: CustomerSidebarProps) {
     const { customerAuth } = usePage().props;
     const reduce = useReducedMotion();
@@ -23,27 +24,28 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
 
     return (
         <aside aria-label="Maklumat kedai dan kategori" className="hidden shrink-0 lg:block lg:w-64">
-            <div className="no-scrollbar sticky top-8 grid max-h-[calc(100vh-4rem)] gap-5 overflow-y-auto pb-2">
-                <div className="on-module rounded-(--radius-panel) bg-module p-5 shadow-(--shadow-module)">
+            {/* Padded and pulled back so the soft shadows are not clipped by the scrolling container. */}
+            <div className="no-scrollbar sticky top-3 -m-5 grid max-h-[calc(100dvh-1.5rem)] gap-5 overflow-y-auto p-5">
+                <div className="neu-card p-5">
                     <div className="flex items-center gap-3">
                         {restaurant.logoUrl ? (
-                            <img src={restaurant.logoUrl} alt="" className="size-12 shrink-0 rounded-(--radius-module) border-2 border-white/15 object-cover" />
+                            <img src={restaurant.logoUrl} alt="" className="size-12 shrink-0 rounded-(--radius-control) object-cover shadow-(--shadow-raised-xs)" />
                         ) : (
-                            <div className="grid size-12 shrink-0 place-items-center rounded-(--radius-module) border-2 border-white/15 bg-white/10">
+                            <div className="on-module grid size-12 shrink-0 place-items-center rounded-(--radius-module) bg-module shadow-(--shadow-module)">
                                 <StorefrontIcon size={22} weight="bold" className="text-amber" aria-hidden />
                             </div>
                         )}
                         <div className="min-w-0">
-                            <p className="truncate text-lg font-extrabold text-white">{restaurant.name}</p>
-                            <p className={cn('mt-0.5 flex items-center gap-1.5 text-sm font-semibold', taking ? 'text-leaf' : 'text-white/60')}>
-                                <span className={cn('size-2 shrink-0 rounded-full', taking ? 'bg-leaf shadow-[0_0_0_3px_theme(colors.leaf/25%)]' : 'bg-white/30')} aria-hidden />
+                            <p className="text-lg leading-tight font-extrabold text-balance text-ink">{restaurant.name}</p>
+                            <p className={cn('mt-1 flex items-center gap-1.5 text-sm font-semibold', taking ? 'text-leaf-deep' : 'text-ink-muted')}>
+                                <span className={cn('size-2 shrink-0 rounded-full', taking ? 'bg-leaf shadow-[0_0_0_3px_theme(colors.leaf/25%)]' : 'bg-ink-muted/40')} aria-hidden />
                                 {label}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <nav aria-label="Kategori menu" className="grid gap-1.5 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-2">
+                <nav aria-label="Kategori menu" className="neu-well grid gap-1 p-2">
                     {categories.map((category) => {
                         const active = category.id === activeId;
 
@@ -59,25 +61,18 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
                                 className={cn(
                                     'relative flex items-center gap-2.5 rounded-(--radius-control) py-1.5 pr-3.5 font-semibold transition-colors duration-150',
                                     category.imageUrl ? 'pl-1.5' : 'pl-3.5',
-                                    active ? 'text-white' : 'text-ink-soft hover:bg-ground hover:text-ink',
+                                    active ? 'text-ink' : 'text-ink-soft hover:text-ink',
                                 )}
                             >
                                 {active && (
                                     <motion.span
-                                        layoutId="sidebar-fill"
-                                        className="absolute inset-0 rounded-(--radius-control) bg-ink"
+                                        layoutId="sidebar-thumb"
+                                        className="absolute inset-0 rounded-(--radius-control) bg-panel shadow-(--shadow-raised-xs)"
                                         transition={reduce ? { duration: 0 } : { duration: duration.base, ease: ease.inOut }}
                                     />
                                 )}
                                 {category.imageUrl && (
-                                    <img
-                                        src={imageSrc(category.imageUrl, 72)}
-                                        alt=""
-                                        className={cn(
-                                            'relative z-10 size-9 shrink-0 rounded-(--radius-module) border-2 object-cover',
-                                            active ? 'border-white/25' : 'border-rule-strong',
-                                        )}
-                                    />
+                                    <img src={imageSrc(category.imageUrl, 72)} alt="" className="relative z-10 size-9 shrink-0 rounded-[11px] object-cover" />
                                 )}
                                 <span className="relative z-10 min-w-0 truncate">{category.name}</span>
                             </a>
@@ -86,7 +81,7 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
                 </nav>
 
                 {(restaurant.address || restaurant.phone || (opens && closes)) && (
-                    <dl className="grid gap-3 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-4 text-[15px] text-ink-muted">
+                    <dl className="neu-tile grid gap-3 p-4 text-[15px] text-ink-muted [--neu-radius:var(--radius-panel)]">
                         {opens && closes && (
                             <div className="flex items-start gap-2.5">
                                 <dt>
@@ -124,22 +119,15 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
                 )}
 
                 {customerAuth.user && (
-                    <div className="grid gap-1 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-2">
+                    <div className="neu-tile grid gap-1 p-2 [--neu-radius:var(--radius-panel)]">
                         <p className="truncate px-2 pt-1 text-sm text-ink-muted">
                             Log masuk sebagai <span className="font-semibold text-ink">{customerAuth.user.name}</span>
                         </p>
-                        <Link
-                            href="/pesanan-saya"
-                            className="flex items-center gap-2.5 rounded-(--radius-control) px-3.5 py-2.5 font-semibold text-ink-soft transition-colors duration-150 hover:bg-ground hover:text-ink"
-                        >
+                        <Link href="/pesanan-saya" className={buttonClass({ variant: 'quiet', className: 'justify-start' })}>
                             <ReceiptIcon size={18} weight="bold" aria-hidden />
                             Pesanan saya
                         </Link>
-                        <button
-                            type="button"
-                            onClick={() => router.post('/log-keluar')}
-                            className="flex items-center gap-2.5 rounded-(--radius-control) px-3.5 py-2.5 text-left font-semibold text-ink-soft transition-colors duration-150 hover:bg-ground hover:text-ink"
-                        >
+                        <button type="button" onClick={() => router.post('/log-keluar')} className={buttonClass({ variant: 'quiet', className: 'justify-start' })}>
                             <SignOutIcon size={18} weight="bold" aria-hidden />
                             Log keluar
                         </button>

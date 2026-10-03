@@ -1,20 +1,19 @@
 import { Link, router } from '@inertiajs/react';
-import { BowlFoodIcon, MagnifyingGlassIcon, PencilSimpleIcon, PlusIcon, StarIcon } from '@phosphor-icons/react';
+import { BowlFoodIcon, PencilSimpleIcon, PlusIcon, StarIcon } from '@phosphor-icons/react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { ConfirmButton } from '@/components/ConfirmButton';
 import { Pagination } from '@/components/Pagination';
 import { useFilters } from '@/components/admin/useFilters';
 import { FoodImage } from '@/components/FoodImage';
-import { Button } from '@/components/ui/Button';
+import { Button, buttonClass } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { inputClass } from '@/components/ui/Field';
+import { SearchField } from '@/components/ui/SearchField';
 import { Switch } from '@/components/ui/Switch';
 import { cn, formatPrice } from '@/lib/format';
 import type { AdminProduct, Option, Paginated } from '@/types';
 
 type Filters = { q: string; category: string; availability: string };
-
-const addLinkClass =
-    'flex h-12 items-center gap-2 rounded-(--radius-control) bg-ink px-4 font-semibold text-white transition-[transform,background-color,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-ink-soft hover:shadow-(--shadow-lift) active:translate-y-0 active:scale-[0.97]';
 
 export default function ProductsIndex({ products, categories, filters: initial }: { products: Paginated<AdminProduct>; categories: Option[]; filters: Filters }) {
     const { filters, set, reset } = useFilters('/admin/products', initial);
@@ -24,18 +23,14 @@ export default function ProductsIndex({ products, categories, filters: initial }
         <AdminLayout
             title="Produk"
             actions={
-                <Link href="/admin/products/create" className={addLinkClass}>
+                <Link href="/admin/products/create" className={buttonClass()}>
                     <PlusIcon size={18} weight="bold" aria-hidden />
                     Tambah produk
                 </Link>
             }
         >
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_13rem_11rem]">
-                <label className="relative block">
-                    <span className="sr-only">Cari produk</span>
-                    <MagnifyingGlassIcon size={20} weight="bold" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-muted" aria-hidden />
-                    <input type="search" value={filters.q} onChange={(event) => set('q', event.target.value)} placeholder="Cari nama produk" className={cn(inputClass, 'pl-10')} />
-                </label>
+                <SearchField label="Cari produk" value={filters.q} onChange={(value) => set('q', value)} placeholder="Cari nama produk" />
                 <label className="block">
                     <span className="sr-only">Kategori</span>
                     <select value={filters.category} onChange={(event) => set('category', event.target.value)} className={inputClass}>
@@ -58,37 +53,37 @@ export default function ProductsIndex({ products, categories, filters: initial }
             </div>
 
             {products.data.length === 0 ? (
-                <div className="mt-8 flex flex-col items-start gap-4 rounded-(--radius-panel) border-2 border-dashed border-rule-strong p-8">
-                    <BowlFoodIcon size={36} weight="bold" className="text-rule-strong" aria-hidden />
-                    <div>
-                        <p className="text-lg font-semibold">{filtered ? 'Tiada produk sepadan' : 'Menu masih kosong'}</p>
-                        <p className="text-[15px] text-ink-muted">{filtered ? 'Cuba kata carian lain atau kosongkan tapisan.' : 'Tambah hidangan pertama supaya pelanggan boleh mula memesan.'}</p>
-                    </div>
+                <EmptyState
+                    Icon={BowlFoodIcon}
+                    className="mt-8"
+                    title={filtered ? 'Tiada produk sepadan' : 'Menu masih kosong'}
+                    description={filtered ? 'Cuba kata carian lain atau kosongkan tapisan.' : 'Tambah hidangan pertama supaya pelanggan boleh mula memesan.'}
+                >
                     {filtered ? (
-                        <Button variant="outline" size="sm" onClick={() => reset({ q: '', category: '', availability: '' })}>
+                        <Button variant="soft" size="sm" onClick={() => reset({ q: '', category: '', availability: '' })}>
                             Kosongkan tapisan
                         </Button>
                     ) : (
-                        <Link href="/admin/products/create" className={addLinkClass}>
+                        <Link href="/admin/products/create" className={buttonClass()}>
                             <PlusIcon size={18} weight="bold" aria-hidden />
                             Tambah produk
                         </Link>
                     )}
-                </div>
+                </EmptyState>
             ) : (
                 <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                     {products.data.map((product) => (
-                        <li key={product.id} className="flex flex-col overflow-hidden rounded-(--radius-panel) border-2 border-rule-strong bg-panel transition-colors duration-150 hover:border-ink">
-                            <div className="relative">
+                        <li key={product.id} className="neu-tile flex flex-col p-2.5 transition-[transform,box-shadow] duration-300 ease-spring [--neu-radius:var(--radius-panel)] hover:-translate-y-1 hover:shadow-(--shadow-raised) motion-reduce:transition-shadow motion-reduce:hover:translate-y-0">
+                            <div className="relative overflow-hidden rounded-[calc(var(--radius-panel)-10px)] bg-ground-deep">
                                 <FoodImage url={product.imageUrl} alt="" sizes="(min-width: 1024px) 22vw, (min-width: 640px) 30vw, 47vw" className={cn('aspect-[4/3] w-full', !product.isAvailable && 'opacity-60 grayscale')} />
                                 {product.isFeatured && (
-                                    <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-(--radius-module) bg-amber px-1.5 py-1 text-[11px] font-bold tracking-wide text-ink uppercase">
+                                    <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-(--radius-module) bg-amber px-1.5 py-1 text-[11px] font-bold tracking-wide text-ink uppercase shadow-(--shadow-raised-2xs)">
                                         <StarIcon size={11} weight="fill" aria-hidden />
                                         Pilihan
                                     </span>
                                 )}
                             </div>
-                            <div className="flex min-h-0 flex-1 flex-col gap-2.5 p-3.5">
+                            <div className="flex min-h-0 flex-1 flex-col gap-3 px-1.5 pt-3.5 pb-1">
                                 <div className="min-w-0">
                                     <Link href={`/admin/products/${product.id}/edit`} className="block truncate font-semibold hover:text-ink-soft hover:underline">
                                         {product.name}
@@ -103,9 +98,9 @@ export default function ProductsIndex({ products, categories, filters: initial }
                                     label="Ada dijual"
                                     onChange={() => router.patch(`/admin/products/${product.id}/toggle`, {}, { preserveScroll: true })}
                                 />
-                                <div className="mt-auto flex items-center justify-between gap-2 border-t border-rule pt-2.5">
-                                    <Link href={`/admin/products/${product.id}/edit`} className="group flex h-9 items-center gap-1.5 rounded-(--radius-control) px-2 text-sm font-semibold transition-colors duration-150 hover:bg-rule/60">
-                                        <PencilSimpleIcon size={15} weight="bold" aria-hidden className="transition-transform duration-150 ease-out group-hover:-rotate-12" />
+                                <div className="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-ink/10 pt-2.5">
+                                    <Link href={`/admin/products/${product.id}/edit`} className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+                                        <PencilSimpleIcon size={15} weight="bold" aria-hidden />
                                         Edit
                                     </Link>
                                     <ConfirmButton

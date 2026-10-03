@@ -1,9 +1,11 @@
 import { Link, useForm } from '@inertiajs/react';
 import { ArrowRightIcon, ImagesIcon, QrCodeIcon } from '@phosphor-icons/react';
-import type { FormEvent, ReactNode } from 'react';
+import type { FormEvent } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { FormPanel } from '@/components/admin/FormPanel';
 import { FormFooter } from '@/components/admin/FormFooter';
 import { ImageInput } from '@/components/admin/ImageInput';
+import { buttonClass } from '@/components/ui/Button';
 import { Field, inputClass } from '@/components/ui/Field';
 import { Switch } from '@/components/ui/Switch';
 import { cn } from '@/lib/format';
@@ -47,22 +49,6 @@ type SettingFields = {
     payment_instructions: string;
 };
 
-function Panel({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
-    const id = title.toLowerCase().replace(/\s+/g, '-');
-
-    return (
-        <section aria-labelledby={id} className="grid gap-5 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5 sm:p-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
-            <div>
-                <h2 id={id} className="font-heading text-xl font-extrabold text-ink">
-                    {title}
-                </h2>
-                {description && <p className="mt-1 text-sm text-ink-muted">{description}</p>}
-            </div>
-            <div className="grid content-start gap-5">{children}</div>
-        </section>
-    );
-}
-
 export default function Settings({ settings }: SettingsProps) {
     const form = useForm<SettingFields>({
         name: settings.name,
@@ -94,7 +80,7 @@ export default function Settings({ settings }: SettingsProps) {
     return (
         <AdminLayout title="Tetapan">
             <form onSubmit={submit} noValidate className="grid gap-6">
-                <Panel title="Maklumat restoran" description="Dipaparkan pada papan tanda di atas menu.">
+                <FormPanel title="Maklumat restoran" description="Dipaparkan pada papan tanda di atas menu.">
                     <Field id="name" label="Nama restoran" error={form.errors.name}>
                         {(control) => <input {...control} type="text" maxLength={100} value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} className={inputClass} />}
                     </Field>
@@ -141,22 +127,19 @@ export default function Settings({ settings }: SettingsProps) {
                         onRemovedChange={(removed) => form.setData('remove_logo', removed)}
                         error={form.errors.logo}
                     />
-                </Panel>
+                </FormPanel>
 
-                <Panel title="Slaid menu" description="Gambar jalur di atas menu pelanggan.">
-                    <Link
-                        href="/admin/banners"
-                        className="group flex items-center justify-between gap-3 rounded-(--radius-control) border-2 border-rule-strong px-4 py-3.5 font-semibold transition-[transform,border-color,box-shadow] duration-150 hover:-translate-y-0.5 hover:border-ink hover:shadow-(--shadow-lift) active:translate-y-0"
-                    >
+                <FormPanel title="Slaid menu" description="Gambar jalur di atas menu pelanggan.">
+                    <Link href="/admin/banners" className={buttonClass({ variant: 'soft', className: 'w-full justify-between' })}>
                         <span className="flex items-center gap-2.5">
                             <ImagesIcon size={20} weight="bold" className="text-ink-soft" aria-hidden />
                             Urus slaid menu
                         </span>
-                        <ArrowRightIcon size={18} weight="bold" aria-hidden className="transition-transform duration-150 ease-out group-hover:translate-x-1" />
+                        <ArrowRightIcon size={18} weight="bold" aria-hidden />
                     </Link>
-                </Panel>
+                </FormPanel>
 
-                <Panel title="Waktu operasi" description={`Sekarang kedai dikira ${settings.isOpenNow ? 'BUKA' : 'TUTUP'}. Kosongkan kedua-dua masa untuk buka sepanjang masa.`}>
+                <FormPanel title="Waktu operasi" description={`Sekarang kedai dikira ${settings.isOpenNow ? 'BUKA' : 'TUTUP'}. Kosongkan kedua-dua masa untuk buka sepanjang masa.`}>
                     <div className="grid gap-5 sm:grid-cols-2">
                         <Field id="opens_at" label="Buka" error={form.errors.opens_at}>
                             {(control) => <input {...control} type="time" value={form.data.opens_at} onChange={(event) => form.setData('opens_at', event.target.value)} className={cn(inputClass, 'tabular')} />}
@@ -165,9 +148,9 @@ export default function Settings({ settings }: SettingsProps) {
                             {(control) => <input {...control} type="time" value={form.data.closes_at} onChange={(event) => form.setData('closes_at', event.target.value)} className={cn(inputClass, 'tabular')} />}
                         </Field>
                     </div>
-                </Panel>
+                </FormPanel>
 
-                <Panel title="Pesanan" description="Kawal cara pelanggan boleh memesan.">
+                <FormPanel title="Pesanan" description="Kawal cara pelanggan boleh memesan.">
                     <Switch
                         checked={form.data.ordering_enabled}
                         onChange={(checked) => form.setData('ordering_enabled', checked)}
@@ -199,16 +182,16 @@ export default function Settings({ settings }: SettingsProps) {
                         </Field>
                     )}
                     <Switch checked={form.data.takeaway_enabled} onChange={(checked) => form.setData('takeaway_enabled', checked)} label="Bungkus" description="Pelanggan ambil di kaunter." />
-                    <div className="flex gap-3 border-t border-rule pt-5 text-[15px]">
+                    <div className="flex gap-3 border-t border-ink/10 pt-5 text-[15px]">
                         <QrCodeIcon size={24} weight="bold" className="shrink-0 text-ink-soft" aria-hidden />
                         <p className="text-ink-soft">
                             Untuk kod QR meja, gunakan pautan menu dengan nombor meja di hujung, contohnya{' '}
                             <code className="rounded-(--radius-module) bg-amber-tint px-1.5 py-0.5 font-semibold text-ink">{origin}/?meja=12</code>. Nombor meja akan dipilih sendiri semasa pelanggan memesan, jika ia tersedia.
                         </p>
                     </div>
-                </Panel>
+                </FormPanel>
 
-                <Panel title="Pembayaran" description="Kod QR dan arahan bayaran dipaparkan semasa pelanggan memilih 'Imbas kod QR' di checkout.">
+                <FormPanel title="Pembayaran" description="Kod QR dan arahan bayaran dipaparkan semasa pelanggan memilih 'Imbas kod QR' di checkout.">
                     <ImageInput
                         label="Kod QR pembayaran"
                         aspect="square"
@@ -235,7 +218,7 @@ export default function Settings({ settings }: SettingsProps) {
                             />
                         )}
                     </Field>
-                </Panel>
+                </FormPanel>
 
                 <FormFooter processing={form.processing} isDirty={form.isDirty} saveLabel="Simpan tetapan" />
             </form>

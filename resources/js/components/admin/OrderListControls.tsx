@@ -1,8 +1,9 @@
-import { MagnifyingGlassIcon, TrayIcon } from '@phosphor-icons/react';
+import { TrayIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { inputClass } from '@/components/ui/Field';
-import { cn } from '@/lib/format';
+import { SearchField } from '@/components/ui/SearchField';
 
 type FilterValues = { q: string; type: string; date_from: string; date_to: string };
 
@@ -15,17 +16,7 @@ type OrderFilterBarProps = {
 export function OrderFilterBar({ filters, onChange }: OrderFilterBarProps) {
     return (
         <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem_9.5rem_9.5rem]">
-            <label className="relative block">
-                <span className="sr-only">Cari nombor pesanan, nama atau telefon</span>
-                <MagnifyingGlassIcon size={20} weight="bold" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-muted" aria-hidden />
-                <input
-                    type="search"
-                    value={filters.q}
-                    onChange={(event) => onChange('q', event.target.value)}
-                    placeholder="Cari FD0012, nama atau telefon"
-                    className={cn(inputClass, 'pl-10')}
-                />
-            </label>
+            <SearchField label="Cari nombor pesanan, nama atau telefon" value={filters.q} onChange={(value) => onChange('q', value)} placeholder="Cari FD0012, nama atau telefon" />
             <label className="block">
                 <span className="sr-only">Jenis pesanan</span>
                 <select value={filters.type} onChange={(event) => onChange('type', event.target.value)} className={inputClass}>
@@ -65,25 +56,23 @@ type EmptyOrdersStateProps = {
     onReset: () => void;
 };
 
-/** The dashed-border "nothing here" panel shared by the admin Orders and Reports list pages. */
+/** The "nothing here" panel shared by the admin Orders and Reports list pages. */
 export function EmptyOrdersState({ title, description, showReset, onReset }: EmptyOrdersStateProps) {
     return (
-        <div className="mt-8 flex flex-col items-start gap-4 rounded-(--radius-panel) border-2 border-dashed border-rule-strong p-8">
-            <TrayIcon size={36} weight="bold" className="text-rule-strong" aria-hidden />
-            <div>
-                <p className="text-lg font-semibold">{title}</p>
-                <p className="text-[15px] text-ink-muted">{description}</p>
-            </div>
+        <EmptyState Icon={TrayIcon} title={title} description={description} className="mt-8">
             {showReset && (
-                <Button variant="outline" size="sm" onClick={onReset}>
+                <Button variant="soft" size="sm" onClick={onReset}>
                     Kosongkan tapisan
                 </Button>
             )}
-        </div>
+        </EmptyState>
     );
 }
 
 type SelectionToolbarProps = {
+    /** What is being selected, for the count ("3 pesanan dipilih"). */
+    noun?: string;
+    selectAllLabel?: string;
     count: number;
     allSelected: boolean;
     bulkPending: boolean;
@@ -92,13 +81,13 @@ type SelectionToolbarProps = {
     children: ReactNode;
 };
 
-/** The "N pesanan dipilih" bar shared by the admin Orders and Reports list pages; each page supplies its own bulk-action buttons. */
-export function SelectionToolbar({ count, allSelected, bulkPending, onToggleAll, onClear, children }: SelectionToolbarProps) {
+/** The "N dipilih" bar shared by the admin list pages; each page supplies its own bulk-action buttons. */
+export function SelectionToolbar({ noun = 'pesanan', selectAllLabel = 'Pilih semua di halaman ini', count, allSelected, bulkPending, onToggleAll, onClear, children }: SelectionToolbarProps) {
     return (
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-t-(--radius-panel) border-2 border-b-0 border-rule-strong bg-ground px-4 py-2.5">
+        <div className="neu-well-sm mt-6 flex flex-wrap items-center justify-between gap-3 px-4 py-2.5">
             <label className="flex items-center gap-2.5 text-[15px] font-semibold text-ink-soft">
-                <input type="checkbox" checked={allSelected} onChange={onToggleAll} className="size-5 shrink-0 rounded-sm border-2 border-rule-strong accent-ink" />
-                {count > 0 ? `${count} pesanan dipilih` : 'Pilih semua di halaman ini'}
+                <input type="checkbox" checked={allSelected} onChange={onToggleAll} />
+                {count > 0 ? `${count} ${noun} dipilih` : selectAllLabel}
             </label>
             {count > 0 && (
                 <div className="flex flex-wrap items-center gap-2">

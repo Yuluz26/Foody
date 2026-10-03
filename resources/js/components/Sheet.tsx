@@ -1,6 +1,7 @@
 import { XIcon } from '@phosphor-icons/react';
 import { AnimatePresence, motion, useDragControls, useReducedMotion, type PanInfo } from 'framer-motion';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { buttonClass } from '@/components/ui/Button';
 import { cn } from '@/lib/format';
 import { duration, ease } from '@/lib/motion';
 import { useMediaQuery } from '@/lib/useMediaQuery';
@@ -97,7 +98,7 @@ function SheetDialog({ onClose, title, hideTitle = false, children, footer, widt
                 dragElastic={{ top: 0, bottom: 0.7 }}
                 onDragEnd={onDragEnd}
                 className={cn(
-                    'relative flex max-h-[92dvh] w-full flex-col rounded-t-(--radius-panel) border-t-4 border-amber bg-panel text-ink shadow-(--shadow-sheet) md:max-h-[88dvh] md:rounded-(--radius-panel) md:border-t-0 md:shadow-(--shadow-lift)',
+                    'relative flex max-h-[92dvh] w-full flex-col rounded-t-(--radius-panel) bg-panel text-ink shadow-(--shadow-sheet) md:max-h-[88dvh] md:rounded-(--radius-panel) md:shadow-(--shadow-lift)',
                     width === 'lg' ? 'md:max-w-2xl' : 'md:max-w-xl',
                 )}
             >
@@ -107,7 +108,7 @@ function SheetDialog({ onClose, title, hideTitle = false, children, footer, widt
                     onPointerDown={(event) => dragControls.start(event)}
                     aria-hidden
                 >
-                    <span className="h-1 w-10 bg-rule-strong" />
+                    <span className="h-1.5 w-12 rounded-full bg-ground-deep shadow-(--shadow-inset-sm)" />
                 </div>
                 <div className={cn('flex shrink-0 items-start justify-between gap-4 px-5 md:px-6', hideTitle ? 'absolute inset-x-0 top-0 z-10 pt-2 md:pt-3' : 'pt-1 pb-3 md:pt-5')}>
                     <h2 id={titleId} className={cn('text-2xl font-bold text-ink', hideTitle && 'sr-only')}>
@@ -116,17 +117,14 @@ function SheetDialog({ onClose, title, hideTitle = false, children, footer, widt
                     <button
                         type="button"
                         onClick={onClose}
-                        className={cn(
-                            'ml-auto grid size-11 shrink-0 place-items-center rounded-(--radius-control) transition-[transform,background-color] duration-150 ease-out hover:scale-110 active:scale-90',
-                            hideTitle ? 'bg-panel text-ink shadow-(--shadow-lift) hover:bg-ground' : 'hover:bg-rule/70',
-                        )}
+                        className={buttonClass({ variant: 'soft', icon: true, className: 'ml-auto shrink-0' })}
                         aria-label="Tutup"
                     >
                         <XIcon size={20} weight="bold" aria-hidden />
                     </button>
                 </div>
                 <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
-                {footer && <div className="shrink-0 border-t border-rule bg-panel px-5 pt-3 pb-safe md:px-6 md:pb-5">{footer}</div>}
+                {footer && <div className="shrink-0 rounded-b-(--radius-panel) bg-panel px-5 pt-3 pb-safe shadow-[0_-10px_16px_-12px_var(--neu-dark)] md:px-6 md:pb-5">{footer}</div>}
             </motion.div>
         </dialog>
     );

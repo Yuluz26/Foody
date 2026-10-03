@@ -2,24 +2,24 @@
 name: Foody
 description: A hawker stall's own ordering board, where every number glows as a real LED digit.
 colors:
-  ground: "#fbf6ec"
-  ground-deep: "#f3ead4"
-  panel: "#ffffff"
+  ground: "#efe7d7"
+  ground-deep: "#e8dfcc"
+  panel: "#efe7d7"
   ink: "#211d17"
-  ink-soft: "#5b5549"
-  ink-muted: "#6f6858"
-  rule: "#e8e0cd"
-  rule-strong: "#d4c9ac"
+  ink-soft: "#4f493b"
+  ink-muted: "#5f5848"
+  rule: "#d9cdb2"
+  rule-strong: "#bfb294"
   module: "#211d17"
   module-deep: "#14110d"
   amber: "#ff9f3d"
   amber-deep: "#e07f1e"
-  amber-tint: "#fff2de"
+  amber-tint: "#fbe6c6"
   leaf: "#2fa562"
   leaf-deep: "#227a49"
-  leaf-tint: "#e8f6ee"
+  leaf-tint: "#dcefdf"
   alert: "#d6432b"
-  alert-tint: "#fbeae5"
+  alert-tint: "#f6ddd3"
 typography:
   display:
     fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
@@ -56,9 +56,9 @@ typography:
     fontWeight: 600
     letterSpacing: "0.02em"
 rounded:
-  control: "12px"
-  panel: "16px"
-  module: "8px"
+  control: "16px"
+  panel: "24px"
+  module: "10px"
 spacing:
   hairline: "2px"
   tight: "12px"
@@ -67,44 +67,35 @@ spacing:
   section: "40px"
 components:
   button-ink:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.panel}"
+    backgroundColor: "linear-gradient(150deg, #403a31, #1d1a15)"
+    textColor: "#ffffff"
     typography: "{typography.label}"
     rounded: "{rounded.control}"
-    padding: "0 16px"
+    padding: "0 18px"
     height: "48px"
-  button-ink-hover:
-    backgroundColor: "{colors.ink-soft}"
   button-amber:
-    backgroundColor: "{colors.amber}"
+    backgroundColor: "linear-gradient(150deg, #ffb760, #f48f26)"
     textColor: "{colors.ink}"
     rounded: "{rounded.control}"
-    padding: "0 16px"
+    padding: "0 18px"
     height: "48px"
-  button-amber-hover:
-    backgroundColor: "{colors.amber-deep}"
   button-leaf:
-    backgroundColor: "{colors.leaf}"
-    textColor: "{colors.panel}"
+    backgroundColor: "linear-gradient(150deg, #3bb870, #23803f)"
+    textColor: "#ffffff"
     rounded: "{rounded.control}"
-    padding: "0 16px"
+    padding: "0 18px"
     height: "48px"
-  button-leaf-hover:
-    backgroundColor: "{colors.leaf-deep}"
-  button-outline:
-    backgroundColor: "transparent"
+  button-soft:
+    backgroundColor: "{colors.panel}"
     textColor: "{colors.ink}"
     rounded: "{rounded.control}"
-    padding: "0 16px"
+    padding: "0 18px"
     height: "48px"
-  button-outline-hover:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.panel}"
   button-alert:
-    backgroundColor: "{colors.alert}"
-    textColor: "{colors.panel}"
+    backgroundColor: "linear-gradient(150deg, #e2573e, #b8341d)"
+    textColor: "#ffffff"
     rounded: "{rounded.control}"
-    padding: "0 16px"
+    padding: "0 18px"
     height: "48px"
   digit-module:
     backgroundColor: "{colors.module}"
@@ -119,39 +110,33 @@ components:
     padding: "0 10px"
     height: "28px"
   input-field:
-    backgroundColor: "{colors.panel}"
+    backgroundColor: "{colors.ground-deep}"
     textColor: "{colors.ink}"
     typography: "{typography.body}"
     rounded: "{rounded.control}"
-    padding: "12px 14px"
-  category-tab:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink-muted}"
-    typography: "{typography.label}"
-    padding: "0 12px"
-    height: "56px"
-  category-tab-active:
-    textColor: "{colors.ink}"
+    padding: "12px 16px"
 ---
 
 # Design System: Foody
 
 ## Overview
 
-**Creative North Star: "Papan Digit Gerai" (Stall Digit Board)**
+**Creative North Star: "Papan Digit Gerai, soft edition"**
 
-The product reads like the digital number board bolted above a hawker stall's counter: every number it owns — order numbers, table numbers, prices, quantities, cart counts, admin KPI tiles — glows as a real LED digit, amber on a dark instrument housing. Everything else — names, descriptions, labels, navigation — is set in a plain, confident grotesk (Inter), self-hosted and deliberately workhorse for this Operate-mode product. This build replaces a prior world ("Papan Menu Kedai Makan": signboard red, Big Shoulders Display, square corners), and the break is total: warm cream replaces enamel white as the ground, rounded panels replace square ones, and plain sequential two-digit numbering (01, 02...) replaces lettered menu codes.
+The product still reads like the digital number board bolted above a hawker stall: every number it owns (order numbers, table numbers, prices, quantities, cart counts, admin KPIs) glows as an LED digit, amber on a dark instrument housing. What changed is everything around the digits. The page and every surface are now cut from one warm clay tone (`#efe7d7`) and lit from the top left: things you can use or that group content are **raised**, things you have chosen or type into are **pressed in**. That is the whole neumorphic vocabulary, and it is kept to two states on purpose.
 
-Density reads as a photo-forward card grid: a sticky numbered rail up top, then dishes as square/4:3 photo tiles carrying their digit code and status badge, name and price below, with a pinned dark cart strip on phones; wide screens add a standing order chit beside the grid. A rotating photo slider (staff-uploaded, auto-cropped to one consistent ratio) can sit above the menu as its own moment before the grid begins. The admin panel mirrors the same card-grid language for its product catalogue, built from the same instrument-module vocabulary — KPI tiles and order numbers glow the same amber digits staff see on the customer-facing board. Amber is reserved for the digit face and its housing, plus the rail underline and section rules; leaf green marks only open/ready/success state; alert red is reserved for errors.
+Neumorphism fails when everything is soft, because nothing then says "this is the button". Three rules keep it usable here: text stays full-contrast ink on clay; real actions (ink, amber, leaf, alert) are solid colour with a gradient and a lit top edge, so the main path never depends on a shadow; and the dark digit module is the one hard-edged, high-contrast element on every screen.
 
-Motion is fast and decelerating: digits flip like a real number board when a count changes, sheets rise like a drawer, and a rounded amber underline slides between category tabs. Reduced motion collapses every move to a crossfade.
+Density reads as a photo-forward card grid: a sticky segmented category rail on phones (a pressed-in track with a raised thumb that slides between categories), a standing sidebar and a pinned order chit on wide screens, and dishes as raised tiles with the photo set into them. The admin panel uses the same language: a floating raised sidebar, KPI tiles whose numbers sit in digit modules, order rows as raised tiles (a new order is tinted amber), and tables inside a raised card.
+
+Motion is tactile and short. Buttons lift 2px on hover, sink and spring back when pressed (overshoot easing), and solid ones catch a single light sweep. Switch knobs squish while held. Digits flip when a count changes. Reduced motion removes every transform and the sweep and keeps only the shadow swap, so a press still reads.
 
 **Key Characteristics:**
-- Every number in the product — order/table numbers, prices, quantities, cart counts, KPIs — renders through the `DigitDisplay` primitive: IBM Plex Mono, tabular, glowing amber inside a dark module housing.
-- Warm cream ground (`#fbf6ec`) with a dark instrument-module counterpoint (`#211d17`); amber for lit digits, leaf green for open/ready/success only, alert red for errors only.
-- Inter for all reading and UI text; IBM Plex Mono exclusively for digits. No other display face.
-- Rounded panels and controls throughout (8-16px radius family); no pill/stadium shapes except genuine toggle switches and thin decorative line-caps (the rail underline, a timeline connector).
-- Category and dish numbering is plain sequential two digits (01, 02...) running across the whole menu, not per-category letter codes.
+- One clay tone for page and surfaces; wells and fields are one step deeper (`ground-deep`).
+- Two surface states: raised (`neu-card`, `neu-tile`, `neu-press`) and pressed (`neu-well`, `neu-well-sm`, `neu-field`). Selected means pressed.
+- Every number the product owns renders through `DigitDisplay` (IBM Plex Mono, tabular, amber in a dark recessed module).
+- Solid-colour buttons for real actions (`.btn-ink`, `.btn-amber`, `.btn-leaf`, `.btn-alert`), clay `.btn-soft` for secondary, `.btn-quiet` for low-emphasis text actions.
+- Amber is the only glow colour; leaf green marks open/ready/success; alert red is for errors only.
 
 ## Colors
 
@@ -160,7 +145,7 @@ A warm cream shopfront ground with one dark instrument-module accent color; ambe
 ### Primary
 - **Lit Amber** (amber, `#ff9f3d`): the lit color of every digit inside a dark module (order numbers, prices, counts, KPIs), the category-rail active underline, section-heading rules, and the focus ring inside dark ("on-module") surfaces.
 - **Deep Amber** (amber-deep, `#e07f1e`): hover/pressed state for amber controls; the warning icon on the product sheet's closed message.
-- **Amber Tint** (amber-tint, `#fff2de`): text-selection background, and the highlighted KPI tile on the admin dashboard (e.g. a nonzero "Baru" count).
+- **Amber Tint** (amber-tint, `#fbe6c6`): text-selection background, and the highlighted KPI tile on the admin dashboard (e.g. a nonzero "Baru" count).
 
 ### Neutral (module)
 - **Module** (module / module-deep, `#211d17` / `#14110d`): the dark instrument housing behind every chip-mode digit readout, the admin sidebar/header bar, and the mobile cart strip. Text and focus rings inside it switch to amber or white (the `on-module` scope).
@@ -173,10 +158,10 @@ A warm cream shopfront ground with one dark instrument-module accent color; ambe
 ### Neutral
 - **Ink** (ink, `#211d17`): primary text, 2px borders, the "Habis hari ini" sold-out tag, the "completed" status color, dark surfaces.
 - **Soft Ink** (ink-soft, `#5b5549`): descriptions, secondary copy, inactive nav text.
-- **Muted Ink** (ink-muted, `#6f6858`): hints, placeholders, timestamps — darkened from an earlier ~3.4:1 pass to clear 4.5:1 on both cream and white.
-- **Ground** (ground, `#fbf6ec`) / **Deep Ground** (ground-deep, `#f3ead4`): the page background and its slightly deeper variant.
-- **Panel** (panel, `#ffffff`): cards, sheets, the desktop cart chit, fields.
-- **Rule** (rule, `#e8e0cd`) / **Strong Rule** (rule-strong, `#d4c9ac`): hairline dividers, dotted price leaders, field borders, the scrollbar thumb.
+- **Muted Ink** (ink-muted, `#5f5848`): hints, placeholders, timestamps. Checked to clear 4.5:1 on both the clay and the deeper well tone.
+- **Ground** (ground, `#efe7d7`) / **Deep Ground** (ground-deep, `#e8dfcc`): the page, and the one-step-deeper tone used inside wells, fields and tracks.
+- **Panel** (panel, `#efe7d7`): the same clay as the ground on purpose. Raised surfaces are separated from the page by light and shadow, not by a different colour.
+- **Rule** (rule, `#d9cdb2`) / **Strong Rule** (rule-strong, `#bfb294`): dotted price leaders, the scrollbar thumb and the neutral segment in charts. Dividers inside cards use `ink` at 8 to 14% instead.
 - **Alert** (alert, `#d6432b`) / **Alert Tint** (alert-tint, `#fbeae5`): errors only, always paired with an icon and written text.
 
 ### Named Rules
@@ -208,105 +193,109 @@ A warm cream shopfront ground with one dark instrument-module accent color; ambe
 
 ## Layout
 
-A 96rem (max-w-[96rem]) container on the menu at desktop widths; reading pages (checkout, order status) stay narrower. Below 1024px it's a single scrolling column: hero header, horizontal sticky category rail, search field, then dish sections. From 1024px it becomes a 3-zone grid — a 16rem standing sidebar (the shop's own identity card, a vertical category nav replacing the horizontal rail, and hours/contact), the dish grid in the middle, and a sticky ~340px order chit on the right. There is no diner account in this product, so the sidebar's "profile card" slot is the restaurant's own — logo/name and its open/closed lamp — not a person's. Dishes run in a 2-column (mobile) / 3-column (`sm:`) photo-forward card grid, not a single scrolling list — the photo leads, with the digit code and any status badge riding the frame and the name/description/price below. The admin product catalogue mirrors the same card-grid language (2/3/4 columns by breakpoint) for the same reason: staff scan photos faster than rows of text. Admin uses a 240px fixed sidebar from `lg` and a top bar plus horizontally scrolling tab strip below it.
+A 96rem (max-w-[96rem]) container on the menu at desktop widths; reading pages (checkout, order status) stay narrower. Below 1024px it's a single scrolling column: hero header, horizontal sticky category rail, search field, then dish sections. From 1024px it becomes a 3-zone grid — a 16rem standing sidebar (the shop's own identity card, a vertical category nav replacing the horizontal rail, and hours/contact), the dish grid in the middle, and a sticky ~340px order chit on the right. There is no diner account in this product, so the sidebar's "profile card" slot is the restaurant's own — logo/name and its open/closed lamp — not a person's. Dishes run in a 2-column (mobile) / 3-column (`sm:`) photo-forward card grid, not a single scrolling list — the photo leads, with the digit code and any status badge riding the frame and the name/description/price below. The admin product catalogue mirrors the same card-grid language (2/3/4 columns by breakpoint) for the same reason: staff scan photos faster than rows of text. Admin uses a 17rem floating raised sidebar from `lg`; below that, a light top bar with a pressed-in segmented nav that scrolls horizontally.
 
 Rhythm: card grids use 16-20px gaps, sections start ~40px apart, cards/fields commonly step in 12-24px units, and fixed bars (mobile cart strip, safe-area padding) respect `env(safe-area-inset-*)`. Breakpoints in active use are 640px, 768px (sheet becomes a centered dialog; product-sheet photo goes from 4:3 to 16:10) and 1024px (desktop order chit, admin sidebar, mobile cart strip/bar removed).
 
 ## Elevation & Depth
 
-Depth is hybrid: most surfaces are flat, relying on paint (dark module fill, amber rules) and 2px borders for structure, but floating layers cast real shadows. Sheets, the desktop dialog, toasts and the floating quick-add tile use a soft shadow to read as lifted above the page; the dark digit module itself uses only a subtle 1px inset highlight/shadow pair (`--shadow-module`) to suggest a housing, not a cast shadow.
+Depth is the system. Light comes from the top left, so every raised surface carries a light shadow up-left and a warm, clay-tinted shadow down-right; every pressed surface carries the same pair inset. Shadows are tinted to the clay (`rgb(158 133 88 / .42)`), never black.
 
 ### Shadow Vocabulary
-- **Sheet** (`box-shadow: 0 -12px 32px -12px rgb(20 17 13 / 0.28)`): upward cast of the phone bottom sheet.
-- **Lift** (`box-shadow: 0 10px 28px -14px rgb(20 17 13 / 0.32)`): centered dialog from 768px, toasts, the quick-add tile floating over a dish photo, the desktop order chit's outer edge feel.
-- **Module** (`box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 -1px 0 0 rgb(0 0 0 / 0.3) inset`): the dark instrument housing's own subtle inset highlight/shadow — not a cast shadow, part of the housing's material.
+- **Raised** (`--shadow-raised`, 10/22px): cards, the desktop chit, hovered tiles.
+- **Raised small** (`--shadow-raised-sm`, 6/13px): resting tiles, buttons, list rows.
+- **Raised xs / 2xs** (3/7px, 2/5px): badges, thumbs inside tracks, knobs. 2xs is small enough to live inside a scrolling track without being clipped.
+- **Inset / inset small**: wells, fields, tracks, chosen options, the progress track.
+- **Module** (`--shadow-module`): the dark digit housing is recessed into the clay, with a light edge on its lower right.
+- **Sheet / lift**: the upward cast of the phone sheet and floating layers.
 
 ### Named Rules
-**The Floating-Only Shadow Rule.** Cast shadows (sheet, lift) belong only to layers above the page. Resting surfaces read through fill, border and the module's own inset highlight, never a cast shadow.
+**The Two-State Rule.** A surface is raised or pressed. Never invent a third (no borders as structure, no coloured outlines). Selected, chosen and active all mean pressed; hover means a bigger raised shadow.
+
+**The Scroll-Container Rule.** A container that scrolls clips its children's shadows. Give it padding (and a matching negative margin) at least as large as the shadow it holds, or use the 2xs shadow inside it.
+
+**The Solid-Action Rule.** Every action a user must find (add, order, confirm, mark ready) is solid colour. Soft clay buttons are for secondary actions only.
 
 ## Shapes
 
-A full break from the prior world's square corners: panels use a 16px radius (`--radius-panel`), controls and fields use 12px (`--radius-control`), and the dark digit/status module uses 8px (`--radius-module`) — a deliberately tighter radius so the housing reads as a distinct instrument surface from the softer panels around it. Borders are 2px in ink or rule-strong. No pill or stadium shape appears except genuine toggle switches (the `Switch` track and thumb are fully rounded, a distinct control class) and thin decorative line-caps — the rounded rail underline and the order-status timeline connector — which are line devices, not badges, and do not license rounded-full chips or tags elsewhere.
+One radius family: **24px panels** (`--radius-panel`: cards, sheets, dish tiles, wells), **16px controls** (`--radius-control`: buttons, fields, segmented tabs, option cards) and a tight **10px module** (`--radius-module`) for the dark digit housing and status tags, so the housing still reads as a distinct instrument. Round shapes are allowed for circular controls only: icon buttons, switch tracks and knobs, steppers, pill-shaped tracks (set through `--neu-radius`), icon bubbles. Photos inside a tile use the tile radius minus its padding, so the corners stay concentric.
 
 ## Components
 
 ### Buttons
-Solid blocks of ink or amber/leaf paint with semibold labels; 12px corner.
-- **Sizes:** 40px (sm), 48px (md, default), 56px (lg).
-- **Ink (default):** ink fill, white text; hover fades to ink-soft.
-- **Amber:** amber fill, ink text; hover deepens to amber-deep.
-- **Leaf:** leaf fill, white text; used for "mark ready".
-- **Outline:** transparent, 2px ink border; hover fills ink with white text.
-- **Quiet:** transparent; hover shows a 70%-opacity rule wash.
-- **Alert:** alert fill, white text (destructive actions).
-- **Press:** scales to 0.97 (buttons) or 0.9-0.92 (small square tiles like quick-add) over 150ms ease-out.
-
-### Status Tags / Badges (StatusBadge, "Pilihan", sold-out)
-- **Shape:** 8px module radius (matches the digit housing) — squared from an initial rounded-full pass during finish review so state tags read as part of the same instrument vocabulary as the digit modules, not as pill badges.
-- **Order status colors:** Baru (amber, ink text), Disahkan (amber-tint with an inset ink ring), Disediakan (ink fill, white text), Siap (leaf, white text), Selesai (rule wash, soft-ink text), Dibatalkan (alert-tint, alert text with an inset ring).
-- **Product flags:** "Pilihan" (featured) is an amber module-radius tag with a filled star icon; "Habis hari ini" (sold out) is an ink module-radius tag on the dish row.
-- Status is always written as a word plus icon, never color alone.
+Defined once in `app.css` (`.btn` plus a variant and a size) and reached through `buttonClass()` / `<Button>` in `components/ui/Button.tsx`, so a `<Link>` can look identical to a `<button>`.
+- **Sizes:** 40px (sm), 48px (md, default), 56px (lg); icon buttons are round, 44px (40px sm).
+- **Ink, Amber, Leaf, Alert:** solid gradient fills with a lit top edge. Hover lifts 2px and sweeps a light band across once; press sinks to an inset shadow and scales to 0.96, then springs back.
+- **Soft:** clay with raised shadow; the default secondary action.
+- **Quiet:** no surface until hover (a small raised shadow); for text actions inside rows.
+- **Loading:** three bouncing dots replace the leading icon; the label stays.
+- **Reduced motion:** transforms and the sweep are removed; the shadow swap remains.
 
 ### Cards / Containers
-- **Corner Style:** 16px panel radius (order chit, dashboard KPI grid, product sheet top).
-- **Background:** panel on ground.
-- **Shadow Strategy:** none at rest; see Elevation & Depth for floating exceptions.
-- **Border:** 2px ink or rule-strong.
+- `neu-card` (24px, raised): panels, the chit, charts, tables.
+- `neu-tile` (16px, raised small): rows and tiles; usually widened to the panel radius with `[--neu-radius:var(--radius-panel)]`.
+- `neu-well` / `neu-well-sm` (pressed): empty states, totals, notices, tracks.
+- `neu-press`: a tile that lifts on hover and sinks when pressed or selected (`aria-current`, `aria-pressed` or `data-selected`). Used for option cards and links that behave like buttons.
+- A notice takes its colour from `--neu-bg` (amber tint for guidance, alert tint for errors), never from a border.
 
 ### Inputs / Fields
-- **Style:** white field, 2px rule-strong border, 12px corner, 12x14px padding, 16px text; label above (15px semibold), hint or error below.
-- **Focus:** border shifts to full ink; global 3px ink focus ring (amber inside `on-module` scopes). Caret is amber-deep.
-- **Error:** alert border with a 40%-opacity alert-tint wash, bold alert message with a warning icon via `aria-describedby`.
-- **Disabled:** 60% opacity.
-- **Switch:** the one deliberately pill-shaped control — a rounded-full 32x56px track, 2px border, leaf fill with a white thumb when on, panel track with an ink thumb when off; the state is always also written out ("Ya"/"Tidak").
+- **Style:** `neu-field`: pressed into the clay, one step deeper, 16px, with a hairline edge at about 26% ink so the control stays findable without relying on shadow alone. Label above (15px semibold), hint or error below.
+- **Focus:** the border goes full ink and the inset deepens; the global 3px ink focus ring (amber inside `on-module`) stays.
+- **Error:** alert border and alert tint; bold message with an icon via `aria-describedby`.
+- **Checkbox:** styled globally in the base layer: pressed in when empty, raised amber with a springy tick when checked.
+- **Switch:** a pressed-in track with a raised knob that stretches while held and slides on change; the state is always also written out ("Ya" / "Tidak").
+- **Choice cards:** `ChoiceCard`, a radio you press: raised until chosen, then pressed in with a lit amber icon bubble and a tick.
 
 ### Navigation
-- **Category rail:** sticky panel bar, 2px rule bottom border, 56px tabs in Label type; active tab turns ink with a rounded amber underline (shared layout animation, 240ms ease-in-out) that auto-centers as the page scrolls. No numbered code tile in the rail itself — dish/category numbering lives on the digit face in the menu body, not in the nav.
-- **Admin sidebar:** 240px panel sidebar with a 2px rule right border, headed by a dark ink block naming the shop; active item is ink-filled with white text; a nonzero item count renders as a small `DigitDisplay` badge, not a plain number.
+- **Segmented control** (`CategoryRail` on phones, `SegmentedTabs` for filters, the admin phone nav): a pressed-in track, with the active item as a raised thumb. The category thumb slides between tabs (shared-layout tween, 240ms).
+- **Sidebars** (customer from `lg`, admin from `lg`): the customer sidebar is stacked raised cards with the categories in a pressed-in track; the admin sidebar is one floating raised card whose active item is pressed in with an amber icon. A nonzero order count renders as a small `DigitDisplay`.
 
-### DigitDisplay (signature component)
-The defining primitive: renders any string of characters through IBM Plex Mono, tabular numerals, 0.02em tracking. In "chip" mode (the default) it sits inside a rounded 8px dark module (`bg-module`) with the `--shadow-module` inset highlight and a subtle `text-shadow` glow on the lit color. In inline (`chip={false}`) mode it drops the housing, for plain tabular numerals riding inline with body text (e.g. a dish-row price). Tone defaults to amber inside a chip and ink otherwise, with leaf/white/dim variants for state and context. Used for: dish/category codes, prices everywhere, cart/rail counts, quantity steppers, KPI tiles, and order numbers up to the largest size on the order-status page.
+### Status Tags / Badges (StatusBadge, PaymentBadge)
+- 10px module radius with a tiny raised shadow. Order status colours: Baru (amber), Disahkan (amber tint with an inset ink ring), Disediakan (ink), Siap (leaf), Selesai (deep clay), Dibatalkan (alert tint with ring). `StatusBadge` takes an optional `label` so the diner side can use friendlier wording on the same colours and icons. Status is always a word plus an icon, never colour alone.
 
-An earlier pass added a faint ghost "8" behind every lit digit to mimic an unlit seven-segment cell. Dropped after user feedback: it read as visual noise rather than an instrument detail, especially with narrow digits like "1" where the ghost shape competed with the real character.
-
-### Quantity Stepper
-A 2px-bordered, 12px-corner inline group with minus/plus icon buttons flanking a `DigitDisplay` (inline mode) that flips vertically (70% travel, 180ms) in the direction of change. A `light` tone variant swaps the border and digit color to white for use on dark (module) surfaces.
+### Dish Card (customer menu, admin catalogue)
+A raised tile with the photo set into it (concentric radius). The digit code rides the photo top-left, the status tag top-right, and the quick-add button hangs off the bottom-right corner (ink; amber with the quantity once in the cart). Name, a 2-line description and the price sit below. The whole tile opens the product sheet through a stretched name button; quick-add stays separate.
 
 ### Sheet
-A native `<dialog>`-based bottom sheet on phones (drag-to-dismiss, 4px amber top border under a 16px top radius, sheet shadow) that becomes a centered 16px-radius panel with the lift shadow from 768px. The amber top-edge stripe on the bottom sheet is a confirmed intentional signature device (inherited in spirit from the prior world's red top edge), not accidental drift against the "no border accent on a rounded corner" concern — verified against captured screenshots showing the stripe curving cleanly into the rounded top corners.
+A native `<dialog>` bottom sheet on phones (drag-to-dismiss, inset grab handle, soft round close button) that becomes a centred 24px panel from 768px. No coloured edge.
+
+### Empty State
+`EmptyState`: a pressed-in field with a raised round icon bubble, what is missing, and the action to fix it. Replaces every dashed-border placeholder.
+
+### Tables
+`.data-table` inside a `neu-card`: a hairline under the header, hairlines between rows, and a soft wash under the row being read.
 
 ### Order Status Timeline
-Square-ish markers joined by a thin rounded connector (a line-cap device, not a pill). Current step uses amber with a pulsing outline (stopped under reduced motion); done steps use leaf; to-do steps use a rule-strong outline.
+Round markers joined by a thin connector. Done: raised leaf with a tick. Current: raised amber with a pulsing ring (stopped under reduced motion). Ahead: a pressed-in dimple.
 
-### Dish Card (customer menu, admin product catalogue)
-A photo-led tile, not the generic icon-plus-heading-plus-text scaffold: a square/4:3 photo carries the digit code (top-left) and a status badge — "Pilihan" in amber or "Habis" in ink (top-right) — with the quick-add control hanging off its bottom-right corner. Name, a 2-line description clamp, and the price sit below in plain type. The whole tile opens the product sheet; quick-add stays a separate control so adding to cart never requires leaving the grid. Replaced an earlier single-column row list — reasoned that the photo is the product's real content here (PRODUCT.md: "the food is the hero"), so it leads the tile instead of riding along at a fixed small size in a row.
+### DigitDisplay (signature component)
+The defining primitive: renders any string of characters through IBM Plex Mono, tabular numerals, 0.02em tracking. In "chip" mode (the default) it sits inside a 10px dark module (`bg-module`) recessed into the clay by `--shadow-module`, with a small `text-shadow` glow on the lit colour. In inline (`chip={false}`) mode it drops the housing, for plain tabular numerals riding with body text (a dish price, a row total). The `kpi` size steps down on phones so a seven-character total still fits a half-width tile. Used for dish and category codes, prices, cart and rail counts, quantity steppers, KPI tiles and order numbers up to the largest size on the order-status page.
+
+### Quantity Stepper
+A pressed-in pill holding two raised round buttons around an inline `DigitDisplay` that flips vertically (70% travel, 180ms) in the direction of change.
 
 ### Menu Slider (customer menu, optional)
-A rotating photo strip above the menu, populated by staff-uploaded images cropped server-side to one fixed 16:7 ratio so every slide is the same shape — no client-side cropping decisions, no wobble between slides. Crossfades with a slight scale-in (`duration.sheet`, reduced motion drops the scale), dot indicators plus a play/pause control (a genuine pause control, not just hover-to-stop, per the auto-rotating-content accessibility rule), and prev/next arrows that reveal on hover/focus. Renders nothing when no banners are active.
+A rotating photo strip in a raised card, populated by staff-uploaded images cropped server-side to one fixed 16:7 ratio. Crossfades with a slight scale-in (reduced motion drops the scale). A small frosted pill carries the dots (24px hit areas) and a real pause control; prev/next are soft round buttons that appear on hover or focus. Renders nothing when no banners are active.
 
-### Customer Sidebar (menu, desktop only, `lg:` and up)
-The standing left rail once the page has room for it: the shop's own identity card (module housing, logo, name, the same open/closed lamp language as the header), a vertical list standing in for the horizontal category rail (same active-state treatment as the admin sidebar nav — ink fill, white text), and an hours/address/phone block. Replaces the mobile hero + horizontal rail rather than duplicating them; the two never show at once. A search field sits at the top of the main column at every width, filtering by name or description across all categories at once into a flat "Hasil carian" grid — dropped back into the normal per-category sections the moment the field empties.
-
-### Order Volume Chart (admin dashboard)
-Today's order count per hour as amber bars, growing in from the baseline on first load (`scaleY` 0→1, ~25ms stagger per bar, reduced motion drops to a plain fade) — the one authored motion moment on this page. An hour with no orders still renders a minimal rule-colored sliver so the time axis stays even. Hover or focus any bar for an exact count-and-hour readout; axis labels thin out as the hour range grows so they never crowd. Amber is the only bar color because this is a single series — no categorical palette needed.
-
-### Order Pipeline Bar (admin dashboard)
-Today's orders as one segmented bar — proportion at a glance — using the exact same status colors and icons as `StatusBadge` (amber/ink/leaf/muted), never a freshly invented categorical palette for what is already status data. Segments grow in from the left on load; a legend row below carries the icon, label and exact `DigitDisplay` count for all four states, including zero, so identity is never color-alone.
+### Order Volume Chart / Order Pipeline Bar / Completed Orders Chart (admin)
+Each sits in a `neu-card`; the plot area is a pressed-in well. Hourly bars are amber (a rule-coloured sliver for an empty hour) and grow in from the baseline; the pipeline is one segmented bar in a pressed-in track using the same status colours as `StatusBadge`, with exact counts in a legend; the completed-orders trend is an amber line over a soft area, with a `SegmentedTabs` switch between count and revenue. Axis labels stay recessive.
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** render every order number, table number, price, quantity, cart count and KPI through `DigitDisplay`, never as plain UI type.
-- **Do** keep amber as the only glow/ornament color; reserve leaf green strictly for open/ready/done/on state and alert red strictly for errors.
-- **Do** give panels a 16px radius and controls/fields a 12px radius; give the dark digit/status module its own tighter 8px radius.
-- **Do** write status in words and an icon as well as color (StatusBadge, the open/closed lamp, switches).
-- **Do** number dishes and categories sequentially (01, 02...) across the whole menu, not per-category letter codes.
-- **Do** keep every tap target at least 44px and press controls with a 0.9-0.97 scale over 150ms ease-out.
+- **Do** keep text full-contrast ink on clay, and make real actions solid colour.
+- **Do** use `buttonClass()` for anything that looks like a button, and the `neu-*` utilities for surfaces, instead of writing shadows by hand.
+- **Do** treat selected as pressed and hover as a bigger raised shadow.
+- **Do** pad scroll containers so shadows are not clipped.
+- **Do** write status in words and an icon as well as colour.
+- **Do** keep every tap target at least 24px (44px for primary controls) and respect reduced motion.
 
 ### Don't:
-- **Don't** set a digit-owning value (price, count, order/table number, KPI) in plain Inter type; it must go through the digit face.
-- **Don't** use pill/stadium shapes for panels, cards, buttons, or tags — the rounded family stops at 16px. The only rounded-full exceptions are the toggle switch and thin line-caps (rail underline, timeline connector); do not read those as license for pill badges or chips elsewhere.
-- **Don't** invent kicker/eyebrow labels above headings; none exist in the shipped system and none should be added — this build carries no such device to canonize.
+- **Don't** set a digit-owning value in plain Inter type; it must go through the digit face.
+- **Don't** use a border to show structure or state; use raised or pressed. The one exception is the hairline edge on fields.
+- **Don't** put a cast shadow on a pure text block, or stack raised inside raised more than one level.
+- **Don't** use `!important`; radii and fills are overridden through `--neu-radius` and `--neu-bg`.
 - **Don't** use leaf green decoratively, or alert red for anything but an actual error state.
-- **Don't** add a system-display or signage typeface; Inter carries every reading and UI role, IBM Plex Mono is reserved for the digit face alone.
-- **Don't** put a cast shadow on a resting surface; cast shadows belong only to sheets, dialogs, toasts and the floating quick-add tile.
+- **Don't** add a system-display or signage typeface; Inter carries reading and UI, Nunito the admin headings, IBM Plex Mono the digits.
+- **Don't** invent kicker or eyebrow labels above headings.

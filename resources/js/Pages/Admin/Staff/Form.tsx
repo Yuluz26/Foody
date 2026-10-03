@@ -44,7 +44,7 @@ export default function StaffForm({ staff }: { staff: AdminStaff | null }) {
     return (
         <AdminLayout title={staff ? `Edit ${staff.name}` : 'Tambah kakitangan'}>
             <form onSubmit={submit} noValidate className="max-w-3xl">
-                <div className="grid gap-6 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5 sm:p-6">
+                <div className="neu-card grid gap-6 p-5 sm:p-6">
                     <Field id="name" label="Nama" error={form.errors.name}>
                         {(control) => (
                             <input

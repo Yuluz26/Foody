@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
-import type { FormEvent, ReactNode } from 'react';
+import type { FormEvent } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { FormPanel } from '@/components/admin/FormPanel';
 import { Button } from '@/components/ui/Button';
 import { Field, inputClass } from '@/components/ui/Field';
 import { PasswordInput } from '@/components/ui/PasswordInput';
@@ -8,22 +9,6 @@ import type { AdminStaff } from '@/types';
 
 type AccountFields = { name: string; email: string };
 type PasswordFields = { current_password: string; password: string; password_confirmation: string };
-
-function Panel({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
-    const id = title.toLowerCase().replace(/\s+/g, '-');
-
-    return (
-        <section aria-labelledby={id} className="grid gap-5 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5 sm:p-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
-            <div>
-                <h2 id={id} className="font-heading text-xl font-extrabold text-ink">
-                    {title}
-                </h2>
-                {description && <p className="mt-1 text-sm text-ink-muted">{description}</p>}
-            </div>
-            <div className="grid content-start gap-5">{children}</div>
-        </section>
-    );
-}
 
 export default function Profile({ profile }: { profile: AdminStaff }) {
     const accountForm = useForm<AccountFields>({ name: profile.name, email: profile.email });
@@ -48,7 +33,7 @@ export default function Profile({ profile }: { profile: AdminStaff }) {
         <AdminLayout title="Profil saya">
             <div className="grid max-w-3xl gap-6">
                 <form onSubmit={submitAccount} noValidate>
-                    <Panel title="Maklumat akaun" description="Nama dan emel log masuk anda.">
+                    <FormPanel title="Maklumat akaun" description="Nama dan emel log masuk anda.">
                         <Field id="name" label="Nama" error={accountForm.errors.name}>
                             {(control) => (
                                 <input
@@ -81,11 +66,11 @@ export default function Profile({ profile }: { profile: AdminStaff }) {
                                 {accountForm.processing ? 'Menyimpan...' : 'Simpan'}
                             </Button>
                         </div>
-                    </Panel>
+                    </FormPanel>
                 </form>
 
                 <form onSubmit={submitPassword} noValidate>
-                    <Panel title="Tukar kata laluan" description="Sahkan kata laluan semasa untuk menukar kata laluan.">
+                    <FormPanel title="Tukar kata laluan" description="Sahkan kata laluan semasa untuk menukar kata laluan.">
                         <Field id="current_password" label="Kata laluan semasa" error={passwordForm.errors.current_password}>
                             {(control) => (
                                 <PasswordInput
@@ -121,7 +106,7 @@ export default function Profile({ profile }: { profile: AdminStaff }) {
                                 {passwordForm.processing ? 'Menyimpan...' : 'Tukar kata laluan'}
                             </Button>
                         </div>
-                    </Panel>
+                    </FormPanel>
                 </form>
             </div>
         </AdminLayout>

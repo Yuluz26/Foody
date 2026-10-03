@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon, StorefrontIcon, XIcon } from '@phosphor-icons/react';
+import { StorefrontIcon } from '@phosphor-icons/react';
 import { useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCart } from '@/cart/CartProvider';
@@ -13,8 +13,8 @@ import { ProductSheet } from '@/components/customer/ProductSheet';
 import { RestaurantBoard } from '@/components/customer/RestaurantBoard';
 import { DigitDisplay } from '@/components/DigitDisplay';
 import { useToast } from '@/components/Toaster';
-import { inputClass } from '@/components/ui/Field';
-import { cn, digitCode, formatClock } from '@/lib/format';
+import { SearchField } from '@/components/ui/SearchField';
+import { digitCode, formatClock } from '@/lib/format';
 import type { AddOn, MenuBanner, MenuCategory, MenuProduct, Restaurant } from '@/types';
 
 type MenuProps = {
@@ -158,18 +158,20 @@ function MenuScreen({ restaurant, banners, categories, table: tableFromLink }: M
                 <RestaurantBoard restaurant={restaurant} />
             </div>
 
-            {table && (
-                <p className="border-b border-rule bg-amber-tint px-6 py-2.5 text-center text-[15px] font-semibold text-ink">
-                    Anda di meja{' '}
-                    <DigitDisplay value={table} size="sm" className="mx-0.5 align-middle" />. Pesanan makan di sini akan dihantar ke meja ini.
-                </p>
-            )}
-
-            {!canOrder && (
-                <p role="status" className="flex items-center justify-center gap-2 bg-ink px-6 py-3 text-center text-[15px] font-semibold text-white">
-                    <StorefrontIcon size={20} weight="bold" className="shrink-0 text-amber" aria-hidden />
-                    {closedMessage(restaurant)} Menu masih boleh dilihat.
-                </p>
+            {(table || !canOrder) && (
+                <div className="mx-auto grid max-w-[96rem] gap-3 px-5 pb-1 sm:px-8 lg:pt-6">
+                    {table && (
+                        <p className="neu-well-sm [--neu-bg:var(--color-amber-tint)] px-4 py-3 text-center text-[15px] font-semibold text-ink">
+                            Anda di meja <DigitDisplay value={table} size="sm" className="mx-0.5 align-middle" />. Pesanan makan di sini akan dihantar ke meja ini.
+                        </p>
+                    )}
+                    {!canOrder && (
+                        <p role="status" className="neu-tile flex items-center gap-3 px-4 py-3 text-[15px] font-semibold text-ink">
+                            <StorefrontIcon size={22} weight="bold" className="shrink-0 text-amber-deep" aria-hidden />
+                            {closedMessage(restaurant)} Menu masih boleh dilihat.
+                        </p>
+                    )}
+                </div>
             )}
 
             {categories.length === 0 ? (
@@ -189,37 +191,17 @@ function MenuScreen({ restaurant, banners, categories, table: tableFromLink }: M
                         <main id="kandungan" className="min-w-0">
                             <MenuSlider banners={banners} />
 
-                            <label className="relative block">
-                                <span className="sr-only">Cari hidangan</span>
-                                <MagnifyingGlassIcon size={20} weight="bold" className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-ink-muted" aria-hidden />
-                                <input
-                                    type="search"
-                                    value={query}
-                                    onChange={(event) => setQuery(event.target.value)}
-                                    placeholder="Cari hidangan atau bahan..."
-                                    className={cn(inputClass, 'pl-11')}
-                                />
-                                {query && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setQuery('')}
-                                        aria-label="Kosongkan carian"
-                                        className="absolute top-1/2 right-2.5 grid size-8 -translate-y-1/2 place-items-center rounded-(--radius-control) text-ink-muted hover:bg-ground hover:text-ink"
-                                    >
-                                        <XIcon size={18} weight="bold" aria-hidden />
-                                    </button>
-                                )}
-                            </label>
+                            <SearchField label="Cari hidangan" value={query} onChange={setQuery} placeholder="Cari hidangan atau bahan..." />
 
                             {isSearching ? (
                                 <section aria-labelledby="carian-tajuk" className="pt-8">
-                                    <h2 id="carian-tajuk" className="border-b-2 border-amber pb-2.5 text-2xl font-extrabold text-ink sm:text-3xl">
+                                    <h2 id="carian-tajuk" className="section-title text-2xl font-extrabold text-ink sm:text-3xl">
                                         Hasil carian
                                     </h2>
                                     {searchResults.length === 0 ? (
                                         <p className="py-8 text-[15px] text-ink-muted">Tiada hidangan sepadan dengan &ldquo;{query}&rdquo;.</p>
                                     ) : (
-                                        <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5">
+                                        <ul className="mt-6 grid grid-cols-2 gap-4 gap-y-8 sm:grid-cols-3 sm:gap-5 sm:gap-y-9">
                                             {searchResults.map(({ product, code }) => (
                                                 <DishCard
                                                     key={product.id}

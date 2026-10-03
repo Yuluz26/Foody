@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { cn, formatPrice, formatWaiting } from '@/lib/format';
 import type { AdminOrderRow, OrderStatus } from '@/types';
 import { ConfirmButton } from '@/components/ConfirmButton';
-import { ADMIN_STATUS, StatusBadge } from './StatusBadge';
+import { ORDER_STATUS, StatusBadge } from '@/components/StatusBadge';
 
 /** Re-render once a minute so waiting times stay honest without refetching. */
 export function useMinuteTick(): number {
@@ -46,7 +46,7 @@ export function OrderActions({ order, size = 'sm' }: { order: AdminOrderRow; siz
         <div className="flex flex-wrap items-center gap-2">
             {next && (
                 <Button size={size} variant={next.value === 'ready' ? 'leaf' : next.value === 'completed' ? 'ink' : 'amber'} loading={pending === next.value} disabled={pending !== null} onClick={() => update(next.value)}>
-                    {pending === next.value ? 'Menyimpan...' : ADMIN_STATUS[next.value].action}
+                    {pending === next.value ? 'Menyimpan...' : ORDER_STATUS[next.value].action}
                 </Button>
             )}
             {canCancel && (
@@ -76,19 +76,19 @@ export function OrderQueueRow({ order, now, selected, onToggleSelect }: OrderQue
     return (
         <li
             className={cn(
-                'grid gap-3 px-4 py-4 transition-colors duration-150 sm:items-center sm:px-5',
+                'neu-tile relative grid gap-3 px-4 py-4 [--neu-radius:var(--radius-panel)] sm:items-center sm:px-5',
                 onToggleSelect ? 'sm:grid-cols-[2.75rem_8rem_minmax(0,1fr)_auto]' : 'sm:grid-cols-[8rem_minmax(0,1fr)_auto]',
-                selected ? 'bg-amber-tint' : order.status === 'pending' ? 'bg-amber-tint hover:bg-amber-tint/70' : 'hover:bg-ground',
+                order.status === 'pending' && '[--neu-bg:var(--color-amber-tint)]',
+                selected && 'shadow-(--shadow-inset-sm)',
             )}
         >
             {onToggleSelect && (
-                <label className="flex h-11 items-center sm:h-auto">
+                <label className="absolute top-2 right-2 grid size-11 place-items-center sm:static sm:size-auto sm:place-items-start">
                     <span className="sr-only">Pilih pesanan {order.number}</span>
                     <input
                         type="checkbox"
                         checked={selected ?? false}
                         onChange={() => onToggleSelect(order.id)}
-                        className="size-5 shrink-0 rounded-sm border-2 border-rule-strong accent-ink"
                     />
                 </label>
             )}

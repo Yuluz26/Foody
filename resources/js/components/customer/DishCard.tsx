@@ -2,6 +2,7 @@ import { PlusIcon, StarIcon } from '@phosphor-icons/react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { DigitDisplay } from '@/components/DigitDisplay';
 import { FoodImage } from '@/components/FoodImage';
+import { buttonClass } from '@/components/ui/Button';
 import { cn, priceDigits } from '@/lib/format';
 import { duration, ease } from '@/lib/motion';
 import type { MenuProduct } from '@/types';
@@ -16,22 +17,30 @@ type DishProps = {
     priority?: boolean;
 };
 
-/** A tile on the board: photo up top with its digit code and status riding the frame, name and price below. */
+/** A raised tile: the photo sits in it with its digit code and status on the frame, name and price below. */
 export function DishCard({ product, code, quantityInCart, canOrder, onOpen, onQuickAdd, priority = false }: DishProps) {
     const soldOut = !product.isAvailable;
 
     return (
         <li>
-            <article className="group relative">
+            <article
+                className={cn(
+                    'group neu-tile relative h-full p-2.5 [--neu-radius:var(--radius-panel)] transition-[transform,box-shadow] duration-300 ease-spring',
+                    'motion-reduce:transition-shadow',
+                    soldOut
+                        ? 'shadow-(--shadow-raised-xs)'
+                        : 'hover:-translate-y-1 hover:shadow-(--shadow-raised) active:translate-y-0 active:shadow-(--shadow-inset-sm) motion-reduce:hover:translate-y-0',
+                )}
+            >
                 <div className="relative">
-                    <div className="relative overflow-hidden rounded-(--radius-panel) border-2 border-rule-strong bg-module">
+                    <div className="relative overflow-hidden rounded-[calc(var(--radius-panel)-10px)] bg-ground-deep">
                         <FoodImage
                             url={product.imageUrl}
                             alt=""
                             priority={priority}
                             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 45vw, 47vw"
                             className={cn(
-                                'aspect-square w-full transition-transform duration-500 ease-out group-hover:scale-[1.04] sm:aspect-[4/3]',
+                                'aspect-square w-full transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transform-none sm:aspect-[4/3]',
                                 soldOut && 'opacity-60 grayscale',
                             )}
                         />
@@ -42,7 +51,7 @@ export function DishCard({ product, code, quantityInCart, canOrder, onOpen, onQu
                             <span className="absolute top-2 right-2 rounded-(--radius-module) bg-ink px-1.5 py-1 text-[11px] font-bold tracking-wide text-white uppercase">Habis</span>
                         ) : (
                             product.isFeatured && (
-                                <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-(--radius-module) bg-amber px-1.5 py-1 text-[11px] font-bold tracking-wide text-ink uppercase">
+                                <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-(--radius-module) bg-amber px-1.5 py-1 text-[11px] font-bold tracking-wide text-ink uppercase shadow-(--shadow-raised-2xs)">
                                     <StarIcon size={11} weight="fill" aria-hidden />
                                     Pilihan
                                 </span>
@@ -51,18 +60,18 @@ export function DishCard({ product, code, quantityInCart, canOrder, onOpen, onQu
                     </div>
                     {!soldOut && canOrder && <QuickAdd name={product.name} quantity={quantityInCart} onAdd={onQuickAdd} />}
                 </div>
-                <div className="mt-2.5">
+                <div className="mt-6 px-1 pb-1">
                     <h3 className="min-w-0 text-[15px] leading-snug font-bold text-ink">
                         <button
                             type="button"
                             onClick={onOpen}
-                            className="text-left after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:outline-3 focus-visible:after:outline-offset-2 focus-visible:after:outline-ink"
+                            className="text-left after:absolute after:inset-0 after:rounded-(--radius-panel) after:content-[''] focus-visible:outline-none focus-visible:after:outline-3 focus-visible:after:outline-offset-2 focus-visible:after:outline-ink"
                         >
                             {product.name}
                         </button>
                     </h3>
                     {product.description && <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-ink-soft">{product.description}</p>}
-                    <div className="mt-1.5">
+                    <div className="mt-2">
                         <DigitDisplay
                             value={priceDigits(product.price)}
                             chip={false}
@@ -85,10 +94,7 @@ function QuickAdd({ name, quantity, onAdd }: { name: string; quantity: number; o
             type="button"
             onClick={onAdd}
             aria-label={quantity > 0 ? `Tambah satu lagi ${name}, ${quantity} dalam troli` : `Tambah ${name} ke troli`}
-            className={cn(
-                'absolute right-2 -bottom-2 z-10 grid size-11 place-items-center overflow-hidden rounded-(--radius-control) border-2 border-panel shadow-(--shadow-lift) transition-[transform,background-color] duration-150 ease-out active:scale-[0.9]',
-                quantity > 0 ? 'bg-amber text-ink' : 'bg-ink text-white hover:bg-ink-soft',
-            )}
+            className={buttonClass({ variant: quantity > 0 ? 'amber' : 'ink', icon: true, className: 'absolute right-2.5 -bottom-5 z-10' })}
         >
             <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span

@@ -60,7 +60,6 @@ export default function Login() {
                                 type="checkbox"
                                 checked={form.data.remember}
                                 onChange={(event) => form.setData('remember', event.target.checked)}
-                                className="size-5 accent-ink"
                             />
                             Kekal log masuk pada peranti ini
                         </label>

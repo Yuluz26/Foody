@@ -1,12 +1,15 @@
 import { Link, usePoll } from '@inertiajs/react';
-import { ArrowRightIcon, CoffeeIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, CoffeeIcon, ReceiptIcon } from '@phosphor-icons/react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { KpiGrid } from '@/components/admin/KpiGrid';
 import { OrderPipelineBar } from '@/components/admin/OrderPipelineBar';
 import { OrderQueueRow, useMinuteTick } from '@/components/admin/OrderQueue';
 import { OrderVolumeChart } from '@/components/admin/OrderVolumeChart';
-import { StatusBadge } from '@/components/admin/StatusBadge';
+import { StatusBadge } from '@/components/StatusBadge';
 import { DigitDisplay } from '@/components/DigitDisplay';
-import { cn, formatPrice, formatWaiting, priceDigits } from '@/lib/format';
+import { buttonClass } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { formatPrice, formatWaiting, priceDigits } from '@/lib/format';
 import type { AdminOrderRow, HourlyPoint } from '@/types';
 
 type DashboardProps = {
@@ -43,17 +46,9 @@ export default function Dashboard({ stats, hourly, activeOrders, recentOrders }:
         <AdminLayout title="Ringkasan hari ini">
             <p className="-mt-3 text-[15px] text-ink-muted capitalize">{today}</p>
 
-            {/* Every reading here is a KPI on the operator console: a real digit readout, not a stat label. */}
-            <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-(--radius-panel) border-2 border-rule-strong bg-rule sm:grid-cols-3 xl:grid-cols-6">
-                {figures.map((figure) => (
-                    <div key={figure.label} className={cn('px-4 py-4', figure.highlight ? 'bg-amber-tint' : 'bg-panel')}>
-                        <dt className="text-sm font-medium text-ink-muted">{figure.label}</dt>
-                        <dd className="mt-1.5">
-                            <DigitDisplay value={figure.value} tone={figure.highlight ? 'amber' : 'ink'} chip={false} size="lg" />
-                        </dd>
-                    </div>
-                ))}
-            </dl>
+            <div className="mt-6">
+                <KpiGrid figures={figures} />
+            </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
                 <OrderVolumeChart hourly={hourly} />
@@ -61,26 +56,25 @@ export default function Dashboard({ stats, hourly, activeOrders, recentOrders }:
             </div>
 
             <section aria-labelledby="tindakan-tajuk" className="mt-10">
-                <div className="flex flex-wrap items-end justify-between gap-3 border-b-2 border-amber pb-2">
-                    <h2 id="tindakan-tajuk" className="font-heading flex items-baseline gap-3 text-2xl font-extrabold text-ink">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                    <h2 id="tindakan-tajuk" className="section-title font-heading text-2xl font-extrabold text-ink">
                         Perlu tindakan
-                        <span className="font-mono text-lg text-ink-muted tabular-nums">{activeOrders.length}</span>
+                        <span className="ml-3 font-mono text-lg text-ink-muted tabular-nums">{activeOrders.length}</span>
                     </h2>
-                    <Link href="/admin/orders" className="group flex items-center gap-1.5 pb-1 text-[15px] font-semibold text-ink hover:underline">
+                    <Link href="/admin/orders" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
                         Semua pesanan aktif
-                        <ArrowRightIcon size={16} weight="bold" aria-hidden className="transition-transform duration-150 ease-out group-hover:translate-x-1" />
+                        <ArrowRightIcon size={16} weight="bold" aria-hidden />
                     </Link>
                 </div>
                 {activeOrders.length === 0 ? (
-                    <div className="flex items-center gap-4 border-b border-rule px-2 py-8">
-                        <CoffeeIcon size={36} weight="bold" className="shrink-0 text-rule-strong" aria-hidden />
-                        <div>
-                            <p className="text-lg font-semibold">Tiada pesanan menunggu</p>
-                            <p className="text-[15px] text-ink-muted">Pesanan baru akan muncul di sini sendiri. Halaman ini dikemas kini setiap 15 saat.</p>
-                        </div>
-                    </div>
+                    <EmptyState
+                        Icon={CoffeeIcon}
+                        className="mt-6"
+                        title="Tiada pesanan menunggu"
+                        description="Pesanan baru akan muncul di sini sendiri. Halaman ini dikemas kini setiap 15 saat."
+                    />
                 ) : (
-                    <ul className="divide-y divide-rule border-b border-rule bg-panel">
+                    <ul className="mt-6 grid gap-3">
                         {activeOrders.map((order) => (
                             <OrderQueueRow key={order.id} order={order} now={now} />
                         ))}
@@ -89,16 +83,16 @@ export default function Dashboard({ stats, hourly, activeOrders, recentOrders }:
             </section>
 
             <section aria-labelledby="terkini-tajuk" className="mt-12">
-                <h2 id="terkini-tajuk" className="font-heading border-b-2 border-amber pb-2 text-2xl font-extrabold text-ink">
+                <h2 id="terkini-tajuk" className="section-title font-heading text-2xl font-extrabold text-ink">
                     Pesanan terkini
                 </h2>
                 {recentOrders.length === 0 ? (
-                    <p className="py-8 text-[15px] text-ink-muted">Belum ada pesanan. Kongsi pautan menu atau kod QR meja untuk mula menerima pesanan.</p>
+                    <EmptyState Icon={ReceiptIcon} className="mt-6" title="Belum ada pesanan" description="Kongsi pautan menu atau kod QR meja untuk mula menerima pesanan." />
                 ) : (
                     <>
-                    <ul className="divide-y divide-rule sm:hidden">
+                    <ul className="mt-6 grid gap-3 sm:hidden">
                         {recentOrders.map((order) => (
-                            <li key={order.id} className="flex items-center justify-between gap-3 py-3">
+                            <li key={order.id} className="neu-tile flex items-center justify-between gap-3 px-4 py-3 [--neu-radius:var(--radius-panel)]">
                                 <div className="min-w-0">
                                     <Link href={`/admin/orders/${order.id}`} className="group inline-block">
                                         <DigitDisplay
@@ -116,10 +110,11 @@ export default function Dashboard({ stats, hourly, activeOrders, recentOrders }:
                             </li>
                         ))}
                     </ul>
-                    <div className="hidden overflow-x-auto sm:block">
-                        <table className="w-full min-w-[640px] text-left text-[15px]">
+                    <div className="neu-card mt-6 hidden p-3 sm:block">
+                      <div className="overflow-x-auto">
+                        <table className="data-table w-full min-w-[640px] text-left text-[15px]">
                             <thead>
-                                <tr className="border-b-2 border-rule-strong text-sm text-ink-muted">
+                                <tr className="text-sm text-ink-muted">
                                     <th scope="col" className="py-3 pr-4 font-semibold">No.</th>
                                     <th scope="col" className="py-3 pr-4 font-semibold">Pelanggan</th>
                                     <th scope="col" className="py-3 pr-4 font-semibold">Jenis</th>
@@ -128,9 +123,9 @@ export default function Dashboard({ stats, hourly, activeOrders, recentOrders }:
                                     <th scope="col" className="py-3 font-semibold">Masa</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-rule">
+                            <tbody>
                                 {recentOrders.map((order) => (
-                                    <tr key={order.id} className="transition-colors duration-150 hover:bg-amber-tint/50">
+                                    <tr key={order.id}>
                                         <td className="py-3 pr-4">
                                             <Link href={`/admin/orders/${order.id}`} className="group inline-block">
                                                 <DigitDisplay
@@ -146,7 +141,7 @@ export default function Dashboard({ stats, hourly, activeOrders, recentOrders }:
                                             {order.typeLabel}
                                             {order.tableNumber ? `, meja ${order.tableNumber}` : ''}
                                         </td>
-                                        <td className="tabular py-3 pr-4 text-right font-semibold">{formatPrice(order.total)}</td>
+                                        <td className="tabular py-3 pr-4 text-right font-semibold whitespace-nowrap">{formatPrice(order.total)}</td>
                                         <td className="py-3 pr-4">
                                             <StatusBadge status={order.status} />
                                         </td>
@@ -155,6 +150,7 @@ export default function Dashboard({ stats, hourly, activeOrders, recentOrders }:
                                 ))}
                             </tbody>
                         </table>
+                      </div>
                     </div>
                     </>
                 )}

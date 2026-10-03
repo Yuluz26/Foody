@@ -9,7 +9,7 @@ type DigitDisplayProps = {
     tone?: DigitTone;
     /** Wrap in the dark instrument housing with the unlit-segment ghost. Off for a plain inline tabular numeral, e.g. a dish row price. */
     chip?: boolean;
-    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'kpi' | 'xl';
     className?: string;
     /** A fuller accessible name (e.g. "Nombor pesanan FD0003"). Optional: the digits are correct, selectable, copyable text on their own without it. */
     label?: string;
@@ -28,6 +28,8 @@ const sizes: Record<NonNullable<DigitDisplayProps['size']>, string> = {
     sm: 'text-sm',
     md: 'text-lg',
     lg: 'text-3xl',
+    /** Dashboard readouts: a step down on phones so a seven-character total still fits a half-width tile. */
+    kpi: 'text-2xl md:text-3xl',
     xl: 'text-5xl',
 };
 

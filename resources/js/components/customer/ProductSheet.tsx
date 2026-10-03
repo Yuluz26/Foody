@@ -5,7 +5,7 @@ import { FoodImage } from '@/components/FoodImage';
 import { QuantityStepper } from '@/components/QuantityStepper';
 import { Sheet } from '@/components/Sheet';
 import { Button } from '@/components/ui/Button';
-import { cn, formatPrice, priceDigits } from '@/lib/format';
+import { formatPrice, priceDigits } from '@/lib/format';
 import type { AddOn, MenuProduct } from '@/types';
 
 type ProductSheetProps = {
@@ -27,28 +27,21 @@ export function ProductSheet({ selection, canOrder, closedMessage, onClose, onAd
 
 function AddOnPicker({ addOns, selectedIds, onToggle }: { addOns: AddOn[]; selectedIds: number[]; onToggle: (id: number) => void }) {
     return (
-        <fieldset className="mt-6 border-t border-rule pt-5">
+        <fieldset className="mt-6 border-t border-rule/70 pt-5">
             <legend className="text-lg font-bold text-ink">Tambahan</legend>
             <p className="mt-0.5 text-sm text-ink-muted">Harga tambahan dikenakan sekali sahaja, tidak mengikut kuantiti.</p>
-            <ul className="mt-3 grid gap-2">
+            <ul className="mt-4 grid gap-3">
                 {addOns.map((addOn) => {
                     const checked = selectedIds.includes(addOn.id);
 
                     return (
                         <li key={addOn.id}>
                             <label
-                                className={cn(
-                                    'flex cursor-pointer items-center justify-between gap-3 rounded-(--radius-control) border-2 px-4 py-3 transition-[transform,background-color,border-color] duration-150 ease-out active:scale-[0.98]',
-                                    checked ? 'border-ink bg-amber-tint/40' : 'border-rule-strong hover:border-ink-muted',
-                                )}
+                                data-selected={checked}
+                                className="neu-press flex cursor-pointer items-center justify-between gap-3 px-4 py-3 has-focus-visible:outline-3 has-focus-visible:outline-offset-3 has-focus-visible:outline-ink"
                             >
                                 <span className="flex items-center gap-3">
-                                    <input
-                                        type="checkbox"
-                                        checked={checked}
-                                        onChange={() => onToggle(addOn.id)}
-                                        className="size-5 shrink-0 rounded-sm border-2 border-rule-strong accent-ink"
-                                    />
+                                    <input type="checkbox" checked={checked} onChange={() => onToggle(addOn.id)} />
                                     <span className="font-semibold text-ink">{addOn.name}</span>
                                 </span>
                                 <span className="shrink-0 text-sm font-semibold text-ink-muted">+{formatPrice(addOn.price)}</span>
@@ -107,13 +100,13 @@ function ProductDetail({
 
                 {product.addOns.length > 0 && <AddOnPicker addOns={product.addOns} selectedIds={selectedIds} onToggle={toggleAddOn} />}
 
-                <div className="mt-6 border-t border-rule pt-5">
+                <div className="mt-6 border-t border-rule/70 pt-5">
                     {orderable ? (
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
                             <QuantityStepper value={quantity} onChange={setQuantity} label={product.name} />
-                            <Button size="lg" className="min-w-0 flex-1" onClick={() => onAdd(product, quantity, selectedAddOns)}>
+                            <Button variant="amber" size="lg" className="min-w-0 flex-1 basis-44" onClick={() => onAdd(product, quantity, selectedAddOns)}>
                                 Tambah
-                                <DigitDisplay value={priceDigits(total)} tone="white" chip={false} size="md" />
+                                <DigitDisplay value={priceDigits(total)} tone="ink" chip={false} size="md" />
                             </Button>
                         </div>
                     ) : (

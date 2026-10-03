@@ -3,7 +3,9 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useId, useState } from 'react';
 import { cn, formatPrice, priceDigits } from '@/lib/format';
 import { ease } from '@/lib/motion';
-import { DigitDisplay } from '@/components/DigitDisplay';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
+import { KpiGrid } from './KpiGrid';
 
 export type TrendPoint = { label: string; count: number; revenue: number };
 
@@ -65,7 +67,7 @@ export function CompletedOrdersChart({ trend }: { trend: TrendPoint[] }) {
     const labelEvery = trend.length <= 7 ? 1 : trend.length <= 14 ? 2 : Math.ceil(trend.length / 8);
 
     return (
-        <div className="rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5">
+        <div className="neu-card p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h3 className="font-heading text-lg font-extrabold text-ink">Pesanan selesai</h3>
@@ -73,33 +75,22 @@ export function CompletedOrdersChart({ trend }: { trend: TrendPoint[] }) {
                         {metric === 'count' ? `${total} pesanan dalam tempoh ini` : `${formatPrice(total)} jualan dalam tempoh ini`}
                     </p>
                 </div>
-                <div role="tablist" aria-label="Papar mengikut" className="flex gap-0.5 rounded-(--radius-control) border-2 border-rule-strong bg-ground p-0.5">
-                    {(['count', 'revenue'] as const).map((option) => (
-                        <button
-                            key={option}
-                            type="button"
-                            role="tab"
-                            aria-selected={metric === option}
-                            onClick={() => setMetric(option)}
-                            className={cn(
-                                'h-9 rounded-(--radius-module) px-3 text-sm font-semibold transition-colors duration-150',
-                                metric === option ? 'bg-amber text-ink' : 'text-ink-soft hover:text-ink',
-                            )}
-                        >
-                            {option === 'count' ? 'Pesanan' : 'Jualan'}
-                        </button>
-                    ))}
-                </div>
+                <SegmentedTabs
+                    label="Papar mengikut"
+                    tabs={[
+                        { value: 'count', label: 'Pesanan' },
+                        { value: 'revenue', label: 'Jualan' },
+                    ]}
+                    value={metric}
+                    onChange={(value) => setMetric(value as Metric)}
+                />
             </div>
 
             {total === 0 ? (
-                <div className="mt-6 grid place-items-center gap-2 rounded-(--radius-panel) border-2 border-dashed border-rule-strong py-10 text-center">
-                    <ChartLineUpIcon size={28} weight="bold" className="text-rule-strong" aria-hidden />
-                    <p className="text-[15px] text-ink-muted">Tiada pesanan selesai dalam tempoh ini.</p>
-                </div>
+                <EmptyState centered Icon={ChartLineUpIcon} title="Tiada pesanan selesai dalam tempoh ini." className="mt-6" />
             ) : (
-                <>
-                    <div className="relative mt-6" style={{ height: CHART_HEIGHT }} role="img" aria-label={`Carta aliran ${metric === 'count' ? 'bilangan' : 'jualan'} pesanan selesai, jumlah ${metric === 'count' ? `${total} pesanan` : formatPrice(total)}.`}>
+                <div className="neu-well-sm mt-5 px-3 pt-4 pb-2.5">
+                    <div className="relative" style={{ height: CHART_HEIGHT }} role="img" aria-label={`Carta aliran ${metric === 'count' ? 'bilangan' : 'jualan'} pesanan selesai, jumlah ${metric === 'count' ? `${total} pesanan` : formatPrice(total)}.`}>
                         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
                             <defs>
                                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -168,7 +159,7 @@ export function CompletedOrdersChart({ trend }: { trend: TrendPoint[] }) {
                             </div>
                         ))}
                     </div>
-                </>
+                </div>
             )}
         </div>
     );
@@ -186,16 +177,5 @@ export function TrendSummary({ trend }: { trend: TrendPoint[] }) {
         { label: 'Purata pesanan', value: average !== null ? priceDigits(average) : '—' },
     ];
 
-    return (
-        <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-(--radius-panel) border-2 border-rule-strong bg-rule">
-            {figures.map((figure) => (
-                <div key={figure.label} className="bg-panel px-4 py-4">
-                    <dt className="text-sm font-medium text-ink-muted">{figure.label}</dt>
-                    <dd className="mt-1.5">
-                        <DigitDisplay value={figure.value} chip={false} size="lg" />
-                    </dd>
-                </div>
-            ))}
-        </dl>
-    );
+    return <KpiGrid figures={figures} phoneColumns={1} />;
 }
