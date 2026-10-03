@@ -275,6 +275,9 @@ mark { background: linear-gradient(transparent 58%, rgb(255 159 61 / 0.62) 58%);
   .band > .wrap:first-child { break-after: avoid-page; }
   .band--peach, .band--mint, .band--amber, #harga, .band--flow { break-inside: avoid; }
   .hero { break-after: avoid-page; }
+  .band--peach, .band--butter, .band--admin, .band--mint { break-before: page; }
+  #harga { break-before: page; }
+  .plans { break-inside: avoid; }
   .btn, .tab, .round { box-shadow: none; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
@@ -371,7 +374,7 @@ mark { background: linear-gradient(transparent 58%, rgb(255 159 61 / 0.62) 58%);
   </div>
 </section>
 
-<section class="band band--cream" aria-labelledby="h-admin">
+<section class="band band--cream band--admin" aria-labelledby="h-admin">
   <div class="wrap">
     <h2 id="h-admin"><span lang="ms">Apa yang anda dan staf pegang</span><span lang="en">What you and your staff run</span></h2>
     <p class="sub"><span lang="ms">Ketik mana-mana gambar untuk besarkan.</span><span lang="en">Tap any picture to enlarge it.</span></p>
