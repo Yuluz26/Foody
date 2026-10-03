@@ -122,8 +122,8 @@ export default function StockIndex({ products, summary, movements, filters: init
     const filtered = filters.q !== '' || filters.state !== '';
 
     return (
-        <AdminLayout title="Stok">
-            <p className="-mt-3 max-w-[60ch] text-[15px] text-ink-muted">Baki setiap hidangan yang dijejak. Stok ditolak sendiri bila pesanan masuk dan dipulangkan bila pesanan dibatalkan.</p>
+        <AdminLayout title="Stok makanan">
+            <p className="-mt-3 max-w-[60ch] text-[15px] text-ink-muted">Baki setiap hidangan yang dijejak. Ditolak sendiri bila pesanan masuk, dipulangkan bila dibatalkan. Untuk bahan mentah di dapur, guna Stok bahan.</p>
 
             <div className="mt-6">
                 <KpiGrid

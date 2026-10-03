@@ -63,6 +63,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('stock', [Admin\StockController::class, 'index'])->name('stock.index');
         Route::post('stock/{product}', [Admin\StockController::class, 'store'])->name('stock.store');
 
+        // Kitchen ingredients: their own list, prices and history. Nothing here touches dish stock.
+        Route::get('ingredients', [Admin\IngredientController::class, 'index'])->name('ingredients.index');
+        Route::post('ingredients', [Admin\IngredientController::class, 'store'])->name('ingredients.store');
+        Route::put('ingredients/{ingredient}', [Admin\IngredientController::class, 'update'])->name('ingredients.update');
+        Route::delete('ingredients/{ingredient}', [Admin\IngredientController::class, 'destroy'])->name('ingredients.destroy');
+        Route::post('ingredients/{ingredient}/adjust', [Admin\IngredientController::class, 'adjust'])->name('ingredients.adjust');
+
         Route::get('profile', [Admin\ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('profile', [Admin\ProfileController::class, 'update'])->name('profile.update');
         Route::put('profile/password', [Admin\ProfileController::class, 'updatePassword'])->name('profile.password');

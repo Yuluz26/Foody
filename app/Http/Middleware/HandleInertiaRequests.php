@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Ingredient;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\RestaurantSetting;
@@ -63,6 +64,7 @@ class HandleInertiaRequests extends Middleware
                 ? [
                     'activeOrders' => Order::query()->active()->count(),
                     'lowStock' => Product::query()->lowOnStock()->count(),
+                    'lowIngredients' => Ingredient::query()->needsAttention()->count(),
                     'latestOrderId' => Order::query()->max('id'),
                     'latestCustomerCancelledOrderId' => Order::query()->where('cancelled_by_customer', true)->max('id'),
                 ]

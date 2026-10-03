@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowSquareOutIcon,
     BellIcon,
+    BasketIcon,
     BellSlashIcon,
     BowlFoodIcon,
     ChartLineUpIcon,
@@ -26,12 +27,15 @@ import { buttonClass } from '@/components/ui/Button';
 import { cn } from '@/lib/format';
 import { useNewOrderAlert } from './useNewOrderAlert';
 
-type NavItem = { href: string; label: string; Icon: Icon; exact?: boolean; countKey?: 'activeOrders' | 'lowStock'; adminOnly?: boolean };
+type NavItem = { href: string; label: string; Icon: Icon; exact?: boolean; countKey?: 'activeOrders' | 'lowStock' | 'lowIngredients'; adminOnly?: boolean };
+
+const STOCK_LABELS: Record<string, string> = { lowStock: 'hidangan hampir habis', lowIngredients: 'bahan hampir habis' };
 
 const NAV: NavItem[] = [
     { href: '/admin', label: 'Ringkasan', Icon: HouseIcon, exact: true },
     { href: '/admin/orders', label: 'Pesanan', Icon: ReceiptIcon, countKey: 'activeOrders' },
-    { href: '/admin/stock', label: 'Stok', Icon: PackageIcon, countKey: 'lowStock' },
+    { href: '/admin/stock', label: 'Stok makanan', Icon: PackageIcon, countKey: 'lowStock' },
+    { href: '/admin/ingredients', label: 'Stok bahan', Icon: BasketIcon, countKey: 'lowIngredients' },
     { href: '/admin/reports', label: 'Laporan', Icon: ChartLineUpIcon },
     { href: '/admin/products', label: 'Produk', Icon: BowlFoodIcon, adminOnly: true },
     { href: '/admin/categories', label: 'Kategori', Icon: SquaresFourIcon, adminOnly: true },
@@ -140,7 +144,7 @@ function AdminShell({ title, actions, children }: AdminLayoutProps) {
                 {item.label}
                 {count > 0 && (
                     <span className="ml-auto">
-                        <DigitDisplay value={String(count)} size="xs" label={item.countKey === 'lowStock' ? `${count} produk hampir habis` : `${count} pesanan aktif`} />
+                        <DigitDisplay value={String(count)} size="xs" label={`${count} ${STOCK_LABELS[item.countKey ?? ''] ?? 'pesanan aktif'}`} />
                     </span>
                 )}
             </Link>

@@ -221,5 +221,35 @@ export type SharedProps = {
     customerAuth: { user: CustomerAuthUser | null };
     flash: { success: string | null; error: string | null };
     restaurantName: string;
-    adminCounts: { activeOrders: number; lowStock: number; latestOrderId: number | null; latestCustomerCancelledOrderId: number | null } | null;
+    adminCounts: { activeOrders: number; lowStock: number; lowIngredients: number; latestOrderId: number | null; latestCustomerCancelledOrderId: number | null } | null;
+};
+
+export type IngredientMovementType = 'restock' | 'usage' | 'waste' | 'adjustment';
+
+export type IngredientRow = {
+    id: number;
+    name: string;
+    unit: string;
+    quantity: number;
+    /** Sen per unit. */
+    unitCost: number;
+    lowStockThreshold: number;
+    supplier: string | null;
+    /** Sen. */
+    stockValue: number;
+    stockState: Exclude<StockState, 'untracked'>;
+};
+
+export type IngredientMovementRow = {
+    id: number;
+    ingredientName: string;
+    unit: string;
+    type: IngredientMovementType;
+    typeLabel: string;
+    delta: number;
+    balanceAfter: number;
+    unitCost: number | null;
+    note: string | null;
+    userName: string | null;
+    createdAt: string;
 };
