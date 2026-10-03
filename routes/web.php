@@ -59,6 +59,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('reports', [Admin\ReportController::class, 'index'])->name('reports.index');
 
+        // Counting the shelf is part of running the day, so staff can restock and record waste too.
+        Route::get('stock', [Admin\StockController::class, 'index'])->name('stock.index');
+        Route::post('stock/{product}', [Admin\StockController::class, 'store'])->name('stock.store');
+
         Route::get('profile', [Admin\ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('profile', [Admin\ProfileController::class, 'update'])->name('profile.update');
         Route::put('profile/password', [Admin\ProfileController::class, 'updatePassword'])->name('profile.password');

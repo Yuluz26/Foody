@@ -30,6 +30,8 @@ export type MenuProduct = {
     imageUrl: string | null;
     isAvailable: boolean;
     isFeatured: boolean;
+    /** Set only when the shelf is nearly empty; null means there is nothing worth telling the diner. */
+    stockLeft: number | null;
     addOns: AddOn[];
 };
 
@@ -138,8 +140,39 @@ export type AdminProduct = {
     imageUrl: string | null;
     isAvailable: boolean;
     isFeatured: boolean;
+    trackStock: boolean;
+    stockQuantity: number;
+    lowStockThreshold: number;
+    stockState: StockState;
     sortOrder: number;
     addOns: AddOn[];
+};
+
+export type StockState = 'untracked' | 'out' | 'low' | 'ok';
+
+export type StockRow = {
+    id: number;
+    name: string;
+    categoryName: string | null;
+    imageUrl: string | null;
+    stockQuantity: number;
+    lowStockThreshold: number;
+    stockState: StockState;
+};
+
+export type StockMovementType = 'restock' | 'adjustment' | 'waste' | 'sale' | 'return';
+
+export type StockMovementRow = {
+    id: number;
+    productName: string;
+    type: StockMovementType;
+    typeLabel: string;
+    delta: number;
+    balanceAfter: number;
+    note: string | null;
+    orderNumber: string | null;
+    userName: string | null;
+    createdAt: string;
 };
 
 export type AdminBanner = {
@@ -188,5 +221,5 @@ export type SharedProps = {
     customerAuth: { user: CustomerAuthUser | null };
     flash: { success: string | null; error: string | null };
     restaurantName: string;
-    adminCounts: { activeOrders: number; latestOrderId: number | null; latestCustomerCancelledOrderId: number | null } | null;
+    adminCounts: { activeOrders: number; lowStock: number; latestOrderId: number | null; latestCustomerCancelledOrderId: number | null } | null;
 };

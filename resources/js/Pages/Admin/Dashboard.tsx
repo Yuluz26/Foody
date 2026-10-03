@@ -1,16 +1,17 @@
 import { Link, usePoll } from '@inertiajs/react';
-import { ArrowRightIcon, CoffeeIcon, ReceiptIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, CoffeeIcon, PackageIcon, ReceiptIcon } from '@phosphor-icons/react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { KpiGrid } from '@/components/admin/KpiGrid';
 import { OrderPipelineBar } from '@/components/admin/OrderPipelineBar';
 import { OrderQueueRow, useMinuteTick } from '@/components/admin/OrderQueue';
 import { OrderVolumeChart } from '@/components/admin/OrderVolumeChart';
+import { StockBadge } from '@/components/admin/StockBadge';
 import { StatusBadge } from '@/components/StatusBadge';
 import { DigitDisplay } from '@/components/DigitDisplay';
 import { buttonClass } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatPrice, formatWaiting, priceDigits } from '@/lib/format';
-import type { AdminOrderRow, HourlyPoint } from '@/types';
+import type { AdminOrderRow, HourlyPoint, StockState } from '@/types';
 
 type DashboardProps = {
     stats: {
@@ -23,12 +24,13 @@ type DashboardProps = {
         averageOrder: number | null;
     };
     hourly: HourlyPoint[];
+    lowStock: { id: number; name: string; stockQuantity: number; stockState: StockState }[];
     activeOrders: AdminOrderRow[];
     recentOrders: AdminOrderRow[];
 };
 
-export default function Dashboard({ stats, hourly, activeOrders, recentOrders }: DashboardProps) {
-    usePoll(15_000, { only: ['stats', 'hourly', 'activeOrders', 'recentOrders', 'adminCounts'] });
+export default function Dashboard({ stats, hourly, lowStock, activeOrders, recentOrders }: DashboardProps) {
+    usePoll(15_000, { only: ['stats', 'hourly', 'lowStock', 'activeOrders', 'recentOrders', 'adminCounts'] });
     const now = useMinuteTick();
 
     const today = new Intl.DateTimeFormat('ms-MY', { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
@@ -54,6 +56,32 @@ export default function Dashboard({ stats, hourly, activeOrders, recentOrders }:
                 <OrderVolumeChart hourly={hourly} />
                 <OrderPipelineBar stats={stats} />
             </div>
+
+            {lowStock.length > 0 && (
+                <section aria-labelledby="stok-tajuk" className="neu-card mt-6 p-5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <h2 id="stok-tajuk" className="flex items-center gap-2 text-lg font-bold text-ink">
+                            <PackageIcon size={22} weight="bold" className="text-amber-deep" aria-hidden />
+                            Stok perlu ditambah
+                        </h2>
+                        <Link href="/admin/stock" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+                            Buka stok
+                            <ArrowRightIcon size={16} weight="bold" aria-hidden />
+                        </Link>
+                    </div>
+                    <ul className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-2.5 sm:grid-cols-2">
+                        {lowStock.map((product) => (
+                            <li key={product.id} className="neu-well-sm flex items-center justify-between gap-3 px-4 py-3">
+                                <span className="min-w-0 truncate font-semibold text-ink">{product.name}</span>
+                                <span className="flex shrink-0 items-center gap-2.5">
+                                    <span className="font-mono text-lg font-semibold text-ink tabular-nums">{product.stockQuantity}</span>
+                                    <StockBadge state={product.stockState} />
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
 
             <section aria-labelledby="tindakan-tajuk" className="mt-10">
                 <div className="flex flex-wrap items-end justify-between gap-3">

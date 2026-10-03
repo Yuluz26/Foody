@@ -1,6 +1,7 @@
 import { Link, router } from '@inertiajs/react';
 import { BowlFoodIcon, PencilSimpleIcon, PlusIcon, StarIcon } from '@phosphor-icons/react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { StockBadge } from '@/components/admin/StockBadge';
 import { ConfirmButton } from '@/components/ConfirmButton';
 import { Pagination } from '@/components/Pagination';
 import { useFilters } from '@/components/admin/useFilters';
@@ -93,6 +94,14 @@ export default function ProductsIndex({ products, categories, filters: initial }
                                         <span className="font-mono shrink-0 font-semibold text-ink tabular-nums">{formatPrice(product.price)}</span>
                                     </p>
                                 </div>
+                                {product.trackStock && (
+                                    <p className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink-soft">
+                                        <span>
+                                            Baki <span className="font-mono font-semibold text-ink tabular-nums">{product.stockQuantity}</span>
+                                        </span>
+                                        <StockBadge state={product.stockState} />
+                                    </p>
+                                )}
                                 <Switch
                                     checked={product.isAvailable}
                                     label="Ada dijual"

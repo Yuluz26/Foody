@@ -28,6 +28,9 @@ type ProductFields = {
     price: string;
     is_available: boolean;
     is_featured: boolean;
+    track_stock: boolean;
+    stock_quantity: string;
+    low_stock_threshold: string;
     image: File | null;
     remove_image: boolean;
     add_ons: AddOnField[];
@@ -143,6 +146,53 @@ function AddOnsEditor({ rows, errors, onChange }: { rows: AddOnField[]; errors: 
     );
 }
 
+type StockPanelProps = {
+    product: AdminProduct | null;
+    tracked: boolean;
+    quantity: string;
+    threshold: string;
+    errors: Record<string, string | undefined>;
+    onTrackedChange: (checked: boolean) => void;
+    onQuantityChange: (value: string) => void;
+    onThresholdChange: (value: string) => void;
+};
+
+/** Opening count only while tracking is being switched on; after that every change goes through the Stok page so it is logged. */
+function StockPanel({ product, tracked, quantity, threshold, errors, onTrackedChange, onQuantityChange, onThresholdChange }: StockPanelProps) {
+    const alreadyTracked = product?.trackStock ?? false;
+
+    return (
+        <div className="neu-card grid content-start gap-5 p-5 sm:p-6 lg:col-span-2">
+            <Switch
+                checked={tracked}
+                onChange={onTrackedChange}
+                label="Jejak stok"
+                description="Baki ditolak sendiri bila pesanan masuk. Bila sampai kosong, hidangan ditanda habis dengan sendirinya."
+            />
+            {tracked && (
+                <div className="grid gap-4 border-t border-ink/10 pt-5 sm:grid-cols-2">
+                    {alreadyTracked ? (
+                        <div className="grid content-start gap-1.5">
+                            <p className="text-[15px] font-semibold text-ink">Baki sekarang</p>
+                            <p className="font-mono text-2xl font-semibold text-ink tabular-nums">{product?.stockQuantity}</p>
+                            <Link href="/admin/stock" className="inline-flex min-h-10 w-fit items-center text-sm font-semibold text-ink-soft underline-offset-2 hover:underline">
+                                Tambah atau betulkan di halaman Stok
+                            </Link>
+                        </div>
+                    ) : (
+                        <Field id="stock_quantity" label="Baki permulaan" hint="Berapa yang ada sekarang." error={errors.stock_quantity}>
+                            {(control) => <input {...control} type="number" inputMode="numeric" min={0} step={1} value={quantity} onChange={(event) => onQuantityChange(event.target.value)} className={cn(inputClass, 'max-w-40 tabular')} />}
+                        </Field>
+                    )}
+                    <Field id="low_stock_threshold" label="Beri amaran bila baki" hint="Hidangan muncul sebagai hampir habis pada atau bawah angka ini." error={errors.low_stock_threshold}>
+                        {(control) => <input {...control} type="number" inputMode="numeric" min={0} step={1} value={threshold} onChange={(event) => onThresholdChange(event.target.value)} className={cn(inputClass, 'max-w-40 tabular')} />}
+                    </Field>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function ProductForm({ product, categories }: { product: AdminProduct | null; categories: Option[] }) {
     const form = useForm<ProductFields>({
         category_id: product ? String(product.categoryId) : String(categories[0]?.id ?? ''),
@@ -151,6 +201,9 @@ export default function ProductForm({ product, categories }: { product: AdminPro
         price: product ? (product.price / 100).toFixed(2) : '',
         is_available: product?.isAvailable ?? true,
         is_featured: product?.isFeatured ?? false,
+        track_stock: product?.trackStock ?? false,
+        stock_quantity: '',
+        low_stock_threshold: String(product?.lowStockThreshold ?? 5),
         image: null,
         remove_image: false,
         add_ons: (product?.addOns ?? []).map((addOn) => ({ key: newAddOnKey(), id: addOn.id, name: addOn.name, price: (addOn.price / 100).toFixed(2) })),
@@ -260,6 +313,17 @@ export default function ProductForm({ product, categories }: { product: AdminPro
                             />
                         </div>
                     </div>
+
+                    <StockPanel
+                        product={product}
+                        tracked={form.data.track_stock}
+                        quantity={form.data.stock_quantity}
+                        threshold={form.data.low_stock_threshold}
+                        errors={errors}
+                        onTrackedChange={(checked) => form.setData('track_stock', checked)}
+                        onQuantityChange={(value) => form.setData('stock_quantity', value)}
+                        onThresholdChange={(value) => form.setData('low_stock_threshold', value)}
+                    />
 
                     <AddOnsEditor rows={form.data.add_ons} errors={errors} onChange={(rows) => form.setData('add_ons', rows)} />
                 </div>

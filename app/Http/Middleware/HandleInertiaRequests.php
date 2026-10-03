@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\RestaurantSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -61,6 +62,7 @@ class HandleInertiaRequests extends Middleware
             'adminCounts' => fn () => $request->user('web')?->canAccessPanel()
                 ? [
                     'activeOrders' => Order::query()->active()->count(),
+                    'lowStock' => Product::query()->lowOnStock()->count(),
                     'latestOrderId' => Order::query()->max('id'),
                     'latestCustomerCancelledOrderId' => Order::query()->where('cancelled_by_customer', true)->max('id'),
                 ]

@@ -49,6 +49,8 @@ export function DishCard({ product, code, quantityInCart, canOrder, onOpen, onQu
                         </span>
                         {soldOut ? (
                             <span className="absolute top-2 right-2 rounded-(--radius-module) bg-ink px-1.5 py-1 text-[11px] font-bold tracking-wide text-white uppercase">Habis</span>
+                        ) : product.stockLeft !== null ? (
+                            <span className="absolute top-2 right-2 rounded-(--radius-module) bg-amber px-1.5 py-1 text-[11px] font-bold tracking-wide text-ink uppercase shadow-(--shadow-raised-2xs)">Tinggal {product.stockLeft}</span>
                         ) : (
                             product.isFeatured && (
                                 <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-(--radius-module) bg-amber px-1.5 py-1 text-[11px] font-bold tracking-wide text-ink uppercase shadow-(--shadow-raised-2xs)">

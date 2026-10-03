@@ -44,8 +44,10 @@ class MenuPresenter
             'description' => $product->description,
             'price' => $product->price,
             'imageUrl' => $product->image_url,
-            'isAvailable' => $product->is_available,
+            'isAvailable' => $product->isSellable(),
             'isFeatured' => $product->is_featured,
+            // Only shown to customers when the shelf is getting empty; null means "no need to say".
+            'stockLeft' => $product->isLowOnStock() ? $product->stock_quantity : null,
             'addOns' => $product->addOns->map(fn (ProductAddOn $addOn) => [
                 'id' => $addOn->id,
                 'name' => $addOn->name,

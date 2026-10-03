@@ -15,6 +15,7 @@ use App\Models\Product;
 use App\Models\RestaurantSetting;
 use App\Support\ImageUpload;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,8 @@ use Throwable;
 
 class PlaceOrder
 {
+    public function __construct(private readonly StockLedger $stock) {}
+
     /**
      * Create an order from validated checkout data.
      *
@@ -40,7 +43,7 @@ class PlaceOrder
      *     customer_phone: string,
      *     notes?: string|null,
      *     payment_method: string,
-     *     payment_proof?: \Illuminate\Http\UploadedFile|null,
+     *     payment_proof?: UploadedFile|null,
      *     items: list<array{product_id: int|string, quantity: int|string, add_on_ids?: list<int|string>}>
      * }  $data
      *
@@ -133,6 +136,7 @@ class PlaceOrder
         $products = Product::query()
             ->orderable()
             ->whereKey($productIds)
+            ->lockForUpdate()
             ->with('addOns')
             ->get()
             ->keyBy('id');
@@ -143,6 +147,16 @@ class PlaceOrder
             throw OrderRejected::unavailable(
                 Product::query()->whereKey($missingIds)->pluck('name')->all()
             );
+        }
+
+        // Same dish on several lines (different add-ons) draws from the same stock.
+        foreach ($groups->groupBy('product_id') as $productId => $productGroups) {
+            $product = $products[$productId];
+            $wanted = (int) $productGroups->sum('quantity');
+
+            if ($product->track_stock && $wanted > $product->stock_quantity) {
+                throw OrderRejected::notEnoughStock($product->name, $product->stock_quantity);
+            }
         }
 
         $lines = [];
@@ -241,6 +255,8 @@ class PlaceOrder
                 $item->addOns()->createMany($lines[$index]['add_ons']);
             }
         }
+
+        $this->stock->sell($order, $lines);
 
         Log::info('Order placed', [
             'order_id' => $order->id,

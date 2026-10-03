@@ -8,6 +8,7 @@ import {
     GearSixIcon,
     HouseIcon,
     IdentificationBadgeIcon,
+    PackageIcon,
     ReceiptIcon,
     SignOutIcon,
     SpeakerHighIcon,
@@ -25,11 +26,12 @@ import { buttonClass } from '@/components/ui/Button';
 import { cn } from '@/lib/format';
 import { useNewOrderAlert } from './useNewOrderAlert';
 
-type NavItem = { href: string; label: string; Icon: Icon; exact?: boolean; countKey?: 'activeOrders'; adminOnly?: boolean };
+type NavItem = { href: string; label: string; Icon: Icon; exact?: boolean; countKey?: 'activeOrders' | 'lowStock'; adminOnly?: boolean };
 
 const NAV: NavItem[] = [
     { href: '/admin', label: 'Ringkasan', Icon: HouseIcon, exact: true },
     { href: '/admin/orders', label: 'Pesanan', Icon: ReceiptIcon, countKey: 'activeOrders' },
+    { href: '/admin/stock', label: 'Stok', Icon: PackageIcon, countKey: 'lowStock' },
     { href: '/admin/reports', label: 'Laporan', Icon: ChartLineUpIcon },
     { href: '/admin/products', label: 'Produk', Icon: BowlFoodIcon, adminOnly: true },
     { href: '/admin/categories', label: 'Kategori', Icon: SquaresFourIcon, adminOnly: true },
@@ -138,7 +140,7 @@ function AdminShell({ title, actions, children }: AdminLayoutProps) {
                 {item.label}
                 {count > 0 && (
                     <span className="ml-auto">
-                        <DigitDisplay value={String(count)} size="xs" label={`${count} pesanan aktif`} />
+                        <DigitDisplay value={String(count)} size="xs" label={item.countKey === 'lowStock' ? `${count} produk hampir habis` : `${count} pesanan aktif`} />
                     </span>
                 )}
             </Link>

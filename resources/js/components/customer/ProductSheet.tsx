@@ -1,5 +1,6 @@
 import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
+import { MAX_QUANTITY } from '@/cart/CartProvider';
 import { DigitDisplay } from '@/components/DigitDisplay';
 import { FoodImage } from '@/components/FoodImage';
 import { QuantityStepper } from '@/components/QuantityStepper';
@@ -74,6 +75,7 @@ function ProductDetail({
     // Add-ons are a flat charge for this line, not per unit: quantity only scales the dish price.
     const addOnsTotal = selectedAddOns.reduce((sum, addOn) => sum + addOn.price, 0);
     const total = product.price * quantity + addOnsTotal;
+    const maxQuantity = Math.min(MAX_QUANTITY, product.stockLeft ?? MAX_QUANTITY);
 
     const toggleAddOn = (id: number) => {
         setSelectedIds((ids) => (ids.includes(id) ? ids.filter((existing) => existing !== id) : [...ids, id]));
@@ -103,7 +105,8 @@ function ProductDetail({
                 <div className="mt-6 border-t border-rule/70 pt-5">
                     {orderable ? (
                         <div className="flex flex-wrap items-center gap-3">
-                            <QuantityStepper value={quantity} onChange={setQuantity} label={product.name} />
+                            {product.stockLeft !== null && <p className="w-full text-sm font-semibold text-amber-deep">Tinggal {product.stockLeft}. Siapa cepat dia dapat.</p>}
+                            <QuantityStepper value={quantity} onChange={setQuantity} label={product.name} max={maxQuantity} />
                             <Button variant="amber" size="lg" className="min-w-0 flex-1 basis-44" onClick={() => onAdd(product, quantity, selectedAddOns)}>
                                 Tambah
                                 <DigitDisplay value={priceDigits(total)} tone="ink" chip={false} size="md" />

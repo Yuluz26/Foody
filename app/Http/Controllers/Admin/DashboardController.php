@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\RestaurantSetting;
 use App\Support\AdminPresenter;
 use Inertia\Inertia;
@@ -14,7 +15,7 @@ class DashboardController extends Controller
     public function __invoke(): Response
     {
         $today = Order::query()->today()
-            ->selectRaw("count(*) as orders_count")
+            ->selectRaw('count(*) as orders_count')
             ->selectRaw("coalesce(sum(case when status <> 'cancelled' then total else 0 end), 0) as revenue")
             ->selectRaw("sum(case when status <> 'cancelled' then 1 else 0 end) as billable_count")
             ->selectRaw("sum(case when status = 'pending' then 1 else 0 end) as pending_count")
@@ -38,6 +39,18 @@ class DashboardController extends Controller
                 // Only shown once there are enough orders for the number to mean something.
                 'averageOrder' => $billable >= 3 ? intdiv((int) $today->revenue, $billable) : null,
             ],
+            'lowStock' => Product::query()
+                ->lowOnStock()
+                ->orderBy('stock_quantity')
+                ->orderBy('name')
+                ->limit(6)
+                ->get(['id', 'name', 'stock_quantity', 'low_stock_threshold', 'track_stock'])
+                ->map(fn (Product $product) => [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'stockQuantity' => $product->stock_quantity,
+                    'stockState' => AdminPresenter::stockState($product),
+                ]),
             'activeOrders' => Order::query()
                 ->active()
                 ->withCount('items')

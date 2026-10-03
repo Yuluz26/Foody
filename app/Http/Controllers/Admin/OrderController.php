@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\StockLedger;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
@@ -26,6 +27,8 @@ use Throwable;
 
 class OrderController extends Controller
 {
+    public function __construct(private readonly StockLedger $stock) {}
+
     public function index(Request $request): Response
     {
         $filters = $request->validate([
@@ -93,6 +96,10 @@ class OrderController extends Controller
             }
 
             $locked->save();
+
+            if ($to === OrderStatus::Cancelled) {
+                $this->stock->syncOrder($locked, request()->user());
+            }
 
             Log::info('Order status changed', [
                 'order_id' => $locked->id,
@@ -162,6 +169,8 @@ class OrderController extends Controller
                 // No service charge or tax in MVP; total equals subtotal.
                 $locked->total = $subtotal;
                 $locked->save();
+
+                $this->stock->syncOrder($locked, $request->user());
             }
         });
 
@@ -171,7 +180,7 @@ class OrderController extends Controller
     public function destroy(Order $order): RedirectResponse
     {
         $number = $order->order_number;
-        $order->delete();
+        $this->deleteOrder($order);
 
         return to_route('admin.orders.index')->with('success', "Pesanan {$number} dipadam.");
     }
@@ -195,8 +204,9 @@ class OrderController extends Controller
 
             foreach ($orders as $order) {
                 if ($action === 'delete') {
-                    $order->delete();
+                    $this->deleteOrder($order);
                     $affected++;
+
                     continue;
                 }
 
@@ -215,6 +225,11 @@ class OrderController extends Controller
                 }
 
                 $order->save();
+
+                if ($to === OrderStatus::Cancelled) {
+                    $this->stock->syncOrder($order, request()->user());
+                }
+
                 $affected++;
                 $transitioned[] = $order;
 
@@ -233,6 +248,19 @@ class OrderController extends Controller
         ];
 
         return back()->with($affected > 0 ? 'success' : 'error', $affected > 0 ? $messages[$action] : 'Tiada pesanan yang boleh dikemas kini dengan tindakan ini.');
+    }
+
+    /** A deleted order that was never served must not keep dishes off the shelf, so its stock goes back first. */
+    private function deleteOrder(Order $order): void
+    {
+        DB::transaction(function () use ($order) {
+            if ($order->status->isActive()) {
+                $order->status = OrderStatus::Cancelled;
+                $this->stock->syncOrder($order, request()->user());
+            }
+
+            $order->delete();
+        });
     }
 
     /** Any staff may reprint any order's receipt — unlike the customer-facing route, this isn't scoped to an owner. */

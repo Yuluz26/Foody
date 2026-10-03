@@ -252,6 +252,7 @@ Defined once in `app.css` (`.btn` plus a variant and a size) and reached through
 
 ### Status Tags / Badges (StatusBadge, PaymentBadge)
 - 10px module radius with a tiny raised shadow. Order status colours: Baru (amber), Disahkan (amber tint with an inset ink ring), Disediakan (ink), Siap (leaf), Selesai (deep clay), Dibatalkan (alert tint with ring). `StatusBadge` takes an optional `label` so the diner side can use friendlier wording on the same colours and icons. Status is always a word plus an icon, never colour alone.
+- `StockBadge` is the same chip for the shelf: Cukup (leaf), Hampir habis (amber), Habis (alert tint with ring). Untracked dishes render nothing. Stock rows pair the chip with a `DigitDisplay` count (dim when empty); customers only ever see a small amber "Tinggal N" tag, and only when the count is at or under the dish's warning level.
 
 ### Dish Card (customer menu, admin catalogue)
 A raised tile with the photo set into it (concentric radius). The digit code rides the photo top-left, the status tag top-right, and the quick-add button hangs off the bottom-right corner (ink; amber with the quantity once in the cart). Name, a 2-line description and the price sit below. The whole tile opens the product sheet through a stretched name button; quick-add stays separate.

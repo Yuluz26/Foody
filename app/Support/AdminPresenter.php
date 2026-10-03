@@ -79,6 +79,10 @@ class AdminPresenter
             'imageUrl' => $product->image_url,
             'isAvailable' => $product->is_available,
             'isFeatured' => $product->is_featured,
+            'trackStock' => $product->track_stock,
+            'stockQuantity' => $product->stock_quantity,
+            'lowStockThreshold' => $product->low_stock_threshold,
+            'stockState' => self::stockState($product),
             'sortOrder' => $product->sort_order,
             'addOns' => $product->addOns->map(fn (ProductAddOn $addOn) => [
                 'id' => $addOn->id,
@@ -86,6 +90,17 @@ class AdminPresenter
                 'price' => $addOn->price,
             ])->all(),
         ];
+    }
+
+    /** @return 'untracked'|'out'|'low'|'ok' */
+    public static function stockState(Product $product): string
+    {
+        return match (true) {
+            ! $product->track_stock => 'untracked',
+            ! $product->isInStock() => 'out',
+            $product->isLowOnStock() => 'low',
+            default => 'ok',
+        };
     }
 
     /** @return array<string, mixed> */
