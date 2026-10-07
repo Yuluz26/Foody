@@ -5,6 +5,7 @@ import {
     BasketIcon,
     BellSlashIcon,
     BowlFoodIcon,
+    CashRegisterIcon,
     ChartLineUpIcon,
     GearSixIcon,
     HouseIcon,
@@ -33,6 +34,7 @@ const STOCK_LABELS: Record<string, string> = { lowStock: 'hidangan hampir habis'
 
 const NAV: NavItem[] = [
     { href: '/admin', label: 'Ringkasan', Icon: HouseIcon, exact: true },
+    { href: '/admin/pos', label: 'Kaunter', Icon: CashRegisterIcon },
     { href: '/admin/orders', label: 'Pesanan', Icon: ReceiptIcon, countKey: 'activeOrders' },
     { href: '/admin/stock', label: 'Stok makanan', Icon: PackageIcon, countKey: 'lowStock' },
     { href: '/admin/ingredients', label: 'Stok bahan', Icon: BasketIcon, countKey: 'lowIngredients' },
@@ -47,6 +49,8 @@ const NAV: NavItem[] = [
 type AdminLayoutProps = {
     title: string;
     actions?: ReactNode;
+    /** The counter screen wants the whole width; everything else reads better in a column. */
+    wide?: boolean;
     children: ReactNode;
 };
 
@@ -103,7 +107,7 @@ function AlertToggleGroup({ sound, notify }: { sound: { active: boolean; onClick
     );
 }
 
-function AdminShell({ title, actions, children }: AdminLayoutProps) {
+function AdminShell({ title, actions, wide = false, children }: AdminLayoutProps) {
     const { props, url } = usePage();
     const toast = useToast();
     const { flash, restaurantName, auth, adminCounts } = props;
@@ -232,7 +236,7 @@ function AdminShell({ title, actions, children }: AdminLayoutProps) {
                         </div>
                     </header>
 
-                    <main id="kandungan" className="mx-auto max-w-6xl px-4 pt-6 pb-16 sm:px-8 lg:pt-10">
+                    <main id="kandungan" className={cn('mx-auto px-4 pt-6 pb-16 sm:px-8 lg:pt-10', wide ? 'max-w-[110rem]' : 'max-w-6xl')}>
                         <div className="flex flex-wrap items-end justify-between gap-4">
                             <h1 className="font-heading text-3xl font-extrabold text-ink sm:text-4xl">{title}</h1>
                             {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

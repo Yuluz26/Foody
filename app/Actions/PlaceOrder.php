@@ -13,6 +13,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\RestaurantSetting;
+use App\Models\User;
 use App\Support\ImageUpload;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
@@ -51,6 +52,29 @@ class PlaceOrder
      */
     public function handle(array $data): Order
     {
+        return $this->place($data, null);
+    }
+
+    /**
+     * An order keyed in at the counter by staff. Same pricing, stock and table rules as a guest order, but
+     * it is not tied to a customer account, ignores opening hours and the online dine-in/takeaway
+     * switches (the person is standing there), skips the guest and staff emails, and starts Confirmed.
+     * Pass `paid => true` when the money has already changed hands.
+     *
+     * @param  array<string, mixed>  $data
+     *
+     * @throws OrderRejected
+     */
+    public function handleForStaff(array $data, User $staff): Order
+    {
+        return $this->place($data, $staff);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function place(array $data, ?User $staff): Order
+    {
         if ($existing = $this->findExisting($data['idempotency_key'])) {
             return $existing;
         }
@@ -58,20 +82,22 @@ class PlaceOrder
         $settings = RestaurantSetting::current();
         $type = OrderType::from($data['type']);
 
-        if (! $settings->isAcceptingOrders()) {
-            throw OrderRejected::closed();
-        }
+        if ($staff === null) {
+            if (! $settings->isAcceptingOrders()) {
+                throw OrderRejected::closed();
+            }
 
-        if (($type === OrderType::DineIn && ! $settings->dine_in_enabled)
-            || ($type === OrderType::Takeaway && ! $settings->takeaway_enabled)) {
-            throw OrderRejected::typeDisabled($type);
+            if (($type === OrderType::DineIn && ! $settings->dine_in_enabled)
+                || ($type === OrderType::Takeaway && ! $settings->takeaway_enabled)) {
+                throw OrderRejected::typeDisabled($type);
+            }
         }
 
         // Merge repeated lines for the same product with the same add-ons.
         $groups = $this->groupItems($data['items']);
 
         try {
-            $order = DB::transaction(fn () => $this->create($data, $type, $groups));
+            $order = DB::transaction(fn () => $this->create($data, $type, $groups, $staff));
         } catch (UniqueConstraintViolationException $exception) {
             // Two identical submits raced past the first check; return the winner.
             if ($existing = $this->findExisting($data['idempotency_key'])) {
@@ -81,7 +107,9 @@ class PlaceOrder
             throw $exception;
         }
 
-        $this->sendPlacedNotifications($order);
+        if ($staff === null) {
+            $this->sendPlacedNotifications($order);
+        }
 
         return $order;
     }
@@ -129,7 +157,7 @@ class PlaceOrder
      * @param  array<string, mixed>  $data
      * @param  Collection<string, array{product_id: int, quantity: int, add_on_ids: list<int>}>  $groups
      */
-    private function create(array $data, OrderType $type, Collection $groups): Order
+    private function create(array $data, OrderType $type, Collection $groups, ?User $staff = null): Order
     {
         $productIds = $groups->pluck('product_id')->unique()->all();
 
@@ -206,34 +234,38 @@ class PlaceOrder
             }
         }
 
-        $phone = Customer::normalizePhone($data['customer_phone']);
-        $name = trim($data['customer_name']);
+        $phone = Customer::normalizePhone($data['customer_phone'] ?? '');
+        $name = trim((string) ($data['customer_name'] ?? '')) ?: 'Pelanggan kaunter';
 
         // The checkout route is auth:customer-gated, so a real account always exists here.
         // Don't look a customer up by phone anymore — two different accounts could share one
         // (a shared family line, a typo), and matching on phone would silently attach an
         // order (and rewrite the name) onto the wrong account.
-        $customer = auth('customer')->user();
-        $customer->update(['last_order_at' => now()]);
+        $customer = $staff ? null : auth('customer')->user();
+        $customer?->update(['last_order_at' => now()]);
 
         $paymentMethod = PaymentMethod::from($data['payment_method']);
         $paymentProof = $paymentMethod === PaymentMethod::Qr
             ? ImageUpload::replace($data['payment_proof'] ?? null, null, false, 'payment-proofs')
             : null;
-        $paymentStatus = $paymentMethod === PaymentMethod::Qr
-            ? PaymentStatus::PendingVerification
-            : PaymentStatus::Unpaid;
+        $paymentStatus = match (true) {
+            $staff !== null && ($data['paid'] ?? false) => PaymentStatus::Paid,
+            $paymentMethod === PaymentMethod::Qr && $staff === null => PaymentStatus::PendingVerification,
+            default => PaymentStatus::Unpaid,
+        };
 
         $order = Order::query()->create([
             'order_number' => 'TMP-'.Str::random(12),
             'idempotency_key' => $data['idempotency_key'],
-            'customer_id' => $customer->id,
+            'source' => $staff ? 'pos' : 'online',
+            'created_by' => $staff?->id,
+            'customer_id' => $customer?->id,
             'customer_name' => $name,
             'customer_phone' => $phone,
             'type' => $type,
             'table_number' => $tableNumber,
             'notes' => filled($data['notes'] ?? null) ? trim($data['notes']) : null,
-            'status' => OrderStatus::Pending,
+            'status' => $staff ? OrderStatus::Confirmed : OrderStatus::Pending,
             'subtotal' => $subtotal,
             // No service charge or tax in MVP; total equals subtotal.
             'total' => $subtotal,
@@ -245,6 +277,11 @@ class PlaceOrder
         // Avoids a lazy-load violation (lazy loading is disabled outside production) when the
         // notification mail below reads $order->customer — it's already in memory right here.
         $order->setRelation('customer', $customer);
+
+        if ($staff) {
+            $order->confirmed_at = now();
+            $order->save();
+        }
 
         $order->update(['order_number' => self::formatNumber($order->id)]);
 

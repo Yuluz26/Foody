@@ -112,6 +112,8 @@ export type AdminOrderRow = {
     id: number;
     number: string;
     publicId: string;
+    /** 'pos' for orders staff keyed in at the counter. */
+    source: 'online' | 'pos';
     customerName: string;
     customerPhone: string;
     type: OrderType;

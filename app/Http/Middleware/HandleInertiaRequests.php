@@ -65,7 +65,8 @@ class HandleInertiaRequests extends Middleware
                 ? [
                     'activeOrders' => Order::query()->active()->count(),
                     ...self::stockCounts(),
-                    'latestOrderId' => Order::query()->max('id'),
+                    // Counter orders are keyed in by staff, so they never ring the new-order bell.
+                    'latestOrderId' => Order::query()->where('source', 'online')->max('id'),
                     'latestCustomerCancelledOrderId' => Order::query()->where('cancelled_by_customer', true)->max('id'),
                 ]
                 : null,

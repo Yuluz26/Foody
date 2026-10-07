@@ -283,6 +283,13 @@ Each sits in a `neu-card`; the plot area is a pressed-in well. Hourly bars are a
 
 ## Do's and Don'ts
 
+### Counter (POS, `/admin/pos`)
+- Tablet-first. The menu is a grid of raised photo tiles (`ProductTile`): 4:3 image, name, price in mono, an amber plus. The whole tile is the button; a dark count badge shows what is already in the basket, and the left corner carries "Habis" or "Tinggal N". Dishes with add-ons open a sheet; the rest add on one tap.
+- Category chips sit in a pressed-in track that scrolls sideways, beside a search field. Sections are headed by the same `section-title` underline as the guest menu.
+- Wide screens (1280px and up) get a fixed side column for the basket: lines scroll, the total and the amber "Hantar ke dapur" stay pinned. Below that the basket is a sheet behind a full-width amber bar showing the item count and total. Only one of the two is ever mounted.
+- Table picker is a grid of numbered keys: free ones raised, taken ones struck through and disabled, chosen one amber and pressed in. Cash shows quick-amount chips and the change due sits above the total so it is never scrolled out of view.
+- Orders keyed here carry a small "Kaunter" tag in the queue.
+
 ### Do:
 - **Do** render every order number, table number, price, quantity, cart count and KPI through `DigitDisplay`, never as plain UI type.
 - **Do** keep text full-contrast ink on clay, and make real actions solid colour.

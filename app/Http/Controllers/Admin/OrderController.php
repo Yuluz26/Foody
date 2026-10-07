@@ -121,6 +121,11 @@ class OrderController extends Controller
     /** Never let a mail hiccup (or a blocked SMTP AUTH setting) fail a status change that's already saved. */
     private function sendStatusNotification(Order $order): void
     {
+        // Counter orders have no guest account to write to.
+        if ($order->customer === null) {
+            return;
+        }
+
         try {
             Mail::to($order->customer)->send(new OrderStatusUpdatedMail($order));
         } catch (Throwable $exception) {

@@ -48,6 +48,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/', Admin\DashboardController::class)->name('dashboard');
 
+        // The counter: staff key in an order for someone standing in front of them.
+        Route::get('pos', [Admin\PosController::class, 'index'])->name('pos');
+        Route::post('pos', [Admin\PosController::class, 'store'])->name('pos.store');
+
         Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
         Route::post('orders/bulk', [Admin\OrderController::class, 'bulk'])->name('orders.bulk');
         Route::get('orders/receipts', [Admin\OrderController::class, 'receipts'])->name('orders.receipts');

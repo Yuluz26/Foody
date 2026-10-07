@@ -111,6 +111,7 @@ export function OrderQueueRow({ order, now, selected, onToggleSelect }: OrderQue
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <p className="truncate font-semibold">{order.customerName}</p>
                     <StatusBadge status={order.status} />
+                    {order.source === 'pos' && <span className="rounded-(--radius-module) bg-ground-deep px-2 py-1 text-[11px] font-bold tracking-wide text-ink-soft uppercase shadow-(--shadow-inset-sm)">Kaunter</span>}
                 </div>
                 <p className="mt-1 text-[15px] text-ink-soft">
                     {order.typeLabel}
