@@ -28,7 +28,7 @@ class AdminPosTest extends TestCase
     {
         parent::setUp();
 
-        $this->staff = User::factory()->staff()->create();
+        $this->staff = User::factory()->chef()->create();
         RestaurantSetting::current()->update(['table_count' => 5]);
     }
 

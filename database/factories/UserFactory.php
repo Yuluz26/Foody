@@ -31,7 +31,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role' => StaffRole::Staff,
+            'role' => StaffRole::Chef,
         ];
     }
 
@@ -56,11 +56,11 @@ class UserFactory extends Factory
     }
 
     /** An active panel account limited to the dashboard and order screens. */
-    public function staff(): static
+    public function chef(): static
     {
         return $this->state(fn (array $attributes) => [
             'is_admin' => true,
-            'role' => StaffRole::Staff,
+            'role' => StaffRole::Chef,
             'approved_at' => now(),
         ]);
     }

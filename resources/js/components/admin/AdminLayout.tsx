@@ -21,7 +21,7 @@ import {
     WarningCircleIcon,
     type Icon,
 } from '@phosphor-icons/react';
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { DigitDisplay } from '@/components/DigitDisplay';
 import { ToastProvider, useToast } from '@/components/Toaster';
 import { buttonClass } from '@/components/ui/Button';
@@ -53,6 +53,34 @@ type AdminLayoutProps = {
     wide?: boolean;
     children: ReactNode;
 };
+
+const SIDEBAR_MIN = 200;
+const SIDEBAR_MAX = 420;
+const SIDEBAR_DEFAULT = 240;
+const SIDEBAR_STEP = 16;
+const SIDEBAR_WIDTH_KEY = 'foody.admin.sidebarWidth';
+
+function clampSidebarWidth(value: number): number {
+    return Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, value));
+}
+
+function readSidebarWidth(): number {
+    try {
+        const saved = Number(window.localStorage.getItem(SIDEBAR_WIDTH_KEY));
+
+        return Number.isFinite(saved) && saved > 0 ? clampSidebarWidth(saved) : SIDEBAR_DEFAULT;
+    } catch {
+        return SIDEBAR_DEFAULT;
+    }
+}
+
+function writeSidebarWidth(value: number): void {
+    try {
+        window.localStorage.setItem(SIDEBAR_WIDTH_KEY, String(value));
+    } catch {
+        // The resize still works for the rest of this visit; it just won't be remembered.
+    }
+}
 
 export function AdminLayout(props: AdminLayoutProps) {
     return (
@@ -113,6 +141,7 @@ function AdminShell({ title, actions, wide = false, children }: AdminLayoutProps
     const { flash, restaurantName, auth, adminCounts } = props;
     const alert = useNewOrderAlert();
     const nav = NAV.filter((item) => !item.adminOnly || auth.user?.role === 'admin');
+    const [sidebarWidth, setSidebarWidth] = useState(readSidebarWidth);
 
     // Every server response carries a fresh flash object, so repeated messages still show.
     useEffect(() => {
@@ -155,6 +184,64 @@ function AdminShell({ title, actions, wide = false, children }: AdminLayoutProps
         );
     };
 
+    /** Pointer capture covers mouse and touch alike, so the drag keeps tracking even past the handle's own thin hit zone. */
+    const startSidebarDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (event.button !== 0 && event.pointerType === 'mouse') {
+            return;
+        }
+
+        event.preventDefault();
+        const handle = event.currentTarget;
+        handle.setPointerCapture(event.pointerId);
+
+        const startX = event.clientX;
+        const startWidth = sidebarWidth;
+        let latestWidth = startWidth;
+
+        const onMove = (moveEvent: PointerEvent) => {
+            latestWidth = clampSidebarWidth(startWidth + (moveEvent.clientX - startX));
+            setSidebarWidth(latestWidth);
+        };
+
+        const stopDragging = () => {
+            handle.removeEventListener('pointermove', onMove);
+            handle.removeEventListener('pointerup', stopDragging);
+            handle.removeEventListener('pointercancel', stopDragging);
+            writeSidebarWidth(latestWidth);
+        };
+
+        handle.addEventListener('pointermove', onMove);
+        handle.addEventListener('pointerup', stopDragging);
+        handle.addEventListener('pointercancel', stopDragging);
+    };
+
+    /** WCAG 2.2 requires a non-drag way to do anything a drag does — arrow keys step the same width the pointer drags. */
+    const onSidebarHandleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        const next =
+            event.key === 'ArrowLeft'
+                ? clampSidebarWidth(sidebarWidth - SIDEBAR_STEP)
+                : event.key === 'ArrowRight'
+                  ? clampSidebarWidth(sidebarWidth + SIDEBAR_STEP)
+                  : event.key === 'Home'
+                    ? SIDEBAR_MIN
+                    : event.key === 'End'
+                      ? SIDEBAR_MAX
+                      : null;
+
+        if (next === null) {
+            return;
+        }
+
+        event.preventDefault();
+        setSidebarWidth(next);
+        writeSidebarWidth(next);
+    };
+
+    const resetSidebarWidth = () => {
+        setSidebarWidth(SIDEBAR_DEFAULT);
+        writeSidebarWidth(SIDEBAR_DEFAULT);
+    };
+
     return (
         <>
             <Head title={`${title} | Panel ${restaurantName}`} />
@@ -162,11 +249,11 @@ function AdminShell({ title, actions, wide = false, children }: AdminLayoutProps
                 Langkau ke kandungan
             </a>
 
-            <div className="min-h-dvh bg-ground lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
-                <aside className="hidden lg:block">
+            <div className="min-h-dvh bg-ground lg:grid" style={{ gridTemplateColumns: `${sidebarWidth}px minmax(0, 1fr)` }}>
+                <aside className="relative hidden lg:block">
                     <div className="neu-card sticky top-4 m-4 flex h-[calc(100dvh-2rem)] flex-col">
                         <div className="px-5 pt-6 pb-3">
-                            <Link href="/admin" className="font-heading block text-2xl leading-tight font-extrabold text-balance text-ink">
+                            <Link href="/admin" className="font-heading line-clamp-2 block text-2xl leading-tight font-extrabold text-balance break-words text-ink">
                                 {restaurantName}
                             </Link>
                             <p className="mt-0.5 text-sm font-medium text-ink-muted">Panel kedai</p>
@@ -204,6 +291,22 @@ function AdminShell({ title, actions, wide = false, children }: AdminLayoutProps
                                 </button>
                             </div>
                         </div>
+                    </div>
+                    <div
+                        role="separator"
+                        aria-orientation="vertical"
+                        aria-label="Laraskan lebar bar sisi"
+                        aria-valuenow={sidebarWidth}
+                        aria-valuemin={SIDEBAR_MIN}
+                        aria-valuemax={SIDEBAR_MAX}
+                        tabIndex={0}
+                        onPointerDown={startSidebarDrag}
+                        onKeyDown={onSidebarHandleKeyDown}
+                        onDoubleClick={resetSidebarWidth}
+                        className="group absolute inset-y-0 right-0 z-10 hidden w-3 translate-x-1/2 touch-none items-center justify-center outline-none lg:flex"
+                        style={{ cursor: 'col-resize' }}
+                    >
+                        <span className="h-full w-0.5 rounded-full bg-rule-strong transition-[background-color,width] duration-150 group-hover:w-1 group-hover:bg-amber-deep group-focus-visible:w-1 group-focus-visible:bg-amber-deep group-active:w-1 group-active:bg-amber-deep" />
                     </div>
                 </aside>
 

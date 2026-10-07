@@ -27,7 +27,7 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
             {/* Padded and pulled back so the soft shadows are not clipped by the scrolling container. */}
             <div className="no-scrollbar sticky top-3 -m-5 grid max-h-[calc(100dvh-1.5rem)] gap-5 overflow-y-auto p-5">
                 <div className="neu-card p-5">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                         {restaurant.logoUrl ? (
                             <img src={restaurant.logoUrl} alt="" className="size-12 shrink-0 rounded-(--radius-control) object-cover shadow-(--shadow-raised-xs)" />
                         ) : (
@@ -35,9 +35,9 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
                                 <StorefrontIcon size={22} weight="bold" className="text-amber" aria-hidden />
                             </div>
                         )}
-                        <div className="min-w-0">
-                            <p className="text-lg leading-tight font-extrabold text-balance text-ink">{restaurant.name}</p>
-                            <p className={cn('mt-1 flex items-center gap-1.5 text-sm font-semibold', taking ? 'text-leaf-deep' : 'text-ink-muted')}>
+                        <div className="min-w-0 pt-0.5">
+                            <p className="line-clamp-2 text-lg leading-tight font-extrabold text-balance break-words text-ink">{restaurant.name}</p>
+                            <p className={cn('mt-0.5 flex items-center gap-1.5 text-sm font-semibold', taking ? 'text-leaf-deep' : 'text-ink-muted')}>
                                 <span className={cn('size-2 shrink-0 rounded-full', taking ? 'bg-leaf shadow-[0_0_0_3px_theme(colors.leaf/25%)]' : 'bg-ink-muted/40')} aria-hidden />
                                 {label}
                             </p>

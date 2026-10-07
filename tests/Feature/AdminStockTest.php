@@ -196,7 +196,7 @@ class AdminStockTest extends TestCase
 
     public function test_staff_can_restock_record_waste_and_count_the_shelf(): void
     {
-        $staff = User::factory()->staff()->create();
+        $staff = User::factory()->chef()->create();
         $product = Product::factory()->tracked(5)->create();
 
         $this->actingAs($staff, 'web')->post("/admin/stock/{$product->id}", ['type' => 'restock', 'quantity' => 10, 'note' => 'Pasar pagi'])

@@ -22,12 +22,12 @@ class AdminStaffTest extends TestCase
 
     public function test_admin_can_see_the_staff_list(): void
     {
-        User::factory()->staff()->create(['name' => 'Aina']);
+        User::factory()->chef()->create(['name' => 'Aina']);
 
         $this->actingAs($this->admin, 'web')
             ->get('/admin/staff')
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->has('staff', 2)->where('staff.0.name', 'Aina')->where('staff.0.role', 'staff'));
+            ->assertInertia(fn ($page) => $page->has('staff', 2)->where('staff.0.name', 'Aina')->where('staff.0.role', 'chef'));
     }
 
     public function test_a_new_account_gets_the_chosen_role_and_stays_inactive_until_approved(): void
@@ -36,7 +36,7 @@ class AdminStaffTest extends TestCase
             ->post('/admin/staff', [
                 'name' => 'Aina Kasih',
                 'email' => 'aina@example.com',
-                'role' => 'staff',
+                'role' => 'chef',
                 'password' => 'kata-laluan-99',
                 'password_confirmation' => 'kata-laluan-99',
             ])
@@ -44,7 +44,7 @@ class AdminStaffTest extends TestCase
 
         $staff = User::query()->where('email', 'aina@example.com')->sole();
         $this->assertTrue($staff->is_admin);
-        $this->assertSame(StaffRole::Staff, $staff->role);
+        $this->assertSame(StaffRole::Chef, $staff->role);
         $this->assertFalse($staff->isApproved());
 
         $this->post('/admin/logout');
@@ -56,7 +56,7 @@ class AdminStaffTest extends TestCase
 
     public function test_approving_an_account_lets_it_log_in(): void
     {
-        $staff = User::factory()->staff()->inactive()->create(['password' => 'kata-laluan-99']);
+        $staff = User::factory()->chef()->inactive()->create(['password' => 'kata-laluan-99']);
 
         $this->actingAs($this->admin, 'web')->patch("/admin/staff/{$staff->id}/approve")->assertSessionHas('success');
         $this->assertTrue($staff->fresh()->isApproved());
@@ -69,8 +69,8 @@ class AdminStaffTest extends TestCase
 
     public function test_admin_can_bulk_approve_inactive_accounts(): void
     {
-        $one = User::factory()->staff()->inactive()->create();
-        $two = User::factory()->staff()->inactive()->create();
+        $one = User::factory()->chef()->inactive()->create();
+        $two = User::factory()->chef()->inactive()->create();
 
         $this->actingAs($this->admin, 'web')
             ->post('/admin/staff/bulk', ['ids' => [$one->id, $two->id], 'action' => 'approve'])
@@ -82,7 +82,7 @@ class AdminStaffTest extends TestCase
 
     public function test_admin_can_edit_another_accounts_details_and_role(): void
     {
-        $staff = User::factory()->staff()->create(['name' => 'Nama Lama']);
+        $staff = User::factory()->chef()->create(['name' => 'Nama Lama']);
 
         $this->actingAs($this->admin, 'web')
             ->put("/admin/staff/{$staff->id}", [
@@ -105,7 +105,7 @@ class AdminStaffTest extends TestCase
             ->put("/admin/staff/{$this->admin->id}", [
                 'name' => $this->admin->name,
                 'email' => $this->admin->email,
-                'role' => 'staff',
+                'role' => 'chef',
             ])
             ->assertSessionHasErrors('role');
 
@@ -133,7 +133,7 @@ class AdminStaffTest extends TestCase
 
     public function test_admin_can_delete_another_account(): void
     {
-        $staff = User::factory()->staff()->create();
+        $staff = User::factory()->chef()->create();
 
         $this->actingAs($this->admin, 'web')->delete("/admin/staff/{$staff->id}")->assertRedirect('/admin/staff');
 
@@ -151,7 +151,7 @@ class AdminStaffTest extends TestCase
 
     public function test_suspending_an_account_ends_its_access_immediately(): void
     {
-        $staff = User::factory()->staff()->create(['remember_token' => 'token-lama']);
+        $staff = User::factory()->chef()->create(['remember_token' => 'token-lama']);
 
         $this->actingAs($this->admin, 'web')->patch("/admin/staff/{$staff->id}/revoke")->assertSessionHas('success');
 
@@ -167,8 +167,8 @@ class AdminStaffTest extends TestCase
 
     public function test_bulk_suspend_and_delete_skip_the_acting_admin(): void
     {
-        $other = User::factory()->staff()->create();
-        $another = User::factory()->staff()->create();
+        $other = User::factory()->chef()->create();
+        $another = User::factory()->chef()->create();
 
         $this->actingAs($this->admin, 'web')->post('/admin/staff/bulk', ['ids' => [$this->admin->id, $other->id], 'action' => 'revoke']);
         $this->assertTrue($this->admin->fresh()->isApproved());
@@ -182,7 +182,7 @@ class AdminStaffTest extends TestCase
     public function test_the_last_active_admin_survives_even_if_the_acting_admin_was_demoted_mid_request(): void
     {
         $lastAdmin = User::factory()->admin()->create();
-        User::query()->whereKey($this->admin->id)->update(['role' => 'staff']);
+        User::query()->whereKey($this->admin->id)->update(['role' => 'chef']);
 
         $this->actingAs($this->admin, 'web')->delete("/admin/staff/{$lastAdmin->id}")->assertSessionHas('error');
         $this->actingAs($this->admin, 'web')->patch("/admin/staff/{$lastAdmin->id}/revoke")->assertSessionHas('error');
@@ -192,11 +192,11 @@ class AdminStaffTest extends TestCase
         $this->assertTrue($lastAdmin->fresh()->isApproved());
     }
 
-    public function test_staff_role_and_guests_cannot_manage_accounts(): void
+    public function test_chef_role_and_guests_cannot_manage_accounts(): void
     {
         $this->get('/admin/staff')->assertRedirect('/admin/login');
 
-        $staff = User::factory()->staff()->create();
+        $staff = User::factory()->chef()->create();
         $this->actingAs($staff, 'web')->get('/admin/staff')->assertForbidden();
         $this->actingAs($staff, 'web')->post('/admin/staff/bulk', ['ids' => [$this->admin->id], 'action' => 'delete'])->assertForbidden();
 

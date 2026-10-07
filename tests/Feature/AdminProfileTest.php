@@ -84,16 +84,16 @@ class AdminProfileTest extends TestCase
             ->assertSessionHasErrors('current_password');
     }
 
-    public function test_staff_role_can_manage_their_own_profile(): void
+    public function test_chef_role_can_manage_their_own_profile(): void
     {
-        $staff = User::factory()->staff()->create();
+        $chef = User::factory()->chef()->create();
 
-        $this->actingAs($staff, 'web')->get('/admin/profile')->assertOk();
-        $this->actingAs($staff, 'web')
-            ->put('/admin/profile', ['name' => 'Staf Baharu', 'email' => $staff->email])
+        $this->actingAs($chef, 'web')->get('/admin/profile')->assertOk();
+        $this->actingAs($chef, 'web')
+            ->put('/admin/profile', ['name' => 'Staf Baharu', 'email' => $chef->email])
             ->assertSessionHasNoErrors();
 
-        $this->assertSame('Staf Baharu', $staff->fresh()->name);
+        $this->assertSame('Staf Baharu', $chef->fresh()->name);
     }
 
     public function test_guests_cannot_access_the_profile_routes(): void

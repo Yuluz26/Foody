@@ -30,7 +30,7 @@ class AdminIngredientTest extends TestCase
         parent::setUp();
 
         $this->admin = User::factory()->admin()->create();
-        $this->staff = User::factory()->staff()->create();
+        $this->staff = User::factory()->chef()->create();
     }
 
     private function adjust(User $user, Ingredient $ingredient, array $data)
