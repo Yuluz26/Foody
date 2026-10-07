@@ -314,6 +314,6 @@ class PlaceOrder
 
     public static function formatNumber(int $id): string
     {
-        return 'FD'.str_pad((string) $id, 4, '0', STR_PAD_LEFT);
+        return 'WR'.str_pad((string) $id, 4, '0', STR_PAD_LEFT);
     }
 }

@@ -84,7 +84,7 @@ class CustomerOrderingTest extends TestCase
         $this->assertCount(2, $order->items);
         $this->assertSame(4, $order->items->firstWhere('product_id', $teh->id)->quantity);
         $this->assertSame(1390, $order->items->firstWhere('product_id', $nasi->id)->unit_price);
-        $this->assertSame('FD'.str_pad((string) $order->id, 4, '0', STR_PAD_LEFT), $order->order_number);
+        $this->assertSame('WR'.str_pad((string) $order->id, 4, '0', STR_PAD_LEFT), $order->order_number);
         $this->assertSame($this->customer->id, $order->customer_id);
     }
 

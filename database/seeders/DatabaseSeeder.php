@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
 
         $admin = User::query()->firstOrNew(['email' => 'admin@foody.test']);
         $admin->forceFill([
-            'name' => 'Pentadbir Foody',
+            'name' => 'Pentadbir Warung',
             'password' => 'password',
             'is_admin' => true,
             'role' => StaffRole::Admin,
@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
         ])->save();
 
         RestaurantSetting::query()->updateOrCreate(['id' => 1], [
-            'name' => 'Foody',
+            'name' => 'Warung',
             'description' => 'Nasi lemak, satay dan teh tarik, dimasak segar setiap hari.',
             'opens_at' => '07:00:00',
             'closes_at' => '23:00:00',

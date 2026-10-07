@@ -216,7 +216,7 @@ class AdminCatalogTest extends TestCase
     public function test_settings_require_an_order_type_when_ordering_is_on(): void
     {
         $this->actingAs($this->admin, 'web')->put('/admin/settings', [
-            'name' => 'Foody',
+            'name' => 'Warung',
             'currency' => 'MYR',
             'ordering_enabled' => '1',
             'dine_in_enabled' => '0',

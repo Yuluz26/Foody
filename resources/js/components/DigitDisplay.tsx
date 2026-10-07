@@ -11,7 +11,7 @@ type DigitDisplayProps = {
     chip?: boolean;
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'kpi' | 'xl';
     className?: string;
-    /** A fuller accessible name (e.g. "Nombor pesanan FD0003"). Optional: the digits are correct, selectable, copyable text on their own without it. */
+    /** A fuller accessible name (e.g. "Nombor pesanan WR0003"). Optional: the digits are correct, selectable, copyable text on their own without it. */
     label?: string;
 };
 

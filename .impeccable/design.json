@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-09-12T00:00:00Z",
-  "title": "Design System: Foody",
+  "title": "Design System: Warung",
   "extensions": {
     "colorMeta": {
       "amber": { "role": "primary", "displayName": "Lit Amber", "canonical": "#ff9f3d", "tonalRamp": ["#331a00", "#5c2f00", "#8a4a00", "#b96703", "#e0821c", "#ff9f3d", "#ffc27f", "#ffe3c2"] },

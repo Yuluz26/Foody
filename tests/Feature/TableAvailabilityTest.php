@@ -159,7 +159,7 @@ class TableAvailabilityTest extends TestCase
 
         $this->actingAs($admin, 'web')
             ->put('/admin/settings', [
-                'name' => 'Foody',
+                'name' => 'Warung',
                 'currency' => 'MYR',
                 'ordering_enabled' => true,
                 'dine_in_enabled' => true,

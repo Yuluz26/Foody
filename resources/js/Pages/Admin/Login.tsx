@@ -16,7 +16,7 @@ function ConsolePanel({ brandName }: { brandName: string }) {
             <div className="neu-card mx-auto w-full max-w-sm p-6 lg:p-8">
                 <p className="text-sm font-medium text-ink-soft">Pesanan baru</p>
                 <div className="mt-2.5">
-                    <DigitDisplay value="FD0042" size="xl" label="Contoh nombor pesanan" />
+                    <DigitDisplay value="WR0042" size="xl" label="Contoh nombor pesanan" />
                 </div>
                 <div className="mt-6 flex flex-wrap gap-2">
                     <StatusBadge status="pending" />

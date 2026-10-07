@@ -167,7 +167,7 @@ class AdminCustomerTest extends TestCase
     private function createOrderFor(Customer $customer): Order
     {
         return Order::query()->create([
-            'order_number' => 'FD'.Str::random(8),
+            'order_number' => 'WR'.Str::random(8),
             'idempotency_key' => (string) Str::uuid(),
             'customer_id' => $customer->id,
             'customer_name' => $customer->name,

@@ -1,4 +1,4 @@
-// Foody service worker: caches the static app shell (build assets, fonts, icons) so it
+// Warung service worker: caches the static app shell (build assets, fonts, icons) so it
 // starts instantly on repeat visits, and shows a friendly offline page for a failed page
 // navigation. It never caches an HTML document, an API response, or anything from /admin —
 // menu, order and account data must always come from the network.

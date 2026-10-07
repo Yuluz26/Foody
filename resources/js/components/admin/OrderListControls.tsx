@@ -16,7 +16,7 @@ type OrderFilterBarProps = {
 export function OrderFilterBar({ filters, onChange }: OrderFilterBarProps) {
     return (
         <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem_9.5rem_9.5rem]">
-            <SearchField label="Cari nombor pesanan, nama atau telefon" value={filters.q} onChange={(value) => onChange('q', value)} placeholder="Cari FD0012, nama atau telefon" />
+            <SearchField label="Cari nombor pesanan, nama atau telefon" value={filters.q} onChange={(value) => onChange('q', value)} placeholder="Cari WR0012, nama atau telefon" />
             <label className="block">
                 <span className="sr-only">Jenis pesanan</span>
                 <select value={filters.type} onChange={(event) => onChange('type', event.target.value)} className={inputClass}>

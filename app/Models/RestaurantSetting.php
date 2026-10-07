@@ -39,7 +39,7 @@ class RestaurantSetting extends Model
     public static function current(): self
     {
         return static::query()->oldest('id')->first()
-            ?? static::query()->create(['name' => config('app.name', 'Foody')]);
+            ?? static::query()->create(['name' => config('app.name', 'Warung')]);
     }
 
     protected function logoUrl(): Attribute

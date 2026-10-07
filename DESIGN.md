@@ -1,5 +1,5 @@
 ---
-name: Foody
+name: Warung
 description: A hawker stall's own ordering board, where every number glows as a real LED digit.
 colors:
   ground: "#efe7d7"
@@ -117,7 +117,7 @@ components:
     padding: "12px 16px"
 ---
 
-# Design System: Foody
+# Design System: Warung
 
 ## Overview
 

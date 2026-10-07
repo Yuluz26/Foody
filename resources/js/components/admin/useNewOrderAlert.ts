@@ -56,7 +56,7 @@ function stockMessage(alerts: StockAlert[]): string {
 }
 
 function orderNumber(id: number): string {
-    return `FD${String(id).padStart(4, '0')}`;
+    return `WR${String(id).padStart(4, '0')}`;
 }
 
 /**
@@ -214,7 +214,7 @@ export function useNewOrderAlert() {
         }
 
         if (notifyEnabled && document.hidden && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-            const notification = new Notification('Stok perlu perhatian di Foody', { body: message, tag: 'foody-stock' });
+            const notification = new Notification('Stok perlu perhatian di Warung', { body: message, tag: 'foody-stock' });
             notification.onclick = () => {
                 window.focus();
                 notification.close();

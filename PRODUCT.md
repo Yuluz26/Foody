@@ -10,7 +10,7 @@ web
 Delegated: Laravel 13 + Inertia v3 + React 19 + TypeScript + Tailwind CSS 4, MySQL (managed through phpMyAdmin on Laragon). React was chosen because the user asked for Framer Motion, which is a React library.
 
 ## Users
-- **Diners (primary):** customers of Foody, a modern Malay eatery (kedai makan Melayu moden). They order from their phone in two equally important situations: seated at a table after scanning a QR code (dine-in), or before arriving to collect at the counter (takeaway).
+- **Diners (primary):** customers of Warung, a modern Malay eatery (kedai makan Melayu moden). They order from their phone in two equally important situations: seated at a table after scanning a QR code (dine-in), or before arriving to collect at the counter (takeaway).
 - **Restaurant staff (secondary):** cashier and kitchen staff who watch incoming orders, move them through statuses, and maintain the menu and settings.
 
 ## Product Purpose
@@ -36,7 +36,7 @@ It is one restaurant's own menu, not a delivery marketplace: no restaurant listi
 - Undecided: real restaurant address, phone, operating hours and logo. Seeded values are placeholders to replace in Settings.
 
 ## Brand Commitments
-- Restaurant name: Foody (editable in Settings).
+- Restaurant name: Warung (editable in Settings).
 - Menu is Malay / Malaysian food: nasi lemak, satay, mee goreng, roti canai, teh tarik and similar.
 
 ## Evidence on Hand
