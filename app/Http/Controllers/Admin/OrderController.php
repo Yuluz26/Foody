@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\IngredientLedger;
 use App\Actions\StockLedger;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateOrderRequest;
 use App\Mail\OrderStatusUpdatedMail;
 use App\Models\Order;
+use App\Models\User;
 use App\Support\AdminPresenter;
 use App\Support\OrderSearch;
 use App\Support\ReceiptPdf;
@@ -27,7 +29,7 @@ use Throwable;
 
 class OrderController extends Controller
 {
-    public function __construct(private readonly StockLedger $stock) {}
+    public function __construct(private readonly StockLedger $stock, private readonly IngredientLedger $ingredients) {}
 
     public function index(Request $request): Response
     {
@@ -98,7 +100,7 @@ class OrderController extends Controller
             $locked->save();
 
             if ($to === OrderStatus::Cancelled) {
-                $this->stock->syncOrder($locked, request()->user());
+                $this->syncStock($locked);
             }
 
             Log::info('Order status changed', [
@@ -170,7 +172,7 @@ class OrderController extends Controller
                 $locked->total = $subtotal;
                 $locked->save();
 
-                $this->stock->syncOrder($locked, $request->user());
+                $this->syncStock($locked, $request->user());
             }
         });
 
@@ -227,7 +229,7 @@ class OrderController extends Controller
                 $order->save();
 
                 if ($to === OrderStatus::Cancelled) {
-                    $this->stock->syncOrder($order, request()->user());
+                    $this->syncStock($order);
                 }
 
                 $affected++;
@@ -250,13 +252,22 @@ class OrderController extends Controller
         return back()->with($affected > 0 ? 'success' : 'error', $affected > 0 ? $messages[$action] : 'Tiada pesanan yang boleh dikemas kini dengan tindakan ini.');
     }
 
+    /** Dish counts and ingredient use both follow what an order currently holds. */
+    private function syncStock(Order $order, ?User $user = null): void
+    {
+        $user ??= request()->user();
+
+        $this->stock->syncOrder($order, $user);
+        $this->ingredients->syncOrder($order, $user);
+    }
+
     /** A deleted order that was never served must not keep dishes off the shelf, so its stock goes back first. */
     private function deleteOrder(Order $order): void
     {
         DB::transaction(function () use ($order) {
             if ($order->status->isActive()) {
                 $order->status = OrderStatus::Cancelled;
-                $this->stock->syncOrder($order, request()->user());
+                $this->syncStock($order);
             }
 
             $order->delete();

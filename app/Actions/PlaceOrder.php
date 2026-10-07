@@ -26,7 +26,7 @@ use Throwable;
 
 class PlaceOrder
 {
-    public function __construct(private readonly StockLedger $stock) {}
+    public function __construct(private readonly StockLedger $stock, private readonly IngredientLedger $ingredients) {}
 
     /**
      * Create an order from validated checkout data.
@@ -257,6 +257,7 @@ class PlaceOrder
         }
 
         $this->stock->sell($order, $lines);
+        $this->ingredients->sell($order, $lines);
 
         Log::info('Order placed', [
             'order_id' => $order->id,

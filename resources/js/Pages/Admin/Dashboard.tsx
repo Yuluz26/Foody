@@ -1,4 +1,4 @@
-import { Link, usePoll } from '@inertiajs/react';
+import { Link, usePage, usePoll } from '@inertiajs/react';
 import { ArrowRightIcon, CoffeeIcon, PackageIcon, ReceiptIcon } from '@phosphor-icons/react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { KpiGrid } from '@/components/admin/KpiGrid';
@@ -11,7 +11,7 @@ import { DigitDisplay } from '@/components/DigitDisplay';
 import { buttonClass } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatPrice, formatWaiting, priceDigits } from '@/lib/format';
-import type { AdminOrderRow, HourlyPoint, StockState } from '@/types';
+import type { AdminOrderRow, HourlyPoint } from '@/types';
 
 type DashboardProps = {
     stats: {
@@ -24,14 +24,14 @@ type DashboardProps = {
         averageOrder: number | null;
     };
     hourly: HourlyPoint[];
-    lowStock: { id: number; name: string; stockQuantity: number; stockState: StockState }[];
     activeOrders: AdminOrderRow[];
     recentOrders: AdminOrderRow[];
 };
 
-export default function Dashboard({ stats, hourly, lowStock, activeOrders, recentOrders }: DashboardProps) {
-    usePoll(15_000, { only: ['stats', 'hourly', 'lowStock', 'activeOrders', 'recentOrders', 'adminCounts'] });
+export default function Dashboard({ stats, hourly, activeOrders, recentOrders }: DashboardProps) {
+    usePoll(15_000, { only: ['stats', 'hourly', 'activeOrders', 'recentOrders', 'adminCounts'] });
     const now = useMinuteTick();
+    const stockAlerts = usePage().props.adminCounts?.stockAlerts ?? [];
 
     const today = new Intl.DateTimeFormat('ms-MY', { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
 
@@ -57,25 +57,37 @@ export default function Dashboard({ stats, hourly, lowStock, activeOrders, recen
                 <OrderPipelineBar stats={stats} />
             </div>
 
-            {lowStock.length > 0 && (
+            {stockAlerts.length > 0 && (
                 <section aria-labelledby="stok-tajuk" className="neu-card mt-6 p-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <h2 id="stok-tajuk" className="flex items-center gap-2 text-lg font-bold text-ink">
                             <PackageIcon size={22} weight="bold" className="text-amber-deep" aria-hidden />
-                            Stok perlu ditambah
+                            Stok perlu perhatian
                         </h2>
-                        <Link href="/admin/stock" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
-                            Buka stok
-                            <ArrowRightIcon size={16} weight="bold" aria-hidden />
-                        </Link>
+                        <div className="flex flex-wrap gap-1">
+                            <Link href="/admin/stock" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+                                Stok makanan
+                                <ArrowRightIcon size={16} weight="bold" aria-hidden />
+                            </Link>
+                            <Link href="/admin/ingredients" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+                                Stok bahan
+                                <ArrowRightIcon size={16} weight="bold" aria-hidden />
+                            </Link>
+                        </div>
                     </div>
                     <ul className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-2.5 sm:grid-cols-2">
-                        {lowStock.map((product) => (
-                            <li key={product.id} className="neu-well-sm flex items-center justify-between gap-3 px-4 py-3">
-                                <span className="min-w-0 truncate font-semibold text-ink">{product.name}</span>
+                        {stockAlerts.map((alert) => (
+                            <li key={alert.key} className="neu-well-sm flex items-center justify-between gap-3 px-4 py-3">
+                                <span className="min-w-0">
+                                    <span className="block truncate font-semibold text-ink">{alert.name}</span>
+                                    <span className="block text-xs text-ink-muted">{alert.kind === 'dish' ? 'Makanan' : 'Bahan'}</span>
+                                </span>
                                 <span className="flex shrink-0 items-center gap-2.5">
-                                    <span className="font-mono text-lg font-semibold text-ink tabular-nums">{product.stockQuantity}</span>
-                                    <StockBadge state={product.stockState} />
+                                    <span className="font-mono text-lg font-semibold text-ink tabular-nums">
+                                        {alert.quantity}
+                                        {alert.unit && <span className="ml-1 text-xs font-medium text-ink-muted">{alert.unit}</span>}
+                                    </span>
+                                    <StockBadge state={alert.state} />
                                 </span>
                             </li>
                         ))}

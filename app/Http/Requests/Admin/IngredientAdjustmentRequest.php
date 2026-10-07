@@ -19,7 +19,7 @@ class IngredientAdjustmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['required', Rule::enum(IngredientMovementType::class)],
+            'type' => ['required', Rule::enum(IngredientMovementType::class)->only(IngredientMovementType::manual())],
             'quantity' => ['required', 'regex:/^\d{1,7}(\.\d{1,3})?$/'],
             // Price paid per unit; only meaningful on a restock.
             'unit_cost' => ['nullable', 'regex:/^\d{1,5}(\.\d{1,2})?$/'],

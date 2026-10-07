@@ -7,10 +7,12 @@ use App\Enums\OrderStatus;
 use App\Enums\StockMovementType;
 use App\Exceptions\OrderRejected;
 use App\Models\Customer;
+use App\Models\Ingredient;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\StockMovement;
 use App\Models\User;
+use App\Support\StockAlerts;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -278,5 +280,40 @@ class AdminStockTest extends TestCase
         $this->assertSame(25, $product->stock_quantity);
         $this->assertSame(6, $product->low_stock_threshold);
         $this->assertDatabaseHas('stock_movements', ['product_id' => $product->id, 'delta' => 25, 'note' => 'Stok permulaan']);
+    }
+
+    public function test_the_panel_is_told_about_dishes_and_ingredients_that_are_low_or_gone(): void
+    {
+        $gone = Product::factory()->tracked(0)->create(['name' => 'Roti Canai']);
+        Product::factory()->tracked(3, 5)->create(['name' => 'Satay']);
+        Product::factory()->tracked(40, 5)->create(['name' => 'Penuh']);
+        Product::factory()->create(['name' => 'Tak Jejak']);
+        $beras = Ingredient::factory()->create(['name' => 'Beras', 'quantity' => 1.5, 'low_stock_threshold' => 5]);
+        Ingredient::factory()->create(['name' => 'Santan', 'quantity' => 0]);
+        Ingredient::factory()->create(['name' => 'Minyak', 'quantity' => 20, 'low_stock_threshold' => 5]);
+
+        $this->actingAs($this->admin, 'web')->get('/admin')
+            ->assertInertia(function (Assert $page) use ($gone, $beras) {
+                $counts = $page->toArray()['props']['adminCounts'];
+
+                $this->assertSame(2, $counts['lowStock']);
+                $this->assertSame(2, $counts['lowIngredients']);
+                $this->assertCount(4, $counts['stockAlerts']);
+                $this->assertSame(['dish:'.$gone->id.':out'], collect($counts['stockAlerts'])->pluck('key')->filter(fn ($key) => str_starts_with($key, 'dish:'.$gone->id))->values()->all());
+                $this->assertContains('ingredient:'.$beras->id.':low', collect($counts['stockAlerts'])->pluck('key')->all());
+                $this->assertSame('out', $counts['stockAlerts'][0]['state'], 'What is gone comes before what is only low.');
+            });
+    }
+
+    public function test_an_alert_key_changes_when_low_turns_into_out_so_it_announces_again(): void
+    {
+        $dish = Product::factory()->tracked(3, 5)->create();
+
+        $low = collect(StockAlerts::forPanel()['items'])->pluck('key')->all();
+        $dish->update(['stock_quantity' => 0]);
+        $out = collect(StockAlerts::forPanel()['items'])->pluck('key')->all();
+
+        $this->assertSame(["dish:{$dish->id}:low"], $low);
+        $this->assertSame(["dish:{$dish->id}:out"], $out);
     }
 }

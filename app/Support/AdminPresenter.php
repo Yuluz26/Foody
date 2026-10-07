@@ -83,6 +83,9 @@ class AdminPresenter
             'stockQuantity' => $product->stock_quantity,
             'lowStockThreshold' => $product->low_stock_threshold,
             'stockState' => self::stockState($product),
+            'recipe' => $product->relationLoaded('recipeItems')
+                ? $product->recipeItems->map(fn ($item) => ['ingredientId' => $item->ingredient_id, 'quantity' => $item->quantity])->all()
+                : [],
             'sortOrder' => $product->sort_order,
             'addOns' => $product->addOns->map(fn (ProductAddOn $addOn) => [
                 'id' => $addOn->id,

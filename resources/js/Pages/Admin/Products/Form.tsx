@@ -5,13 +5,14 @@ import type { FormEvent } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { FormFooter } from '@/components/admin/FormFooter';
 import { ImageInput } from '@/components/admin/ImageInput';
+import { newRecipeKey, RecipeEditor, type RecipeField } from '@/components/admin/RecipeEditor';
 import { Button, buttonClass } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Field, inputClass } from '@/components/ui/Field';
 import { Switch } from '@/components/ui/Switch';
 import { cn } from '@/lib/format';
 import { duration, ease } from '@/lib/motion';
-import type { AdminProduct, Option } from '@/types';
+import type { AdminProduct, IngredientOption, Option } from '@/types';
 
 type AddOnField = {
     /** Client-only, so React and the row-removal logic have a stable key even before the row is saved. */
@@ -31,6 +32,7 @@ type ProductFields = {
     track_stock: boolean;
     stock_quantity: string;
     low_stock_threshold: string;
+    recipe: RecipeField[];
     image: File | null;
     remove_image: boolean;
     add_ons: AddOnField[];
@@ -193,7 +195,7 @@ function StockPanel({ product, tracked, quantity, threshold, errors, onTrackedCh
     );
 }
 
-export default function ProductForm({ product, categories }: { product: AdminProduct | null; categories: Option[] }) {
+export default function ProductForm({ product, categories, ingredients }: { product: AdminProduct | null; categories: Option[]; ingredients: IngredientOption[] }) {
     const form = useForm<ProductFields>({
         category_id: product ? String(product.categoryId) : String(categories[0]?.id ?? ''),
         name: product?.name ?? '',
@@ -204,6 +206,7 @@ export default function ProductForm({ product, categories }: { product: AdminPro
         track_stock: product?.trackStock ?? false,
         stock_quantity: '',
         low_stock_threshold: String(product?.lowStockThreshold ?? 5),
+        recipe: (product?.recipe ?? []).map((line) => ({ key: newRecipeKey(), ingredientId: String(line.ingredientId), quantity: String(line.quantity) })),
         image: null,
         remove_image: false,
         add_ons: (product?.addOns ?? []).map((addOn) => ({ key: newAddOnKey(), id: addOn.id, name: addOn.name, price: (addOn.price / 100).toFixed(2) })),
@@ -213,13 +216,14 @@ export default function ProductForm({ product, categories }: { product: AdminPro
     const submit = (event: FormEvent) => {
         event.preventDefault();
 
-        if (product) {
+        form.transform((data) => ({
+            ...data,
+            recipe: data.recipe.map((row) => ({ ingredient_id: row.ingredientId, quantity: row.quantity })),
             // Files need multipart POST; Laravel reads the intended verb from _method.
-            form.transform((data) => ({ ...data, _method: 'put' }));
-            form.post(`/admin/products/${product.id}`, { forceFormData: true, preserveScroll: true });
-        } else {
-            form.post('/admin/products', { forceFormData: true, preserveScroll: true });
-        }
+            ...(product ? { _method: 'put' } : {}),
+        }));
+
+        form.post(product ? `/admin/products/${product.id}` : '/admin/products', { forceFormData: true, preserveScroll: true });
     };
 
     if (categories.length === 0) {
@@ -323,6 +327,14 @@ export default function ProductForm({ product, categories }: { product: AdminPro
                         onTrackedChange={(checked) => form.setData('track_stock', checked)}
                         onQuantityChange={(value) => form.setData('stock_quantity', value)}
                         onThresholdChange={(value) => form.setData('low_stock_threshold', value)}
+                    />
+
+                    <RecipeEditor
+                        rows={form.data.recipe}
+                        ingredients={ingredients}
+                        priceInSen={Math.round((Number.parseFloat(form.data.price) || 0) * 100)}
+                        errors={errors}
+                        onChange={(rows) => form.setData('recipe', rows)}
                     />
 
                     <AddOnsEditor rows={form.data.add_ons} errors={errors} onChange={(rows) => form.setData('add_ons', rows)} />

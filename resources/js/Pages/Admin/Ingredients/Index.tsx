@@ -158,6 +158,7 @@ function Movements({ movements }: { movements: IngredientMovementRow[] }) {
                             {movement.unitCost !== null && <span className="tabular">
                                     , {formatPrice(movement.unitCost)}/{movement.unit}
                                 </span>}
+                            {movement.orderNumber && <span className="tabular"> {movement.orderNumber}</span>}
                             {movement.userName && `, ${movement.userName}`}
                         </p>
                         {movement.note && <p className="mt-0.5 text-sm text-ink-soft">{movement.note}</p>}
@@ -200,7 +201,7 @@ export default function IngredientsIndex({ ingredients, summary, movements, filt
                 )
             }
         >
-            <p className="-mt-3 max-w-[62ch] text-[15px] text-ink-muted">Senarai bahan di dapur dan harganya. Ini untuk bantu kira apa yang ada dan berapa nilainya. Ia tidak mengubah stok makanan yang pelanggan nampak.</p>
+            <p className="-mt-3 max-w-[62ch] text-[15px] text-ink-muted">Bahan di dapur, harganya dan baki. Letak resipi pada setiap hidangan (di borang produk) dan bahan ditolak sendiri bila hidangan dijual. Baki negatif bermakna bahan sudah digunakan tetapi pembelian belum dicatat.</p>
 
             <div className="mt-6">
                 <KpiGrid
@@ -250,6 +251,7 @@ export default function IngredientsIndex({ ingredients, summary, movements, filt
                                             <span className="tabular">{formatPrice(ingredient.unitCost)}</span> / {ingredient.unit}
                                             {ingredient.supplier && `, ${ingredient.supplier}`}
                                         </p>
+                                        {ingredient.dishCount > 0 && <p className="text-sm text-ink-soft">Dalam resipi {ingredient.dishCount} hidangan</p>}
                                         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
                                             <StockBadge state={ingredient.stockState} />
                                             <span className="text-xs text-ink-muted tabular">Bernilai {formatPrice(ingredient.stockValue)}</span>
@@ -260,7 +262,7 @@ export default function IngredientsIndex({ ingredients, summary, movements, filt
                                             value={`${formatAmount(ingredient.quantity)} ${ingredient.unit}`}
                                             size="md"
                                             label={`Baki ${ingredient.name}: ${formatAmount(ingredient.quantity)} ${ingredient.unit}`}
-                                            tone={ingredient.stockState === 'out' ? 'dim' : 'amber'}
+                                            tone={ingredient.stockState === 'out' && ingredient.quantity === 0 ? 'dim' : 'amber'}
                                         />
                                         <div className="flex flex-wrap items-center justify-end gap-1.5">
                                             {isAdmin && (
@@ -307,7 +309,7 @@ export default function IngredientsIndex({ ingredients, summary, movements, filt
                                 <ConfirmButton
                                     label="Padam bahan"
                                     title={`Padam ${editing.name}?`}
-                                    message="Bahan dan sejarah pergerakannya akan dibuang. Stok makanan tidak terjejas."
+                                    message="Bahan dan sejarah pergerakannya dibuang, dan ia keluar dari resipi hidangan yang menggunakannya."
                                     confirmLabel="Ya, padam"
                                     onConfirm={() => router.delete(`/admin/ingredients/${editing.id}`, { preserveScroll: true, onSuccess: () => setEditing(null) })}
                                 />

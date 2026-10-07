@@ -7,6 +7,7 @@ use App\Enums\StockMovementType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Category;
+use App\Models\Ingredient;
 use App\Models\Product;
 use App\Support\AdminPresenter;
 use App\Support\ImageUpload;
@@ -58,6 +59,7 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Form', [
             'product' => null,
             'categories' => $this->categoryOptions(),
+            'ingredients' => $this->ingredientOptions(),
         ]);
     }
 
@@ -71,6 +73,7 @@ class ProductController extends Controller
         ]);
 
         $this->syncAddOns($product, $request->addOnsInSen());
+        $this->syncRecipe($product, $request->recipeLines());
         $this->openStock($product, $request);
 
         return to_route('admin.products.index')->with('success', "{$product->name} ditambah ke menu.");
@@ -79,8 +82,9 @@ class ProductController extends Controller
     public function edit(Product $product): Response
     {
         return Inertia::render('Admin/Products/Form', [
-            'product' => AdminPresenter::product($product->load(['category', 'addOns'])),
+            'product' => AdminPresenter::product($product->load(['category', 'addOns', 'recipeItems'])),
             'categories' => $this->categoryOptions(),
+            'ingredients' => $this->ingredientOptions(),
         ]);
     }
 
@@ -97,6 +101,7 @@ class ProductController extends Controller
         ]);
 
         $this->syncAddOns($product, $request->addOnsInSen());
+        $this->syncRecipe($product, $request->recipeLines());
 
         if (! $wasTracked) {
             $this->openStock($product, $request);
@@ -128,6 +133,21 @@ class ProductController extends Controller
         }
 
         $product->addOns()->whereNotIn('id', $keptIds)->delete();
+    }
+
+    /**
+     * The recipe is replaced as a whole: what the form sends is what the dish uses from now on.
+     * Orders already placed keep the ingredients they took.
+     *
+     * @param  list<array{ingredient_id: int, quantity: float}>  $lines
+     */
+    private function syncRecipe(Product $product, array $lines): void
+    {
+        $product->recipeItems()->whereNotIn('ingredient_id', array_column($lines, 'ingredient_id'))->delete();
+
+        foreach ($lines as $line) {
+            $product->recipeItems()->updateOrCreate(['ingredient_id' => $line['ingredient_id']], ['quantity' => $line['quantity']]);
+        }
     }
 
     public function destroy(Product $product): RedirectResponse
@@ -171,6 +191,17 @@ class ProductController extends Controller
             'track_stock' => $request->boolean('track_stock'),
             'low_stock_threshold' => (int) ($request->validated('low_stock_threshold') ?? 5),
         ];
+    }
+
+    /** @return list<array{id: int, name: string, unit: string, unitCost: int}> */
+    private function ingredientOptions(): array
+    {
+        return Ingredient::query()->orderBy('name')->get(['id', 'name', 'unit', 'unit_cost'])->map(fn (Ingredient $ingredient) => [
+            'id' => $ingredient->id,
+            'name' => $ingredient->name,
+            'unit' => $ingredient->unit,
+            'unitCost' => $ingredient->unit_cost,
+        ])->all();
     }
 
     /** @return list<array{id: int, name: string}> */

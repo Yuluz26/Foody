@@ -40,6 +40,18 @@ class Product extends Model
         return $this->hasMany(ProductAddOn::class)->orderBy('sort_order');
     }
 
+    /** @return HasMany<RecipeItem, $this> */
+    public function recipeItems(): HasMany
+    {
+        return $this->hasMany(RecipeItem::class);
+    }
+
+    /** What one portion costs in ingredients, in sen, at today's ingredient prices. Needs recipeItems.ingredient loaded. */
+    public function recipeCost(): int
+    {
+        return (int) round($this->recipeItems->sum(fn (RecipeItem $item) => $item->quantity * $item->ingredient->unit_cost));
+    }
+
     /** @return HasMany<StockMovement, $this> */
     public function stockMovements(): HasMany
     {

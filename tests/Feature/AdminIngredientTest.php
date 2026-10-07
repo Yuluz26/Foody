@@ -4,10 +4,13 @@ namespace Tests\Feature;
 
 use App\Actions\PlaceOrder;
 use App\Enums\IngredientMovementType;
+use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Ingredient;
 use App\Models\IngredientMovement;
+use App\Models\Order;
 use App\Models\Product;
+use App\Models\RecipeItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -147,5 +150,200 @@ class AdminIngredientTest extends TestCase
     public function test_guests_cannot_see_the_page(): void
     {
         $this->get('/admin/ingredients')->assertRedirect();
+    }
+
+    /** @param  list<array{product_id: int, quantity: int}>  $items */
+    private function place(array $items): Order
+    {
+        $this->actingAs(Customer::factory()->create(), 'customer');
+
+        return app(PlaceOrder::class)->handle([
+            'idempotency_key' => (string) Str::uuid(),
+            'type' => 'takeaway',
+            'customer_name' => 'Nurul',
+            'customer_phone' => '0112233445',
+            'payment_method' => 'cashier',
+            'items' => $items,
+        ]);
+    }
+
+    private function dishWithRecipe(float $rice = 0.15, float $chicken = 0.2): array
+    {
+        $dish = Product::factory()->create();
+        $riceItem = Ingredient::factory()->create(['name' => 'Beras', 'quantity' => 10]);
+        $chickenItem = Ingredient::factory()->create(['name' => 'Ayam', 'quantity' => 5]);
+        RecipeItem::query()->create(['product_id' => $dish->id, 'ingredient_id' => $riceItem->id, 'quantity' => $rice]);
+        RecipeItem::query()->create(['product_id' => $dish->id, 'ingredient_id' => $chickenItem->id, 'quantity' => $chicken]);
+
+        return [$dish, $riceItem, $chickenItem];
+    }
+
+    public function test_selling_a_dish_takes_its_recipe_from_the_ingredients_and_logs_it_against_the_order(): void
+    {
+        [$dish, $rice, $chicken] = $this->dishWithRecipe();
+
+        $order = $this->place([['product_id' => $dish->id, 'quantity' => 4]]);
+
+        $this->assertSame(9.4, $rice->fresh()->quantity);
+        $this->assertSame(4.2, $chicken->fresh()->quantity);
+        $this->assertDatabaseHas('ingredient_movements', [
+            'ingredient_id' => $rice->id,
+            'order_id' => $order->id,
+            'type' => IngredientMovementType::Sale->value,
+            'delta' => -0.6,
+        ]);
+    }
+
+    public function test_the_same_dish_on_two_lines_and_dishes_without_a_recipe_are_handled(): void
+    {
+        [$dish, $rice] = $this->dishWithRecipe();
+        $plain = Product::factory()->create();
+
+        $this->place([
+            ['product_id' => $dish->id, 'quantity' => 1],
+            ['product_id' => $dish->id, 'quantity' => 1, 'add_on_ids' => []],
+            ['product_id' => $plain->id, 'quantity' => 5],
+        ]);
+
+        $this->assertSame(9.7, $rice->fresh()->quantity);
+        $this->assertSame(2, IngredientMovement::query()->count());
+    }
+
+    public function test_an_order_is_never_blocked_by_ingredients_and_the_balance_shows_the_shortfall(): void
+    {
+        [$dish, $rice] = $this->dishWithRecipe(rice: 6);
+
+        $this->place([['product_id' => $dish->id, 'quantity' => 2]]);
+
+        $this->assertSame(-2.0, $rice->fresh()->quantity);
+        $this->assertSame(0, $rice->fresh()->stockValue());
+    }
+
+    public function test_cancelling_gives_the_ingredients_back_exactly_once_even_after_a_shortfall(): void
+    {
+        [$dish, $rice, $chicken] = $this->dishWithRecipe(rice: 6);
+        $order = $this->place([['product_id' => $dish->id, 'quantity' => 2]]);
+
+        $this->actingAs($this->admin, 'web')->patch("/admin/orders/{$order->id}/status", ['status' => OrderStatus::Cancelled->value])->assertSessionHasNoErrors();
+        $this->assertSame(10.0, $rice->fresh()->quantity);
+        $this->assertSame(5.0, $chicken->fresh()->quantity);
+
+        $this->actingAs($this->admin, 'web')->patch("/admin/orders/{$order->id}/status", ['status' => OrderStatus::Cancelled->value]);
+        $this->assertSame(10.0, $rice->fresh()->quantity);
+    }
+
+    public function test_customer_cancel_and_unserved_delete_return_ingredients_but_a_served_delete_does_not(): void
+    {
+        [$dish, $rice] = $this->dishWithRecipe(rice: 1);
+        $customerCancelled = $this->place([['product_id' => $dish->id, 'quantity' => 1]]);
+        $deleted = $this->place([['product_id' => $dish->id, 'quantity' => 2]]);
+        $served = $this->place([['product_id' => $dish->id, 'quantity' => 3]]);
+        $this->assertSame(4.0, $rice->fresh()->quantity);
+
+        $this->actingAs($customerCancelled->customer, 'customer')->patch("/pesanan/{$customerCancelled->public_id}/batal");
+        $this->assertSame(5.0, $rice->fresh()->quantity);
+
+        $this->actingAs($this->admin, 'web')->delete("/admin/orders/{$deleted->id}");
+        $this->assertSame(7.0, $rice->fresh()->quantity);
+
+        $this->actingAs($this->admin, 'web')->patch("/admin/orders/{$served->id}/status", ['status' => OrderStatus::Completed->value]);
+        $this->actingAs($this->admin, 'web')->delete("/admin/orders/{$served->id}");
+        $this->assertSame(7.0, $rice->fresh()->quantity);
+    }
+
+    public function test_changing_item_quantities_changes_what_was_taken(): void
+    {
+        [$dish, $rice] = $this->dishWithRecipe(rice: 1);
+        $order = $this->place([['product_id' => $dish->id, 'quantity' => 2]]);
+        $item = $order->items()->first();
+
+        $payload = fn (int $quantity) => [
+            'customer_name' => $order->customer_name,
+            'customer_phone' => $order->customer_phone,
+            'type' => $order->type->value,
+            'table_number' => $order->table_number,
+            'notes' => $order->notes,
+            'items' => [['id' => $item->id, 'quantity' => $quantity]],
+        ];
+
+        $this->actingAs($this->admin, 'web')->patch("/admin/orders/{$order->id}", $payload(5))->assertSessionHasNoErrors();
+        $this->assertSame(5.0, $rice->fresh()->quantity);
+
+        $this->actingAs($this->admin, 'web')->patch("/admin/orders/{$order->id}", $payload(1))->assertSessionHasNoErrors();
+        $this->assertSame(9.0, $rice->fresh()->quantity);
+
+        $this->actingAs($this->admin, 'web')->patch("/admin/orders/{$order->id}", $payload(1))->assertSessionHasNoErrors();
+        $this->assertSame(9.0, $rice->fresh()->quantity, 'Saving without a change must not move stock.');
+    }
+
+    public function test_staff_cannot_record_sale_or_return_by_hand(): void
+    {
+        $ingredient = Ingredient::factory()->create();
+
+        $this->adjust($this->staff, $ingredient, ['type' => 'sale', 'quantity' => '1'])->assertSessionHasErrors('type');
+        $this->adjust($this->staff, $ingredient, ['type' => 'return', 'quantity' => '1'])->assertSessionHasErrors('type');
+    }
+
+    public function test_admin_saves_and_replaces_a_dishs_recipe_from_the_product_form(): void
+    {
+        $dish = Product::factory()->create();
+        $rice = Ingredient::factory()->create(['unit_cost' => 500]);
+        $oil = Ingredient::factory()->create(['unit_cost' => 800]);
+        $form = fn (array $recipe) => [
+            'category_id' => $dish->category_id,
+            'name' => $dish->name,
+            'price' => '9.00',
+            'is_available' => true,
+            'recipe' => $recipe,
+        ];
+
+        $this->actingAs($this->admin, 'web')->put("/admin/products/{$dish->id}", $form([
+            ['ingredient_id' => $rice->id, 'quantity' => '0.15'],
+            ['ingredient_id' => $oil->id, 'quantity' => '0.02'],
+        ]))->assertSessionHasNoErrors();
+        $this->assertSame(2, $dish->recipeItems()->count());
+
+        $this->actingAs($this->admin, 'web')->put("/admin/products/{$dish->id}", $form([
+            ['ingredient_id' => $rice->id, 'quantity' => '0.2'],
+        ]))->assertSessionHasNoErrors();
+        $this->assertSame([0.2], $dish->recipeItems()->pluck('quantity')->all());
+
+        $this->actingAs($this->admin, 'web')->get("/admin/products/{$dish->id}/edit")
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('product.recipe.0.ingredientId', $rice->id)
+                ->where('product.recipe.0.quantity', 0.2)
+                ->has('ingredients', 2));
+
+        $this->actingAs($this->admin, 'web')->put("/admin/products/{$dish->id}", $form([]))->assertSessionHasNoErrors();
+        $this->assertSame(0, $dish->recipeItems()->count());
+    }
+
+    public function test_recipe_input_is_validated(): void
+    {
+        $dish = Product::factory()->create();
+        $rice = Ingredient::factory()->create();
+        $put = fn (array $recipe) => $this->actingAs($this->admin, 'web')->put("/admin/products/{$dish->id}", [
+            'category_id' => $dish->category_id,
+            'name' => $dish->name,
+            'price' => '9.00',
+            'recipe' => $recipe,
+        ]);
+
+        $put([['ingredient_id' => $rice->id, 'quantity' => '0']])->assertSessionHasErrors('recipe.0.quantity');
+        $put([['ingredient_id' => $rice->id, 'quantity' => 'abc']])->assertSessionHasErrors('recipe.0.quantity');
+        $put([['ingredient_id' => 9999, 'quantity' => '1']])->assertSessionHasErrors('recipe.0.ingredient_id');
+        $put([['ingredient_id' => $rice->id, 'quantity' => '1'], ['ingredient_id' => $rice->id, 'quantity' => '2']])->assertSessionHasErrors();
+        $this->assertSame(0, $dish->recipeItems()->count());
+    }
+
+    public function test_deleting_an_ingredient_removes_it_from_recipes_and_shows_how_many_dishes_use_it(): void
+    {
+        [$dish, $rice] = $this->dishWithRecipe();
+
+        $this->actingAs($this->admin, 'web')->get('/admin/ingredients')
+            ->assertInertia(fn (Assert $page) => $page->where('ingredients.data.0.dishCount', 1));
+
+        $this->actingAs($this->admin, 'web')->delete("/admin/ingredients/{$rice->id}");
+        $this->assertSame(1, $dish->recipeItems()->count());
     }
 }

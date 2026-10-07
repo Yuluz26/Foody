@@ -2,9 +2,11 @@ import { usePage, usePoll } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { playNewOrderChime, playOrderCancelledChime } from '@/lib/chime';
 import { useToast } from '@/components/Toaster';
+import type { StockAlert } from '@/types';
 
 const SOUND_KEY = 'foody.admin.sound';
 const NOTIFY_KEY = 'foody.admin.notify';
+const STOCK_SEEN_KEY = 'foody.admin.stock.seen';
 
 function readFlag(key: string, fallback: boolean): boolean {
     try {
@@ -22,6 +24,35 @@ function writeFlag(key: string, value: boolean): void {
     } catch {
         // The toggle still works for the rest of this visit; it just won't be remembered.
     }
+}
+
+function readSeenStock(): Set<string> {
+    try {
+        const saved = window.localStorage.getItem(STOCK_SEEN_KEY);
+
+        return new Set(saved ? (JSON.parse(saved) as string[]) : []);
+    } catch {
+        return new Set();
+    }
+}
+
+function writeSeenStock(keys: Set<string>): void {
+    try {
+        window.localStorage.setItem(STOCK_SEEN_KEY, JSON.stringify([...keys]));
+    } catch {
+        // Worst case the same warning shows again on the next visit.
+    }
+}
+
+function stockMessage(alerts: StockAlert[]): string {
+    if (alerts.length > 1) {
+        return `${alerts.length} stok perlu perhatian: ${alerts.slice(0, 3).map((alert) => alert.name).join(', ')}${alerts.length > 3 ? '...' : ''}`;
+    }
+
+    const [alert] = alerts;
+    const left = `${alert.quantity}${alert.unit ? ` ${alert.unit}` : ''}`;
+
+    return alert.state === 'out' ? `${alert.name} sudah habis.` : `${alert.name} hampir habis, tinggal ${left}.`;
 }
 
 function orderNumber(id: number): string {
@@ -46,6 +77,7 @@ export function useNewOrderAlert() {
     const knownLatestId = useRef<number | null | undefined>(undefined);
     const knownLatestCancelledId = useRef<number | null | undefined>(undefined);
     const unseenCount = useRef(0);
+    const seenStock = useRef<Set<string> | null>(null);
 
     usePoll(10_000, { only: ['adminCounts'] });
 
@@ -149,6 +181,46 @@ export function useNewOrderAlert() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.adminCounts?.latestCustomerCancelledOrderId]);
+
+    // A dish or ingredient running low or out alerts once per condition. What was already announced is remembered
+    // in this browser, so a refresh stays quiet but a new login after something ran out while nobody was looking does not.
+    useEffect(() => {
+        const alerts = props.adminCounts?.stockAlerts;
+
+        if (!alerts) {
+            return;
+        }
+
+        seenStock.current ??= readSeenStock();
+        const fresh = alerts.filter((alert) => !seenStock.current?.has(alert.key));
+        seenStock.current = new Set(alerts.map((alert) => alert.key));
+        writeSeenStock(seenStock.current);
+
+        if (fresh.length === 0) {
+            return;
+        }
+
+        const message = stockMessage(fresh);
+        toast(message);
+
+        if (soundEnabled) {
+            playOrderCancelledChime();
+        }
+
+        if (document.hidden) {
+            unseenCount.current += 1;
+            document.title = `(${unseenCount.current}) ${document.title.replace(/^\(\d+\)\s*/, '')}`;
+        }
+
+        if (notifyEnabled && document.hidden && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            const notification = new Notification('Stok perlu perhatian di Foody', { body: message, tag: 'foody-stock' });
+            notification.onclick = () => {
+                window.focus();
+                notification.close();
+            };
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.adminCounts?.stockAlerts]);
 
     const toggleSound = useCallback(() => {
         setSoundEnabled((current) => {

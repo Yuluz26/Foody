@@ -32,6 +32,12 @@ class Ingredient extends Model
         return $this->hasMany(IngredientMovement::class)->latest('id');
     }
 
+    /** @return HasMany<RecipeItem, $this> */
+    public function recipeItems(): HasMany
+    {
+        return $this->hasMany(RecipeItem::class);
+    }
+
     public function isOut(): bool
     {
         return $this->quantity <= 0;
@@ -45,7 +51,7 @@ class Ingredient extends Model
     /** What is on the shelf is worth, in sen. */
     public function stockValue(): int
     {
-        return (int) round($this->quantity * $this->unit_cost);
+        return (int) round(max(0, $this->quantity) * $this->unit_cost);
     }
 
     /** @param Builder<Ingredient> $query */

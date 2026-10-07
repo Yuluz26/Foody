@@ -144,6 +144,7 @@ export type AdminProduct = {
     stockQuantity: number;
     lowStockThreshold: number;
     stockState: StockState;
+    recipe: RecipeLine[];
     sortOrder: number;
     addOns: AddOn[];
 };
@@ -221,10 +222,14 @@ export type SharedProps = {
     customerAuth: { user: CustomerAuthUser | null };
     flash: { success: string | null; error: string | null };
     restaurantName: string;
-    adminCounts: { activeOrders: number; lowStock: number; lowIngredients: number; latestOrderId: number | null; latestCustomerCancelledOrderId: number | null } | null;
+    adminCounts: { activeOrders: number; lowStock: number; lowIngredients: number; stockAlerts: StockAlert[]; latestOrderId: number | null; latestCustomerCancelledOrderId: number | null } | null;
 };
 
-export type IngredientMovementType = 'restock' | 'usage' | 'waste' | 'adjustment';
+export type IngredientMovementType = 'restock' | 'usage' | 'waste' | 'adjustment' | 'sale' | 'return';
+
+export type IngredientOption = { id: number; name: string; unit: string; unitCost: number };
+
+export type RecipeLine = { ingredientId: number; quantity: number };
 
 export type IngredientRow = {
     id: number;
@@ -235,6 +240,8 @@ export type IngredientRow = {
     unitCost: number;
     lowStockThreshold: number;
     supplier: string | null;
+    /** How many dishes list this ingredient in their recipe. */
+    dishCount: number;
     /** Sen. */
     stockValue: number;
     stockState: Exclude<StockState, 'untracked'>;
@@ -250,6 +257,18 @@ export type IngredientMovementRow = {
     balanceAfter: number;
     unitCost: number | null;
     note: string | null;
+    orderNumber: string | null;
     userName: string | null;
     createdAt: string;
+};
+
+/** A dish or ingredient that is low or gone. The key changes with the state, so low then out alerts twice. */
+export type StockAlert = {
+    key: string;
+    kind: 'dish' | 'ingredient';
+    id: number;
+    name: string;
+    state: 'low' | 'out';
+    quantity: number;
+    unit: string | null;
 };

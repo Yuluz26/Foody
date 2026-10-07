@@ -28,6 +28,7 @@ class IngredientController extends Controller
         ]);
 
         $ingredients = Ingredient::query()
+            ->withCount('recipeItems')
             ->when($filters['q'] ?? null, fn (Builder $query, string $term) => $query->where('name', 'like', "%{$term}%"))
             ->when(($filters['state'] ?? null) === 'low', fn (Builder $query) => $query->where('quantity', '>', 0)->whereColumn('quantity', '<=', 'low_stock_threshold'))
             ->when(($filters['state'] ?? null) === 'out', fn (Builder $query) => $query->where('quantity', '<=', 0))
@@ -48,7 +49,7 @@ class IngredientController extends Controller
                 'value' => $all->sum(fn (Ingredient $ingredient) => $ingredient->stockValue()),
             ],
             'movements' => IngredientMovement::query()
-                ->with(['ingredient:id,name,unit', 'user:id,name'])
+                ->with(['ingredient:id,name,unit', 'user:id,name', 'order:id,order_number'])
                 ->latest('id')
                 ->limit(10)
                 ->get()
@@ -62,6 +63,7 @@ class IngredientController extends Controller
                     'balanceAfter' => $movement->balance_after,
                     'unitCost' => $movement->unit_cost,
                     'note' => $movement->note,
+                    'orderNumber' => $movement->order?->order_number,
                     'userName' => $movement->user?->name,
                     'createdAt' => $movement->created_at->toIso8601String(),
                 ]),
@@ -71,7 +73,7 @@ class IngredientController extends Controller
             ],
             'types' => array_map(
                 fn (IngredientMovementType $type) => ['value' => $type->value, 'label' => $type->label()],
-                IngredientMovementType::cases(),
+                IngredientMovementType::manual(),
             ),
         ]);
     }
@@ -142,6 +144,7 @@ class IngredientController extends Controller
             'unitCost' => $ingredient->unit_cost,
             'lowStockThreshold' => $ingredient->low_stock_threshold,
             'supplier' => $ingredient->supplier,
+            'dishCount' => $ingredient->recipe_items_count ?? 0,
             'stockValue' => $ingredient->stockValue(),
             'stockState' => match (true) {
                 $ingredient->isOut() => 'out',

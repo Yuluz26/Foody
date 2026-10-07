@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Actions\IngredientLedger;
 use App\Actions\PlaceOrder;
 use App\Actions\StockLedger;
 use App\Enums\OrderStatus;
@@ -66,7 +67,7 @@ class OrderController extends Controller
     }
 
     /** Self-service cancel stops once the kitchen has acted — past that, the customer calls the stall instead. */
-    public function cancel(Order $order, StockLedger $stock): RedirectResponse
+    public function cancel(Order $order, StockLedger $stock, IngredientLedger $ingredients): RedirectResponse
     {
         $this->authorizeOwner($order);
 
@@ -84,6 +85,7 @@ class OrderController extends Controller
         $order->save();
 
         $stock->syncOrder($order);
+        $ingredients->syncOrder($order);
 
         try {
             Mail::to(config('mail.from.address'))->send(new OrderCancelledStaffMail($order));

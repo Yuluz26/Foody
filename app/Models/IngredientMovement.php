@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['ingredient_id', 'user_id', 'type', 'delta', 'balance_after', 'unit_cost', 'note'])]
+#[Fillable(['ingredient_id', 'user_id', 'order_id', 'type', 'delta', 'balance_after', 'unit_cost', 'note'])]
 class IngredientMovement extends Model
 {
     protected function casts(): array
@@ -24,6 +24,12 @@ class IngredientMovement extends Model
     public function ingredient(): BelongsTo
     {
         return $this->belongsTo(Ingredient::class);
+    }
+
+    /** @return BelongsTo<Order, $this> */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     /** @return BelongsTo<User, $this> */
