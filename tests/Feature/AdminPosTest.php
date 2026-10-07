@@ -182,12 +182,15 @@ class AdminPosTest extends TestCase
 
         $this->actingAs($this->staff, 'web')->get('/admin/pos')
             ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('Admin/Pos/Index')
-                ->where('categories.0.name', 'Nasi')
-                ->where('categories.0.products.0.stockQuantity', 7)
-                ->where('tables.available', ['1', '3', '4', '5'])
-                ->where('completed', null));
+            ->assertInertia(function (Assert $page) {
+                $props = $page->toArray()['props'];
+                $nasi = collect($props['categories'])->firstWhere('name', 'Nasi');
+
+                $this->assertSame('Nasi Lemak', $nasi['products'][0]['name']);
+                $this->assertSame(7, $nasi['products'][0]['stockQuantity']);
+                $this->assertSame(['1', '3', '4', '5'], $props['tables']['available']);
+                $this->assertNull($props['completed']);
+            });
     }
 
     public function test_the_done_screen_only_shows_counter_orders_and_guests_cannot_reach_the_page(): void
