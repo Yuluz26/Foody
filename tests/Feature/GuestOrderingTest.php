@@ -134,6 +134,37 @@ class GuestOrderingTest extends TestCase
         Mail::assertNotQueued(OrderPlacedCustomerMail::class);
     }
 
+    public function test_diners_sharing_the_restaurant_wifi_do_not_use_up_each_others_order_limit(): void
+    {
+        $product = Product::factory()->create();
+
+        // Twelve phones behind one Wi-Fi address — more orders than one phone's limit of ten.
+        foreach (range(1, 12) as $phone) {
+            $this->withCookie(config('session.cookie'), Str::random(40))
+                ->post('/pesanan', $this->payload($product))
+                ->assertSessionHasNoErrors();
+        }
+
+        $this->assertSame(12, Order::query()->count());
+    }
+
+    public function test_one_address_still_has_a_ceiling_so_a_script_cannot_flood_the_kitchen(): void
+    {
+        $product = Product::factory()->create();
+
+        // A script that drops its cookie every time looks like a new phone on each request.
+        foreach (range(1, 60) as $attempt) {
+            $this->withCookie(config('session.cookie'), Str::random(40))->post('/pesanan', $this->payload($product));
+        }
+
+        $this->withCookie(config('session.cookie'), Str::random(40))
+            ->withHeader('X-Inertia', 'true')
+            ->post('/pesanan', $this->payload($product))
+            ->assertSessionHasErrors('order');
+
+        $this->assertSame(60, Order::query()->count());
+    }
+
     public function test_staff_can_work_a_guest_order_like_any_other(): void
     {
         $order = $this->placeGuestOrder();

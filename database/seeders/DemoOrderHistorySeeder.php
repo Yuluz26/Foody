@@ -15,6 +15,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 /**
  * Backfills a couple of years of finished (mostly completed, some cancelled) orders with
@@ -27,6 +28,10 @@ class DemoOrderHistorySeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->isProduction()) {
+            throw new RuntimeException('DemoOrderHistorySeeder fills the shop with made-up customers and orders and must not run in production.');
+        }
+
         $products = Product::query()->get();
 
         if ($products->isEmpty()) {

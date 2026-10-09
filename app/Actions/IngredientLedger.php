@@ -83,6 +83,10 @@ class IngredientLedger
     public function syncOrder(Order $order, ?User $user = null): void
     {
         DB::transaction(function () use ($order, $user) {
+            // Two syncs of one order at once (a double-tapped cancel, staff and diner together) would
+            // both read the same "taken" and give it back twice; the order row lock lines them up.
+            Order::query()->whereKey($order->id)->lockForUpdate()->value('id');
+
             $taken = IngredientMovement::query()
                 ->where('order_id', $order->id)
                 ->whereIn('type', [IngredientMovementType::Sale, IngredientMovementType::Return])
@@ -112,7 +116,8 @@ class IngredientLedger
     }
 
     /**
-     * Total ingredient needed for a set of portions.
+     * Total ingredient needed for a set of portions, in ingredient id order. Every order then locks
+     * ingredients in the same order, so two orders sharing ingredients queue instead of deadlocking.
      *
      * @param  Collection<int, int>  $portions  Portions keyed by product id.
      * @return Collection<int, float> Quantity keyed by ingredient id.
@@ -123,6 +128,7 @@ class IngredientLedger
             ->whereIn('product_id', $portions->keys())
             ->get()
             ->groupBy('ingredient_id')
-            ->map(fn ($items) => round($items->sum(fn (RecipeItem $item) => $item->quantity * $portions[$item->product_id]), 3));
+            ->map(fn ($items) => round($items->sum(fn (RecipeItem $item) => $item->quantity * $portions[$item->product_id]), 3))
+            ->sortKeys();
     }
 }

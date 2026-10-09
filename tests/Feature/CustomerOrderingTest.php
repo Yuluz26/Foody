@@ -318,9 +318,11 @@ class CustomerOrderingTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_too_many_order_attempts_are_explained_on_the_page(): void
+    public function test_too_many_order_attempts_from_one_phone_are_explained_on_the_page(): void
     {
         $product = Product::factory()->create();
+        // A real phone keeps the same session cookie between taps.
+        $this->withCookie(config('session.cookie'), Str::random(40));
 
         foreach (range(1, 10) as $attempt) {
             $this->post('/pesanan', $this->payload(['items' => [['product_id' => $product->id, 'quantity' => 1]]]));

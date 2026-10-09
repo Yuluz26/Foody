@@ -17,6 +17,7 @@ use App\Support\ReceiptPdf;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -72,21 +73,29 @@ class OrderController extends Controller
     {
         $this->authorizeAccess($order);
 
-        abort_unless(
-            in_array($order->status, [OrderStatus::Pending, OrderStatus::Confirmed], true),
-            422,
-            'Pesanan ini tidak boleh dibatalkan lagi. Sila hubungi kedai.',
-        );
+        // Locked and re-read, so a double tap or the kitchen moving the order at the same moment
+        // can't both pass the status check: only one cancel lands, and only while it's still allowed.
+        $order = DB::transaction(function () use ($order, $stock, $ingredients) {
+            $locked = Order::query()->lockForUpdate()->findOrFail($order->id);
 
-        // Timestamp columns (confirmed_at, cancelled_at, ...) aren't mass-assignable — set directly,
-        // matching how the admin status-change path does it.
-        $order->status = OrderStatus::Cancelled;
-        $order->cancelled_at = now();
-        $order->cancelled_by_customer = true;
-        $order->save();
+            abort_unless(
+                in_array($locked->status, [OrderStatus::Pending, OrderStatus::Confirmed], true),
+                422,
+                'Pesanan ini tidak boleh dibatalkan lagi. Sila hubungi kedai.',
+            );
 
-        $stock->syncOrder($order);
-        $ingredients->syncOrder($order);
+            // Timestamp columns (confirmed_at, cancelled_at, ...) aren't mass-assignable — set directly,
+            // matching how the admin status-change path does it.
+            $locked->status = OrderStatus::Cancelled;
+            $locked->cancelled_at = now();
+            $locked->cancelled_by_customer = true;
+            $locked->save();
+
+            $stock->syncOrder($locked);
+            $ingredients->syncOrder($locked);
+
+            return $locked;
+        }, 3);
 
         try {
             Mail::to(config('mail.from.address'))->send(new OrderCancelledStaffMail($order));

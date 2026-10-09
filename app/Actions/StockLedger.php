@@ -74,6 +74,10 @@ class StockLedger
     public function syncOrder(Order $order, ?User $user = null): void
     {
         DB::transaction(function () use ($order, $user) {
+            // Two syncs of one order at once (a double-tapped cancel, staff and diner together) would
+            // both read the same "taken" and give it back twice; the order row lock lines them up.
+            Order::query()->whereKey($order->id)->lockForUpdate()->value('id');
+
             $taken = StockMovement::query()
                 ->where('order_id', $order->id)
                 ->whereIn('type', [StockMovementType::Sale, StockMovementType::Return])

@@ -97,7 +97,9 @@ class PlaceOrder
         $groups = $this->groupItems($data['items']);
 
         try {
-            $order = DB::transaction(fn () => $this->create($data, $type, $groups, $staff));
+            // Up to three tries: under a rush MySQL can still pick this checkout as a deadlock victim
+            // and asks for the transaction to be restarted. Everything inside rolls back first.
+            $order = DB::transaction(fn () => $this->create($data, $type, $groups, $staff), 3);
         } catch (UniqueConstraintViolationException $exception) {
             // Two identical submits raced past the first check; return the winner.
             if ($existing = $this->findExisting($data['idempotency_key'])) {
