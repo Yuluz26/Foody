@@ -114,13 +114,18 @@ class PlaceOrder
         return $order;
     }
 
-    /** Never let a mail hiccup (or a blocked SMTP AUTH setting) fail an order that's already saved. */
+    /**
+     * Never let a mail hiccup (or a blocked SMTP AUTH setting) fail an order that's already saved.
+     * A diner ordering without an account leaves no email address, so only the shop is told.
+     */
     private function sendPlacedNotifications(Order $order): void
     {
-        try {
-            Mail::to($order->customer)->send(new OrderPlacedCustomerMail($order));
-        } catch (Throwable $exception) {
-            Log::error('Failed to send order-placed customer email', ['order_id' => $order->id, 'error' => $exception->getMessage()]);
+        if ($order->customer?->email !== null) {
+            try {
+                Mail::to($order->customer)->send(new OrderPlacedCustomerMail($order));
+            } catch (Throwable $exception) {
+                Log::error('Failed to send order-placed customer email', ['order_id' => $order->id, 'error' => $exception->getMessage()]);
+            }
         }
 
         try {
@@ -237,10 +242,10 @@ class PlaceOrder
         $phone = Customer::normalizePhone($data['customer_phone'] ?? '');
         $name = trim((string) ($data['customer_name'] ?? '')) ?: 'Pelanggan kaunter';
 
-        // The checkout route is auth:customer-gated, so a real account always exists here.
-        // Don't look a customer up by phone anymore — two different accounts could share one
-        // (a shared family line, a typo), and matching on phone would silently attach an
-        // order (and rewrite the name) onto the wrong account.
+        // A signed-in diner's order is tied to their account; anyone else orders as a guest and the order
+        // keeps just the name and phone typed at checkout. Never look a customer up by phone — two
+        // different accounts could share one (a shared family line, a typo), and matching on phone
+        // would silently attach an order (and rewrite the name) onto the wrong account.
         $customer = $staff ? null : auth('customer')->user();
         $customer?->update(['last_order_at' => now()]);
 

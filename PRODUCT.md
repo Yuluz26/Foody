@@ -14,7 +14,7 @@ Delegated: Laravel 13 + Inertia v3 + React 19 + TypeScript + Tailwind CSS 4, MyS
 - **Restaurant staff (secondary):** cashier and kitchen staff who watch incoming orders, move them through statuses, and maintain the menu and settings.
 
 ## Product Purpose
-A restaurant's own ordering system. Diners register or log in, browse the menu, add dishes to a cart, choose dine-in or takeaway, choose to pay at the cashier or by scanning a QR code, place the order, and track its status — including self-cancelling while it's still new — from their own account until it is ready. Staff run the day from an admin panel: dashboard, orders, products, categories, customers, settings.
+A restaurant's own ordering system. Diners browse the menu, add dishes to a cart, choose dine-in or takeaway, choose to pay at the cashier or by scanning a QR code, place the order, and track its status — including self-cancelling while it's still new — until it is ready. No account is needed: a name and phone number is enough, and an order is followed from its private link. Registering or logging in is optional and only adds an order history. Staff run the day from an admin panel: dashboard, orders, products, categories, customers, settings.
 
 Success: a diner can go from menu to placed order quickly on a phone without help, and staff never miss a pending order.
 

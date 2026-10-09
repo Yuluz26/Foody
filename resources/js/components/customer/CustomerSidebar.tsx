@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { ClockIcon, MapPinIcon, PhoneIcon, ReceiptIcon, SignOutIcon, StorefrontIcon } from '@phosphor-icons/react';
+import { ClockIcon, MapPinIcon, PhoneIcon, ReceiptIcon, SignInIcon, SignOutIcon, StorefrontIcon } from '@phosphor-icons/react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { buttonClass } from '@/components/ui/Button';
 import { cn, formatClock, imageSrc } from '@/lib/format';
@@ -13,7 +13,7 @@ type CustomerSidebarProps = {
     onSelect: (category: MenuCategory) => void;
 };
 
-/** The desktop-only standing rail: who this shop is, its categories, how to reach it, and the signed-in diner's own account links. */
+/** The desktop-only standing rail: who this shop is, its categories, how to reach it, and the diner's optional account links. */
 export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: CustomerSidebarProps) {
     const { customerAuth } = usePage().props;
     const reduce = useReducedMotion();
@@ -118,21 +118,31 @@ export function CustomerSidebar({ restaurant, categories, activeId, onSelect }: 
                     </dl>
                 )}
 
-                {customerAuth.user && (
-                    <div className="neu-tile grid gap-1 p-2 [--neu-radius:var(--radius-panel)]">
-                        <p className="truncate px-2 pt-1 text-sm text-ink-muted">
-                            Log masuk sebagai <span className="font-semibold text-ink">{customerAuth.user.name}</span>
-                        </p>
-                        <Link href="/pesanan-saya" className={buttonClass({ variant: 'quiet', className: 'justify-start' })}>
-                            <ReceiptIcon size={18} weight="bold" aria-hidden />
-                            Pesanan saya
-                        </Link>
-                        <button type="button" onClick={() => router.post('/log-keluar')} className={buttonClass({ variant: 'quiet', className: 'justify-start' })}>
-                            <SignOutIcon size={18} weight="bold" aria-hidden />
-                            Log keluar
-                        </button>
-                    </div>
-                )}
+                <div className="neu-tile grid gap-1 p-2 [--neu-radius:var(--radius-panel)]">
+                    {customerAuth.user ? (
+                        <>
+                            <p className="truncate px-2 pt-1 text-sm text-ink-muted">
+                                Log masuk sebagai <span className="font-semibold text-ink">{customerAuth.user.name}</span>
+                            </p>
+                            <Link href="/pesanan-saya" className={buttonClass({ variant: 'quiet', className: 'justify-start' })}>
+                                <ReceiptIcon size={18} weight="bold" aria-hidden />
+                                Pesanan saya
+                            </Link>
+                            <button type="button" onClick={() => router.post('/log-keluar')} className={buttonClass({ variant: 'quiet', className: 'justify-start' })}>
+                                <SignOutIcon size={18} weight="bold" aria-hidden />
+                                Log keluar
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <p className="px-2 pt-1 text-sm text-ink-muted">Anda boleh memesan tanpa akaun. Log masuk jika mahu simpan sejarah pesanan.</p>
+                            <Link href="/log-masuk" className={buttonClass({ variant: 'quiet', className: 'justify-start' })}>
+                                <SignInIcon size={18} weight="bold" aria-hidden />
+                                Log masuk
+                            </Link>
+                        </>
+                    )}
+                </div>
             </div>
         </aside>
     );

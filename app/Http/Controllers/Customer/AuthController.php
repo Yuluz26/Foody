@@ -98,6 +98,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('customer.login');
+        // Signing in is optional, so signing out lands on the menu rather than on a login wall.
+        return redirect()->route('menu');
     }
 }

@@ -342,14 +342,4 @@ class CustomerOrderingTest extends TestCase
             ->assertNotFound()
             ->assertInertia(fn (Assert $page) => $page->component('ErrorPage')->where('status', 404));
     }
-
-    public function test_guests_are_sent_to_the_login_page(): void
-    {
-        auth('customer')->logout();
-        session()->flush();
-
-        $this->get('/')->assertRedirect('/log-masuk');
-        $this->get('/pesan')->assertRedirect('/log-masuk');
-        $this->get('/pesanan-saya')->assertRedirect('/log-masuk');
-    }
 }

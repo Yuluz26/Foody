@@ -1,4 +1,4 @@
-import { Link, router, usePoll } from '@inertiajs/react';
+import { Link, router, usePage, usePoll } from '@inertiajs/react';
 import {
     ArrowLeftIcon,
     BellRingingIcon,
@@ -69,6 +69,7 @@ export default function OrderStatus(props: OrderStatusProps) {
 }
 
 function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
+    const { customerAuth } = usePage().props;
     const cart = useCart();
     const reduce = useReducedMotion();
     const final = order.status === 'completed' || order.status === 'cancelled';
@@ -107,9 +108,11 @@ function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
                             <ArrowLeftIcon size={20} weight="bold" aria-hidden />
                             Menu {restaurant.name}
                         </Link>
-                        <Link href="/pesanan-saya" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
-                            Pesanan saya
-                        </Link>
+                        {customerAuth.user && (
+                            <Link href="/pesanan-saya" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+                                Pesanan saya
+                            </Link>
+                        )}
                     </div>
                     <motion.div
                         className="mt-6"

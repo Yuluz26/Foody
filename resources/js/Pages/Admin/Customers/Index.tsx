@@ -45,7 +45,7 @@ export default function CustomersIndex({ customers, filters: initial }: { custom
                     Icon={UsersThreeIcon}
                     className="mt-8"
                     title={filters.q ? 'Tiada pelanggan sepadan' : 'Belum ada pelanggan'}
-                    description={filters.q ? 'Semak ejaan nama atau cuba beberapa digit nombor telefon.' : 'Pelanggan direkod secara automatik apabila mereka membuat pesanan pertama, atau tambah secara manual.'}
+                    description={filters.q ? 'Semak ejaan nama atau cuba beberapa digit nombor telefon.' : 'Pelanggan muncul di sini apabila mereka mendaftar akaun, atau tambah secara manual. Pesanan tanpa akaun tetap direkod di halaman Pesanan.'}
                 >
                     {!filters.q && (
                         <Link href="/admin/customers/create" className={buttonClass()}>

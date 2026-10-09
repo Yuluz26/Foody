@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { ClockIcon, MapPinIcon, PhoneIcon, ReceiptIcon, SignOutIcon } from '@phosphor-icons/react';
+import { ClockIcon, MapPinIcon, PhoneIcon, ReceiptIcon, SignInIcon, SignOutIcon } from '@phosphor-icons/react';
 import { buttonClass } from '@/components/ui/Button';
 import { cn, formatClock } from '@/lib/format';
 import type { Restaurant } from '@/types';
@@ -17,18 +17,25 @@ export function RestaurantBoard({ restaurant }: { restaurant: Restaurant }) {
     return (
         <header>
             <div className="mx-auto max-w-6xl px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-5 sm:px-10 sm:pb-6">
-                {customerAuth.user && (
-                    <div className="mb-2 flex items-center justify-end gap-1">
-                        <Link href="/pesanan-saya" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
-                            <ReceiptIcon size={16} weight="bold" aria-hidden />
-                            Pesanan saya
+                <div className="mb-2 flex items-center justify-end gap-1">
+                    {customerAuth.user ? (
+                        <>
+                            <Link href="/pesanan-saya" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+                                <ReceiptIcon size={16} weight="bold" aria-hidden />
+                                Pesanan saya
+                            </Link>
+                            <button type="button" onClick={() => router.post('/log-keluar')} className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+                                <SignOutIcon size={16} weight="bold" aria-hidden />
+                                Log keluar
+                            </button>
+                        </>
+                    ) : (
+                        <Link href="/log-masuk" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+                            <SignInIcon size={16} weight="bold" aria-hidden />
+                            Log masuk
                         </Link>
-                        <button type="button" onClick={() => router.post('/log-keluar')} className={buttonClass({ variant: 'quiet', size: 'sm' })}>
-                            <SignOutIcon size={16} weight="bold" aria-hidden />
-                            Log keluar
-                        </button>
-                    </div>
-                )}
+                    )}
+                </div>
 
                 {restaurant.logoUrl && (
                     <img src={restaurant.logoUrl} alt="" className="mb-3 size-14 rounded-(--radius-control) object-cover shadow-(--shadow-raised-sm)" width={56} height={56} />

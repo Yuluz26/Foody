@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/manifest.webmanifest', ManifestController::class)->name('manifest');
 
 /*
-| Customer ordering panel — every page needs a diner account, so a customer can
-| track and cancel their own orders.
+| Customer ordering panel — open to everyone: a diner can browse, order and follow an order
+| without an account. An account is optional and only adds an order history, so
+| /pesanan-saya is the one page that needs it.
 */
 Route::middleware('guest:customer')->group(function () {
     Route::get('/log-masuk', [Customer\AuthController::class, 'create'])->name('customer.login');
@@ -22,18 +23,21 @@ Route::middleware('guest:customer')->group(function () {
         ->name('customer.register.store');
 });
 
+Route::get('/', Customer\MenuController::class)->name('menu');
+Route::get('/pesan', [Customer\CheckoutController::class, 'create'])->name('checkout');
+Route::post('/pesanan', [Customer\OrderController::class, 'store'])
+    ->middleware('throttle:orders')
+    ->name('orders.store');
+
+// An order is reached by its unguessable public_id. One placed without an account is open to whoever
+// holds that link; an account's order stays with that account (see OrderController::authorizeAccess()).
+Route::get('/pesanan/{order:public_id}', [Customer\OrderController::class, 'show'])->name('orders.show');
+Route::patch('/pesanan/{order:public_id}/batal', [Customer\OrderController::class, 'cancel'])->name('orders.cancel');
+Route::get('/pesanan/{order:public_id}/resit', [Customer\OrderController::class, 'receipt'])->name('orders.receipt');
+
 Route::middleware('auth:customer')->group(function () {
     Route::post('/log-keluar', [Customer\AuthController::class, 'destroy'])->name('customer.logout');
-
-    Route::get('/', Customer\MenuController::class)->name('menu');
-    Route::get('/pesan', [Customer\CheckoutController::class, 'create'])->name('checkout');
-    Route::post('/pesanan', [Customer\OrderController::class, 'store'])
-        ->middleware('throttle:orders')
-        ->name('orders.store');
     Route::get('/pesanan-saya', [Customer\OrderController::class, 'myOrders'])->name('orders.index');
-    Route::get('/pesanan/{order:public_id}', [Customer\OrderController::class, 'show'])->name('orders.show');
-    Route::patch('/pesanan/{order:public_id}/batal', [Customer\OrderController::class, 'cancel'])->name('orders.cancel');
-    Route::get('/pesanan/{order:public_id}/resit', [Customer\OrderController::class, 'receipt'])->name('orders.receipt');
 });
 
 /*
