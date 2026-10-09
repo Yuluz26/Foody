@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { SearchField } from '@/components/ui/SearchField';
 import { cn, formatPrice, priceDigits } from '@/lib/format';
 import { useMediaQuery } from '@/lib/useMediaQuery';
+import { useStickyTop } from '@/lib/useStickyTop';
 import type { AddOn } from '@/types';
 
 type PosCategory = { id: number; name: string; products: PosProduct[] };
@@ -138,6 +139,10 @@ function PosScreen({ categories, tables, completed }: PosProps) {
     const key = useRef(newKey());
     // One cart at a time: a side column on wide screens, a sheet behind a bottom bar everywhere else. Never both in the DOM, so ids and focus stay unambiguous.
     const wide = useMediaQuery('(min-width: 1280px)');
+    // The side cart sticks while the menu scrolls. It ends a gutter above the viewport's bottom wherever it currently sits (its height reads --sticky-top), so it fills the screen once stuck.
+    const gridRef = useRef<HTMLDivElement>(null);
+    const cartRef = useRef<HTMLElement>(null);
+    useStickyTop(gridRef, cartRef, wide);
 
     const patchDraft = useCallback((patch: Partial<OrderDraft>) => setDraft((current) => ({ ...current, ...patch })), []);
 
@@ -222,7 +227,7 @@ function PosScreen({ categories, tables, completed }: PosProps) {
 
     return (
         <>
-            <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_25rem]">
+            <div ref={gridRef} className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_25rem]">
                 <section aria-label="Menu" className="min-w-0">
                     <div className="grid gap-3 xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] xl:items-center">
                         <SearchField label="Cari hidangan" value={query} onChange={setQuery} placeholder="Cari hidangan" />
@@ -285,7 +290,7 @@ function PosScreen({ categories, tables, completed }: PosProps) {
                 </section>
 
                 {wide && (
-                    <aside aria-label="Troli" className="neu-card sticky top-6 hidden h-[max(28rem,calc(100dvh-9.5rem))] p-5 xl:block">
+                    <aside ref={cartRef} aria-label="Troli" className="neu-card sticky top-6 hidden h-[max(28rem,calc(100dvh_-_var(--sticky-top,8rem)_-_1.5rem))] p-5 xl:block">
                         {panel(true)}
                     </aside>
                 )}
