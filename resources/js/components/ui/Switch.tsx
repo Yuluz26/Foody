@@ -8,7 +8,7 @@ type SwitchProps = {
     disabled?: boolean;
 };
 
-/** A painted toggle with its label and state written out, not colour alone. */
+/** A pressed-in track with a raised knob that squishes when pressed. State is also written out, never colour alone. */
 export function Switch({ checked, onChange, label, description, disabled = false }: SwitchProps) {
     return (
         <label className={cn('flex items-start justify-between gap-4', disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer')}>
@@ -17,7 +17,7 @@ export function Switch({ checked, onChange, label, description, disabled = false
                 {description && <span className="mt-0.5 block text-sm text-ink-muted">{description}</span>}
             </span>
             <span className="flex shrink-0 items-center gap-2">
-                <span className={cn('w-12 text-right text-sm font-semibold', checked ? 'text-leaf' : 'text-ink-muted')} aria-hidden>
+                <span className={cn('w-12 text-right text-sm font-semibold', checked ? 'text-leaf-deep' : 'text-ink-muted')} aria-hidden>
                     {checked ? 'Ya' : 'Tidak'}
                 </span>
                 <button
@@ -27,15 +27,16 @@ export function Switch({ checked, onChange, label, description, disabled = false
                     disabled={disabled}
                     onClick={() => onChange(!checked)}
                     className={cn(
-                        'relative h-8 w-14 rounded-full border-2 transition-[background-color,border-color,transform] duration-150 hover:scale-105 active:scale-95',
-                        checked ? 'border-leaf bg-leaf' : 'border-rule-strong bg-panel',
+                        'group relative h-8 w-14 rounded-full shadow-(--shadow-inset-sm) transition-colors duration-200 ease-out',
+                        checked ? 'bg-leaf-tint' : 'bg-ground-deep',
                     )}
                 >
                     <span className="sr-only">{label}</span>
                     <span
                         className={cn(
-                            'absolute top-1 left-1 size-5 rounded-full shadow-(--shadow-lift) transition-transform duration-200 ease-out',
-                            checked ? 'translate-x-6 bg-white' : 'translate-x-0 bg-ink',
+                            'absolute top-1 left-1 size-6 rounded-full shadow-(--shadow-raised-xs) transition-[transform,background-color,scale] duration-300 ease-spring motion-reduce:transition-colors',
+                            'group-active:scale-x-125 group-active:scale-y-90 motion-reduce:group-active:scale-100',
+                            checked ? 'translate-x-6 bg-leaf' : 'translate-x-0 bg-panel',
                         )}
                         aria-hidden
                     />

@@ -75,7 +75,8 @@ class AdminAccessTest extends TestCase
     {
         $admin = User::factory()->admin()->create(['password' => 'rahsia-kedai-99']);
 
-        $this->get('/')->assertRedirect('/log-masuk');
+        // A diner-only page sends a signed-out visitor to log in and remembers where they were going.
+        $this->get('/pesanan-saya')->assertRedirect('/log-masuk');
 
         $this->post('/admin/login', ['email' => $admin->email, 'password' => 'rahsia-kedai-99'])
             ->assertRedirect('/admin');

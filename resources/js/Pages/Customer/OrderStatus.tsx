@@ -1,4 +1,4 @@
-import { Link, router, usePoll } from '@inertiajs/react';
+import { Link, router, usePage, usePoll } from '@inertiajs/react';
 import {
     ArrowLeftIcon,
     BellRingingIcon,
@@ -15,9 +15,11 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect } from 'react';
 import { useCart } from '@/cart/CartProvider';
+import { PaymentBadge } from '@/components/PaymentBadge';
 import { ConfirmButton } from '@/components/ConfirmButton';
 import { CustomerLayout } from '@/components/customer/CustomerLayout';
 import { DigitDisplay } from '@/components/DigitDisplay';
+import { buttonClass } from '@/components/ui/Button';
 import { cn, formatDateTime, formatPrice, priceDigits } from '@/lib/format';
 import { duration, ease } from '@/lib/motion';
 import type { CustomerOrder, OrderStatus as Status } from '@/types';
@@ -29,12 +31,6 @@ type OrderStatusProps = {
 };
 
 const FLOW: Status[] = ['pending', 'confirmed', 'preparing', 'ready', 'completed'];
-
-const PAYMENT_TONE: Record<CustomerOrder['paymentStatus'], string> = {
-    unpaid: 'bg-rule/70 text-ink-soft',
-    pending_verification: 'bg-amber-tint text-ink ring-1 ring-ink/20 ring-inset',
-    paid: 'bg-leaf text-white',
-};
 
 const STEPS: Record<Status, { label: string; Icon: Icon }> = {
     pending: { label: 'Pesanan diterima', Icon: ReceiptIcon },
@@ -73,6 +69,7 @@ export default function OrderStatus(props: OrderStatusProps) {
 }
 
 function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
+    const { customerAuth } = usePage().props;
     const cart = useCart();
     const reduce = useReducedMotion();
     const final = order.status === 'completed' || order.status === 'cancelled';
@@ -104,16 +101,18 @@ function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
 
     return (
         <>
-            <header className="border-b-2 border-rule bg-ground">
-                <div className="mx-auto max-w-3xl px-6 pt-[max(1.25rem,env(safe-area-inset-top))] pb-9 sm:px-10">
+            <header>
+                <div className="mx-auto max-w-3xl px-6 pt-[max(1.25rem,env(safe-area-inset-top))] pb-8 sm:px-10">
                     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                        <Link href="/" className="-ml-2 inline-flex h-11 items-center gap-2 rounded-(--radius-control) px-2 font-semibold text-ink hover:bg-rule/70">
+                        <Link href="/" className={buttonClass({ variant: 'soft', size: 'sm' })}>
                             <ArrowLeftIcon size={20} weight="bold" aria-hidden />
                             Menu {restaurant.name}
                         </Link>
-                        <Link href="/pesanan-saya" className="inline-flex h-11 items-center rounded-(--radius-control) px-2 text-[15px] font-semibold text-ink-soft hover:bg-rule/70 hover:text-ink">
-                            Pesanan saya
-                        </Link>
+                        {customerAuth.user && (
+                            <Link href="/pesanan-saya" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
+                                Pesanan saya
+                            </Link>
+                        )}
                     </div>
                     <motion.div
                         className="mt-6"
@@ -145,7 +144,7 @@ function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
                     </p>
 
                     {order.status === 'cancelled' ? (
-                        <div className="mt-5 flex gap-4 rounded-(--radius-panel) border-2 border-rule-strong bg-ground p-5">
+                        <div className="neu-well mt-5 flex gap-4 p-5">
                             <XCircleIcon size={32} weight="bold" className="shrink-0 text-alert" aria-hidden />
                             <div>
                                 <p className="text-2xl font-extrabold text-ink">Dibatalkan</p>
@@ -161,17 +160,17 @@ function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
                                 return (
                                     <li key={status} className="relative flex gap-4 pb-7 last:pb-0" aria-current={state === 'current' ? 'step' : undefined}>
                                         {index < FLOW.length - 1 && (
-                                            <span className={cn('absolute top-11 bottom-1 left-[21px] w-1 rounded-full', index < currentIndex || order.status === 'completed' ? 'bg-leaf' : 'bg-rule')} aria-hidden />
+                                            <span className={cn('absolute top-11 bottom-1 left-[21px] w-1 rounded-full', index < currentIndex || order.status === 'completed' ? 'bg-leaf' : 'bg-ground-deep shadow-(--shadow-inset-sm)')} aria-hidden />
                                         )}
-                                        <span className="relative grid size-11 shrink-0 place-items-center rounded-(--radius-module)">
-                                            {state === 'done' && <span className="absolute inset-0 rounded-(--radius-module) bg-leaf" />}
-                                            {state === 'todo' && <span className="absolute inset-0 rounded-(--radius-module) border-2 border-rule-strong bg-panel" />}
+                                        <span className="relative grid size-11 shrink-0 place-items-center rounded-full">
+                                            {state === 'done' && <span className="absolute inset-0 rounded-full bg-leaf shadow-(--shadow-raised-xs)" />}
+                                            {state === 'todo' && <span className="absolute inset-0 rounded-full bg-ground-deep shadow-(--shadow-inset-sm)" />}
                                             {state === 'current' && (
                                                 <>
-                                                    <motion.span layoutId="status-marker" className="absolute inset-0 rounded-(--radius-module) bg-amber" transition={{ duration: duration.sheet, ease: ease.inOut }} />
+                                                    <motion.span layoutId="status-marker" className="absolute inset-0 rounded-full bg-amber shadow-(--shadow-raised-xs)" transition={{ duration: duration.sheet, ease: ease.inOut }} />
                                                     {!reduce && !final && (
                                                         <motion.span
-                                                            className="absolute inset-0 rounded-(--radius-module) border-2 border-amber"
+                                                            className="absolute inset-0 rounded-full border-2 border-amber"
                                                             animate={{ opacity: [0.7, 0], scale: [1, 1.45] }}
                                                             transition={{ duration: 1.8, repeat: Infinity, ease: ease.out }}
                                                             aria-hidden
@@ -215,10 +214,10 @@ function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
                 </section>
 
                 <section aria-labelledby="ringkasan-tajuk">
-                    <h2 id="ringkasan-tajuk" className="border-b-2 border-amber pb-2 text-3xl font-extrabold text-ink">
+                    <h2 id="ringkasan-tajuk" className="section-title text-3xl font-extrabold text-ink">
                         Ringkasan
                     </h2>
-                    <ul className="divide-y divide-rule">
+                    <ul className="mt-2 divide-y divide-rule/70">
                         {order.items.map((item) => (
                             <li key={item.id} className="py-3">
                                 <div className="flex items-baseline gap-2">
@@ -235,20 +234,18 @@ function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
                             </li>
                         ))}
                     </ul>
-                    <dl className="flex items-baseline justify-between border-t-2 border-ink pt-4">
+                    <dl className="neu-well-sm flex items-center justify-between px-5 py-4">
                         <dt className="text-lg font-semibold">Jumlah</dt>
                         <dd>
                             <DigitDisplay value={priceDigits(order.total)} size="lg" />
                         </dd>
                     </dl>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-4">
+                    <div className="neu-tile mt-5 flex flex-wrap items-center justify-between gap-3 p-4 [--neu-radius:var(--radius-panel)]">
                         <p className="text-[15px] font-semibold text-ink">{order.paymentMethodLabel}</p>
-                        <span className={cn('inline-flex h-7 items-center rounded-(--radius-module) px-2.5 text-xs font-bold tracking-wide uppercase', PAYMENT_TONE[order.paymentStatus])}>
-                            {order.paymentStatusLabel}
-                        </span>
+                        <PaymentBadge status={order.paymentStatus} />
                     </div>
                     {order.notes && (
-                        <p className="mt-4 rounded-(--radius-panel) border-2 border-rule-strong bg-amber-tint p-4 text-[15px]">
+                        <p className="neu-well-sm mt-5 [--neu-bg:var(--color-amber-tint)] p-4 text-[15px]">
                             <span className="font-semibold">Nota: </span>
                             {order.notes}
                         </p>
@@ -256,24 +253,15 @@ function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
                 </section>
 
                 <div className="flex flex-wrap gap-3">
-                    <Link
-                        href="/"
-                        className="inline-flex h-12 items-center rounded-(--radius-control) border-2 border-ink px-5 font-semibold transition-[transform,background-color,color] duration-150 hover:bg-ink hover:text-white active:scale-[0.97]"
-                    >
+                    <Link href="/" className={buttonClass({ variant: 'ink' })}>
                         Pesan lagi
                     </Link>
-                    <a
-                        href={`/pesanan/${order.publicId}/resit`}
-                        className="inline-flex h-12 items-center gap-2 rounded-(--radius-control) px-4 font-semibold text-ink hover:bg-amber-tint"
-                    >
+                    <a href={`/pesanan/${order.publicId}/resit`} className={buttonClass({ variant: 'soft' })}>
                         <DownloadSimpleIcon size={18} weight="bold" aria-hidden />
                         Muat turun resit
                     </a>
                     {restaurant.phone && (
-                        <a
-                            href={`tel:${restaurant.phone.replace(/[^\d+]/g, '')}`}
-                            className="inline-flex h-12 items-center gap-2 rounded-(--radius-control) px-4 font-semibold text-ink hover:bg-amber-tint"
-                        >
+                        <a href={`tel:${restaurant.phone.replace(/[^\d+]/g, '')}`} className={buttonClass({ variant: 'soft' })}>
                             <PhoneIcon size={18} weight="bold" aria-hidden />
                             Hubungi kedai
                         </a>
@@ -286,7 +274,7 @@ function StatusScreen({ order, restaurant, justPlaced }: OrderStatusProps) {
                             message="Pesanan ini akan dibatalkan. Tindakan ini tidak boleh diundur."
                             confirmLabel="Ya, batalkan"
                             onConfirm={() => router.patch(`/pesanan/${order.publicId}/batal`, {}, { preserveScroll: true })}
-                            className="h-12"
+                            className="text-alert"
                         />
                     )}
                 </div>

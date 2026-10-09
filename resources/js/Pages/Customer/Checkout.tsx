@@ -2,7 +2,6 @@ import { Link, useForm } from '@inertiajs/react';
 import {
     ArrowLeftIcon,
     ArrowsOutIcon,
-    CheckIcon,
     DownloadSimpleIcon,
     ForkKnifeIcon,
     InfoIcon,
@@ -19,7 +18,8 @@ import { CartLines } from '@/components/customer/Cart';
 import { CustomerLayout } from '@/components/customer/CustomerLayout';
 import { DigitDisplay } from '@/components/DigitDisplay';
 import { Sheet } from '@/components/Sheet';
-import { Button } from '@/components/ui/Button';
+import { Button, buttonClass } from '@/components/ui/Button';
+import { ChoiceCard } from '@/components/ui/ChoiceCard';
 import { Field, inputClass } from '@/components/ui/Field';
 import { cn, formatPrice, priceDigits } from '@/lib/format';
 import { duration, ease } from '@/lib/motion';
@@ -139,12 +139,8 @@ function QrCodeLightbox({ open, onClose, qrCodeUrl }: { open: boolean; onClose: 
     return (
         <Sheet open={open} onClose={onClose} title="Kod QR pembayaran" hideTitle width="md">
             <div className="grid justify-items-center gap-5 px-5 pt-12 pb-6 md:px-6">
-                <img src={qrCodeUrl} alt="Kod QR pembayaran, saiz penuh" className="aspect-square w-full max-w-80 rounded-(--radius-panel) border-2 border-rule-strong bg-white object-contain p-4" />
-                <a
-                    href={qrCodeUrl}
-                    download="kod-qr-pembayaran.png"
-                    className="inline-flex h-12 items-center gap-2 rounded-(--radius-control) bg-ink px-5 font-semibold text-white transition-[transform,background-color] duration-150 hover:bg-ink-soft active:scale-[0.97]"
-                >
+                <img src={qrCodeUrl} alt="Kod QR pembayaran, saiz penuh" className="aspect-square w-full max-w-80 rounded-(--radius-panel) bg-white object-contain p-4 shadow-(--shadow-raised-sm)" />
+                <a href={qrCodeUrl} download="kod-qr-pembayaran.png" className={buttonClass({ variant: 'ink' })}>
                     <DownloadSimpleIcon size={18} weight="bold" aria-hidden />
                     Muat turun kod QR
                 </a>
@@ -342,9 +338,9 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
 
     return (
         <>
-            <header className="border-b-2 border-rule bg-ground">
-                <div className="mx-auto flex h-16 max-w-3xl items-center justify-between gap-4 px-5 sm:px-8">
-                    <Link href={table ? `/?meja=${encodeURIComponent(table)}` : '/'} className="-ml-2 flex h-11 items-center gap-2 rounded-(--radius-control) px-2 font-semibold text-ink hover:bg-rule/70">
+            <header>
+                <div className="mx-auto flex h-20 max-w-3xl items-center justify-between gap-4 px-5 sm:px-8">
+                    <Link href={table ? `/?meja=${encodeURIComponent(table)}` : '/'} className={buttonClass({ variant: 'soft' })}>
                         <ArrowLeftIcon size={20} weight="bold" aria-hidden />
                         Menu
                     </Link>
@@ -356,7 +352,7 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
                 <h1 className="text-4xl font-extrabold text-ink sm:text-5xl">Semak pesanan</h1>
 
                 {notices.length > 0 && (
-                    <div role="status" className="mt-5 flex gap-3 rounded-(--radius-panel) border-2 border-rule-strong bg-amber-tint p-4">
+                    <div role="status" className="neu-well-sm mt-5 flex gap-3 [--neu-bg:var(--color-amber-tint)] p-4">
                         <InfoIcon size={22} weight="bold" className="mt-0.5 shrink-0 text-amber-deep" aria-hidden />
                         <ul className="grid gap-1 text-[15px] font-medium text-ink">
                             {notices.map((notice) => (
@@ -367,13 +363,10 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
                 )}
 
                 {cart.lines.length === 0 ? (
-                    <div className="mt-10 rounded-(--radius-panel) border-2 border-dashed border-rule-strong px-6 py-14 text-center">
+                    <div className="neu-well mt-10 px-6 py-14 text-center">
                         <p className="text-3xl font-extrabold text-ink">Troli anda kosong</p>
                         <p className="mx-auto mt-2 max-w-[34ch] text-base text-ink-soft">Pilih hidangan dari menu dahulu, kemudian kembali ke sini untuk menghantar pesanan.</p>
-                        <Link
-                            href="/"
-                            className="mt-6 inline-flex h-12 items-center gap-2 rounded-(--radius-control) bg-ink px-5 font-semibold text-white transition-[transform,background-color] duration-150 hover:bg-ink-soft active:scale-[0.97]"
-                        >
+                        <Link href="/" className={buttonClass({ variant: 'ink', className: 'mt-6' })}>
                             <ArrowLeftIcon size={18} weight="bold" aria-hidden />
                             Lihat menu
                         </Link>
@@ -381,8 +374,8 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
                 ) : (
                     <form onSubmit={submit} noValidate className="mt-8 grid gap-10">
                         {!canOrder && (
-                            <p role="alert" className="on-module flex gap-2 rounded-(--radius-panel) bg-ink p-4 text-[15px] font-semibold text-white">
-                                <WarningCircleIcon size={22} weight="bold" className="shrink-0 text-amber" aria-hidden />
+                            <p role="alert" className="neu-tile flex gap-2 p-4 text-[15px] font-semibold text-ink">
+                                <WarningCircleIcon size={22} weight="bold" className="shrink-0 text-amber-deep" aria-hidden />
                                 Kedai tidak menerima pesanan sekarang. Troli anda disimpan untuk nanti.
                             </p>
                         )}
@@ -390,42 +383,22 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
                         <fieldset aria-describedby={form.errors.type ? 'medan-type-error' : undefined}>
                             <legend className="text-2xl font-extrabold text-ink">Makan di sini atau bungkus?</legend>
                             <div className="mt-4 grid grid-cols-2 gap-3">
-                                {typeOptions.map(({ value, label, hint, Icon, enabled }) => {
-                                    const checked = form.data.type === value;
-
-                                    return (
-                                        <label
-                                            key={value}
-                                            className={cn(
-                                                'relative flex min-h-32 flex-col gap-3 rounded-(--radius-panel) border-2 p-4 transition-[transform,background-color,border-color,color] duration-150 ease-out',
-                                                'has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink',
-                                                checked ? 'border-ink bg-ink text-white' : 'border-rule-strong bg-panel text-ink hover:border-ink-muted',
-                                                enabled ? 'cursor-pointer active:scale-[0.98]' : 'cursor-not-allowed opacity-50',
-                                            )}
-                                        >
-                                            <input
-                                                type="radio"
-                                                name="type"
-                                                value={value}
-                                                checked={checked}
-                                                disabled={!enabled}
-                                                onChange={() => {
-                                                    form.setData('type', value);
-                                                    form.clearErrors('type');
-                                                }}
-                                                className="sr-only"
-                                            />
-                                            <Icon size={30} weight="bold" aria-hidden className={checked ? 'text-amber' : 'text-ink-muted'} />
-                                            <span>
-                                                <span className="block text-lg font-bold">{label}</span>
-                                                <span className={cn('mt-1 block text-sm', checked ? 'text-white/90' : 'text-ink-muted')}>
-                                                    {enabled ? hint : 'Tidak tersedia sekarang'}
-                                                </span>
-                                            </span>
-                                            {checked && <CheckIcon size={20} weight="bold" className="absolute top-4 right-4 text-amber" aria-hidden />}
-                                        </label>
-                                    );
-                                })}
+                                {typeOptions.map(({ value, label, hint, Icon, enabled }) => (
+                                    <ChoiceCard
+                                        key={value}
+                                        name="type"
+                                        value={value}
+                                        label={label}
+                                        hint={hint}
+                                        Icon={Icon}
+                                        checked={form.data.type === value}
+                                        disabled={!enabled}
+                                        onChange={() => {
+                                            form.setData('type', value);
+                                            form.clearErrors('type');
+                                        }}
+                                    />
+                                ))}
                             </div>
                             {form.errors.type && (
                                 <p id="medan-type-error" className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-alert">
@@ -529,47 +502,27 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
                         <fieldset aria-describedby={form.errors.payment_method ? 'medan-payment_method-error' : undefined}>
                             <legend className="text-2xl font-extrabold text-ink">Kaedah pembayaran</legend>
                             <div className="mt-4 grid grid-cols-2 gap-3">
-                                {paymentOptions.map(({ value, label, hint, Icon, enabled }) => {
-                                    const checked = form.data.payment_method === value;
+                                {paymentOptions.map(({ value, label, hint, Icon, enabled }) => (
+                                    <ChoiceCard
+                                        key={value}
+                                        name="payment_method"
+                                        value={value}
+                                        label={label}
+                                        hint={hint}
+                                        Icon={Icon}
+                                        checked={form.data.payment_method === value}
+                                        disabled={!enabled}
+                                        onChange={() => {
+                                            form.setData('payment_method', value);
+                                            form.clearErrors('payment_method');
 
-                                    return (
-                                        <label
-                                            key={value}
-                                            className={cn(
-                                                'relative flex min-h-32 flex-col gap-3 rounded-(--radius-panel) border-2 p-4 transition-[transform,background-color,border-color,color] duration-150 ease-out',
-                                                'has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink',
-                                                checked ? 'border-ink bg-ink text-white' : 'border-rule-strong bg-panel text-ink hover:border-ink-muted',
-                                                enabled ? 'cursor-pointer active:scale-[0.98]' : 'cursor-not-allowed opacity-50',
-                                            )}
-                                        >
-                                            <input
-                                                type="radio"
-                                                name="payment_method"
-                                                value={value}
-                                                checked={checked}
-                                                disabled={!enabled}
-                                                onChange={() => {
-                                                    form.setData('payment_method', value);
-                                                    form.clearErrors('payment_method');
-
-                                                    if (value !== 'qr') {
-                                                        form.setData('payment_proof', null);
-                                                        form.clearErrors('payment_proof');
-                                                    }
-                                                }}
-                                                className="sr-only"
-                                            />
-                                            <Icon size={30} weight="bold" aria-hidden className={checked ? 'text-amber' : 'text-ink-muted'} />
-                                            <span>
-                                                <span className="block text-lg font-bold">{label}</span>
-                                                <span className={cn('mt-1 block text-sm', checked ? 'text-white/90' : 'text-ink-muted')}>
-                                                    {enabled ? hint : 'Tidak tersedia sekarang'}
-                                                </span>
-                                            </span>
-                                            {checked && <CheckIcon size={20} weight="bold" className="absolute top-4 right-4 text-amber" aria-hidden />}
-                                        </label>
-                                    );
-                                })}
+                                            if (value !== 'qr') {
+                                                form.setData('payment_proof', null);
+                                                form.clearErrors('payment_proof');
+                                            }
+                                        }}
+                                    />
+                                ))}
                             </div>
                             {form.errors.payment_method && (
                                 <p id="medan-payment_method-error" className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-alert">
@@ -586,12 +539,12 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
                                         animate={reduce ? { opacity: 1 } : { opacity: 1, transform: 'translateY(0px)' }}
                                         exit={{ opacity: 0, transition: { duration: 0.12 } }}
                                         transition={{ duration: duration.fast, ease: ease.out }}
-                                        className="mt-5 flex flex-col items-center gap-4 rounded-(--radius-panel) border-2 border-rule-strong bg-amber-tint/40 p-5 text-center sm:flex-row sm:items-start sm:gap-5 sm:text-left"
+                                        className="neu-well mt-5 flex flex-col items-center gap-4 [--neu-bg:var(--color-amber-tint)] p-5 text-center sm:flex-row sm:items-start sm:gap-5 sm:text-left"
                                     >
                                         <button
                                             type="button"
                                             onClick={() => setQrLightboxOpen(true)}
-                                            className="group relative size-44 shrink-0 overflow-hidden rounded-(--radius-control) border-2 border-rule-strong bg-panel active:scale-[0.98]"
+                                            className="neu-press group relative size-44 shrink-0 overflow-hidden bg-white"
                                         >
                                             <img src={restaurant.qrCodeUrl} alt="Kod QR pembayaran — ketik untuk perbesar" className="size-full object-contain p-2" />
                                             <span className="absolute right-1.5 bottom-1.5 inline-flex items-center gap-1 rounded-full bg-ink/85 px-2 py-1 text-[11px] font-semibold text-white transition-colors duration-150 group-hover:bg-ink">
@@ -637,16 +590,16 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
                         )}
 
                         <section aria-labelledby="ringkasan-tajuk">
-                            <div className="flex items-end justify-between gap-4 border-b-2 border-amber pb-2">
-                                <h2 id="ringkasan-tajuk" className="text-2xl font-extrabold text-ink">
+                            <div className="flex items-end justify-between gap-4">
+                                <h2 id="ringkasan-tajuk" className="section-title text-2xl font-extrabold text-ink">
                                     Pesanan anda
                                 </h2>
-                                <Link href="/" className="pb-1 text-[15px] font-semibold text-ink underline decoration-rule-strong hover:decoration-ink">
+                                <Link href="/" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
                                     Tambah hidangan
                                 </Link>
                             </div>
                             <CartLines />
-                            <dl className="flex items-baseline justify-between border-t-2 border-ink pt-4">
+                            <dl className="neu-well-sm mt-2 flex items-center justify-between px-5 py-4">
                                 <dt className="text-lg font-semibold">Jumlah</dt>
                                 <dd>
                                     <DigitDisplay value={priceDigits(cart.subtotal)} size="lg" />
@@ -655,19 +608,19 @@ function CheckoutScreen({ restaurant, products, table, availableTables }: Checko
                         </section>
 
                         {orderError && (
-                            <p id="ralat-pesanan" tabIndex={-1} role="alert" className="flex gap-2 rounded-(--radius-panel) border-2 border-alert bg-alert-tint p-4 text-[15px] font-semibold text-alert">
+                            <p id="ralat-pesanan" tabIndex={-1} role="alert" className="neu-well-sm flex gap-2 [--neu-bg:var(--color-alert-tint)] p-4 text-[15px] font-semibold text-alert">
                                 <WarningCircleIcon size={22} weight="bold" className="shrink-0" aria-hidden />
                                 {orderError}
                             </p>
                         )}
 
-                        <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-rule bg-panel pb-safe lg:static lg:border-0 lg:bg-transparent lg:pb-0">
+                        <div className="fixed inset-x-0 bottom-0 z-40 rounded-t-(--radius-panel) bg-ground/95 pb-safe shadow-[0_-12px_20px_-14px_var(--neu-dark)] backdrop-blur-md lg:static lg:rounded-none lg:bg-transparent lg:pb-0 lg:shadow-none lg:backdrop-blur-none">
                             <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 pt-3 sm:px-8 lg:px-0 lg:pt-0">
                                 <p className="lg:hidden">
                                     <span className="block text-sm text-ink-muted">Jumlah</span>
                                     <DigitDisplay value={priceDigits(cart.subtotal)} chip={false} size="lg" />
                                 </p>
-                                <Button type="submit" size="lg" loading={form.processing} disabled={!canOrder} className="flex-1 sm:flex-none sm:px-10 lg:ml-auto">
+                                <Button type="submit" variant="amber" size="lg" loading={form.processing} disabled={!canOrder} className="flex-1 sm:flex-none sm:px-10 lg:ml-auto">
                                     {form.processing ? 'Menghantar...' : 'Hantar pesanan'}
                                 </Button>
                             </div>

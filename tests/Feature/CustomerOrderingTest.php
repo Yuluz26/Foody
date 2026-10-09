@@ -84,7 +84,7 @@ class CustomerOrderingTest extends TestCase
         $this->assertCount(2, $order->items);
         $this->assertSame(4, $order->items->firstWhere('product_id', $teh->id)->quantity);
         $this->assertSame(1390, $order->items->firstWhere('product_id', $nasi->id)->unit_price);
-        $this->assertSame('FD'.str_pad((string) $order->id, 4, '0', STR_PAD_LEFT), $order->order_number);
+        $this->assertSame('WR'.str_pad((string) $order->id, 4, '0', STR_PAD_LEFT), $order->order_number);
         $this->assertSame($this->customer->id, $order->customer_id);
     }
 
@@ -341,15 +341,5 @@ class CustomerOrderingTest extends TestCase
         $this->get('/pesanan/tiada-pesanan-ini')
             ->assertNotFound()
             ->assertInertia(fn (Assert $page) => $page->component('ErrorPage')->where('status', 404));
-    }
-
-    public function test_guests_are_sent_to_the_login_page(): void
-    {
-        auth('customer')->logout();
-        session()->flush();
-
-        $this->get('/')->assertRedirect('/log-masuk');
-        $this->get('/pesan')->assertRedirect('/log-masuk');
-        $this->get('/pesanan-saya')->assertRedirect('/log-masuk');
     }
 }

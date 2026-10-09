@@ -30,6 +30,8 @@ export type MenuProduct = {
     imageUrl: string | null;
     isAvailable: boolean;
     isFeatured: boolean;
+    /** Set only when the shelf is nearly empty; null means there is nothing worth telling the diner. */
+    stockLeft: number | null;
     addOns: AddOn[];
 };
 
@@ -87,7 +89,7 @@ export type CustomerOrder = {
     paymentProofUrl: string | null;
 };
 
-export type StaffRole = 'admin' | 'staff';
+export type StaffRole = 'admin' | 'chef';
 
 export type AuthUser = {
     id: number;
@@ -110,6 +112,8 @@ export type AdminOrderRow = {
     id: number;
     number: string;
     publicId: string;
+    /** 'pos' for orders staff keyed in at the counter. */
+    source: 'online' | 'pos';
     customerName: string;
     customerPhone: string;
     type: OrderType;
@@ -138,8 +142,40 @@ export type AdminProduct = {
     imageUrl: string | null;
     isAvailable: boolean;
     isFeatured: boolean;
+    trackStock: boolean;
+    stockQuantity: number;
+    lowStockThreshold: number;
+    stockState: StockState;
+    recipe: RecipeLine[];
     sortOrder: number;
     addOns: AddOn[];
+};
+
+export type StockState = 'untracked' | 'out' | 'low' | 'ok';
+
+export type StockRow = {
+    id: number;
+    name: string;
+    categoryName: string | null;
+    imageUrl: string | null;
+    stockQuantity: number;
+    lowStockThreshold: number;
+    stockState: StockState;
+};
+
+export type StockMovementType = 'restock' | 'adjustment' | 'waste' | 'sale' | 'return';
+
+export type StockMovementRow = {
+    id: number;
+    productName: string;
+    type: StockMovementType;
+    typeLabel: string;
+    delta: number;
+    balanceAfter: number;
+    note: string | null;
+    orderNumber: string | null;
+    userName: string | null;
+    createdAt: string;
 };
 
 export type AdminBanner = {
@@ -157,6 +193,16 @@ export type AdminCategory = {
     isActive: boolean;
     sortOrder: number;
     productsCount: number | null;
+};
+
+export type AdminCustomer = {
+    id: number;
+    name: string;
+    email: string | null;
+    phone: string;
+    ordersCount: number | null;
+    lastOrderAt: string | null;
+    createdAt: string;
 };
 
 export type AdminStaff = {
@@ -188,5 +234,53 @@ export type SharedProps = {
     customerAuth: { user: CustomerAuthUser | null };
     flash: { success: string | null; error: string | null };
     restaurantName: string;
-    adminCounts: { activeOrders: number; latestOrderId: number | null; latestCustomerCancelledOrderId: number | null } | null;
+    adminCounts: { activeOrders: number; lowStock: number; lowIngredients: number; stockAlerts: StockAlert[]; latestOrderId: number | null; latestCustomerCancelledOrderId: number | null } | null;
+};
+
+export type IngredientMovementType = 'restock' | 'usage' | 'waste' | 'adjustment' | 'sale' | 'return';
+
+export type IngredientOption = { id: number; name: string; unit: string; unitCost: number };
+
+export type RecipeLine = { ingredientId: number; quantity: number };
+
+export type IngredientRow = {
+    id: number;
+    name: string;
+    unit: string;
+    quantity: number;
+    /** Sen per unit. */
+    unitCost: number;
+    lowStockThreshold: number;
+    supplier: string | null;
+    /** How many dishes list this ingredient in their recipe. */
+    dishCount: number;
+    /** Sen. */
+    stockValue: number;
+    stockState: Exclude<StockState, 'untracked'>;
+};
+
+export type IngredientMovementRow = {
+    id: number;
+    ingredientName: string;
+    unit: string;
+    type: IngredientMovementType;
+    typeLabel: string;
+    delta: number;
+    balanceAfter: number;
+    unitCost: number | null;
+    note: string | null;
+    orderNumber: string | null;
+    userName: string | null;
+    createdAt: string;
+};
+
+/** A dish or ingredient that is low or gone. The key changes with the state, so low then out alerts twice. */
+export type StockAlert = {
+    key: string;
+    kind: 'dish' | 'ingredient';
+    id: number;
+    name: string;
+    state: 'low' | 'out';
+    quantity: number;
+    unit: string | null;
 };

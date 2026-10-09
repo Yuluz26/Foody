@@ -4,10 +4,10 @@ import { useState, type FormEvent } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { ConfirmButton } from '@/components/ConfirmButton';
 import { OrderActions } from '@/components/admin/OrderQueue';
-import { PaymentBadge } from '@/components/admin/PaymentBadge';
-import { StatusBadge } from '@/components/admin/StatusBadge';
+import { PaymentBadge } from '@/components/PaymentBadge';
+import { StatusBadge } from '@/components/StatusBadge';
 import { DigitDisplay } from '@/components/DigitDisplay';
-import { Button } from '@/components/ui/Button';
+import { Button, buttonClass } from '@/components/ui/Button';
 import { Field, inputClass } from '@/components/ui/Field';
 import { formatDateTime, formatPhone, formatPrice, priceDigits } from '@/lib/format';
 import type { AdminOrderRow, OrderLine } from '@/types';
@@ -58,7 +58,7 @@ function EditOrderForm({ order, onDone }: { order: OrderDetail; onDone: () => vo
     }, 0);
 
     return (
-        <form onSubmit={submit} className="grid gap-4 rounded-(--radius-panel) border-2 border-amber bg-amber-tint/40 p-5">
+        <form onSubmit={submit} className="neu-card grid gap-4 [--neu-bg:var(--color-amber-tint)] p-5">
             <div className="grid gap-4 sm:grid-cols-2">
                 <Field id="customer_name" label="Nama pelanggan" error={form.errors.customer_name}>
                     {(control) => (
@@ -106,9 +106,9 @@ function EditOrderForm({ order, onDone }: { order: OrderDetail; onDone: () => vo
                 </Field>
             </div>
 
-            <div className="grid gap-2 border-t-2 border-amber/60 pt-4">
+            <div className="grid gap-2 pt-2">
                 <p className="text-[15px] font-semibold text-ink">Kuantiti item</p>
-                <ul className="divide-y divide-rule">
+                <ul className="divide-y divide-ink/10">
                     {order.items.map((item, index) => {
                         const quantity = form.data.items[index]?.quantity ?? item.quantity;
                         const error = form.errors[`items.${index}.quantity` as keyof typeof form.errors];
@@ -149,14 +149,14 @@ function EditOrderForm({ order, onDone }: { order: OrderDetail; onDone: () => vo
                         );
                     })}
                 </ul>
-                <dl className="flex items-baseline justify-between border-t-2 border-ink pt-3">
+                <dl className="neu-well-sm mt-2 flex items-center justify-between px-5 py-3">
                     <dt className="text-lg font-semibold">Jumlah</dt>
                     <dd className="text-lg font-semibold tabular-nums">{formatPrice(total)}</dd>
                 </dl>
             </div>
 
             <div className="flex flex-wrap justify-end gap-3">
-                <Button type="button" variant="outline" onClick={onDone}>
+                <Button type="button" variant="soft" onClick={onDone}>
                     Batal
                 </Button>
                 <Button type="submit" variant="amber" loading={form.processing}>
@@ -176,16 +176,8 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
             title={`Pesanan ${order.number}`}
             actions={
                 <>
-                    <button
-                        type="button"
-                        onClick={() => setEditing((value) => !value)}
-                        className="group flex h-11 items-center gap-1.5 rounded-(--radius-control) px-3 font-semibold text-ink-soft transition-colors duration-150 hover:bg-rule/60 hover:text-ink"
-                    >
-                        {editing ? (
-                            <XIcon size={18} weight="bold" aria-hidden />
-                        ) : (
-                            <PencilSimpleIcon size={18} weight="bold" aria-hidden className="transition-transform duration-150 ease-out group-hover:-rotate-12" />
-                        )}
+                    <button type="button" onClick={() => setEditing((value) => !value)} className={buttonClass({ variant: 'soft', size: 'sm' })}>
+                        {editing ? <XIcon size={18} weight="bold" aria-hidden /> : <PencilSimpleIcon size={18} weight="bold" aria-hidden />}
                         {editing ? 'Tutup edit' : 'Edit'}
                     </button>
                     {isAdmin && (
@@ -198,7 +190,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                             onConfirm={() => router.delete(`/admin/orders/${order.id}`)}
                         />
                     )}
-                    <Link href="/admin/orders" className="flex h-11 items-center gap-2 rounded-(--radius-control) px-3 font-semibold text-ink-soft hover:bg-rule/60 hover:text-ink">
+                    <Link href="/admin/orders" className={buttonClass({ variant: 'quiet', size: 'sm' })}>
                         <ArrowLeftIcon size={18} weight="bold" aria-hidden />
                         Semua pesanan
                     </Link>
@@ -207,7 +199,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
         >
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
                 <div className="grid content-start gap-8">
-                    <section aria-labelledby="status-tajuk" className="rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5">
+                    <section aria-labelledby="status-tajuk" className="neu-card p-5">
                         <h2 id="status-tajuk" className="sr-only">
                             Status
                         </h2>
@@ -227,11 +219,11 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                     {editing ? (
                         <EditOrderForm order={order} onDone={() => setEditing(false)} />
                     ) : (
-                        <section aria-labelledby="item-tajuk">
-                            <h2 id="item-tajuk" className="font-heading border-b-2 border-amber pb-2 text-2xl font-extrabold text-ink">
+                        <section aria-labelledby="item-tajuk" className="neu-card p-5 sm:p-6">
+                            <h2 id="item-tajuk" className="section-title font-heading text-2xl font-extrabold text-ink">
                                 Item
                             </h2>
-                            <ul className="divide-y divide-rule">
+                            <ul className="mt-3 divide-y divide-ink/10">
                                 {order.items.map((item) => (
                                     <li key={item.id} className="py-3">
                                         <div className="flex items-baseline gap-3">
@@ -251,14 +243,14 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                     </li>
                                 ))}
                             </ul>
-                            <dl className="flex items-baseline justify-between border-t-2 border-ink pt-4">
+                            <dl className="neu-well-sm mt-3 flex items-center justify-between px-5 py-4">
                                 <dt className="text-lg font-semibold">Jumlah</dt>
                                 <dd>
                                     <DigitDisplay value={priceDigits(order.total)} size="lg" />
                                 </dd>
                             </dl>
                             {order.notes && (
-                                <div className="mt-5 rounded-(--radius-panel) border-2 border-rule-strong bg-amber-tint p-4">
+                                <div className="neu-well-sm mt-5 [--neu-bg:var(--color-amber-tint)] p-4">
                                     <p className="text-sm font-semibold text-ink-muted">Nota pelanggan</p>
                                     <p className="mt-1 text-base">{order.notes}</p>
                                 </div>
@@ -268,11 +260,11 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                 </div>
 
                 <aside className="grid content-start gap-8">
-                    <section aria-labelledby="pelanggan-tajuk">
-                        <h2 id="pelanggan-tajuk" className="font-heading border-b-2 border-amber pb-2 text-xl font-extrabold text-ink">
+                    <section aria-labelledby="pelanggan-tajuk" className="neu-card p-5">
+                        <h2 id="pelanggan-tajuk" className="section-title font-heading text-xl font-extrabold text-ink">
                             Pelanggan
                         </h2>
-                        <dl className="mt-3 grid gap-3 text-[15px]">
+                        <dl className="mt-4 grid gap-3 text-[15px]">
                             <div>
                                 <dt className="text-sm text-ink-muted">Nama</dt>
                                 <dd className="font-semibold">{order.customerName}</dd>
@@ -280,7 +272,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                             <div>
                                 <dt className="text-sm text-ink-muted">Telefon</dt>
                                 <dd>
-                                    <a href={`tel:${order.customerPhone}`} className="inline-flex items-center gap-1.5 font-semibold text-ink hover:underline">
+                                    <a href={`tel:${order.customerPhone}`} className="inline-flex min-h-6 items-center gap-1.5 font-semibold text-ink hover:underline">
                                         <PhoneIcon size={16} weight="bold" aria-hidden />
                                         {formatPhone(order.customerPhone)}
                                     </a>
@@ -296,11 +288,11 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                         </dl>
                     </section>
 
-                    <section aria-labelledby="bayaran-tajuk">
-                        <h2 id="bayaran-tajuk" className="font-heading border-b-2 border-amber pb-2 text-xl font-extrabold text-ink">
+                    <section aria-labelledby="bayaran-tajuk" className="neu-card p-5">
+                        <h2 id="bayaran-tajuk" className="section-title font-heading text-xl font-extrabold text-ink">
                             Pembayaran
                         </h2>
-                        <dl className="mt-3 grid gap-3 text-[15px]">
+                        <dl className="mt-4 grid gap-3 text-[15px]">
                             <div>
                                 <dt className="text-sm text-ink-muted">Kaedah</dt>
                                 <dd className="font-semibold">{order.paymentMethodLabel}</dd>
@@ -319,7 +311,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                                             <img
                                                 src={order.paymentProofUrl}
                                                 alt={`Bukti bayaran pesanan ${order.number}`}
-                                                className="h-40 w-40 rounded-(--radius-panel) border-2 border-rule-strong object-cover"
+                                                className="h-40 w-40 rounded-(--radius-control) object-cover shadow-(--shadow-raised-sm)"
                                             />
                                         </a>
                                     </dd>
@@ -329,6 +321,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                         {order.paymentStatus !== 'paid' && (
                             <ConfirmButton
                                 label="Sahkan pembayaran"
+                                variant="leaf"
                                 size="sm"
                                 className="mt-4"
                                 title={`Sahkan pembayaran ${order.number}?`}
@@ -339,11 +332,11 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                         )}
                     </section>
 
-                    <section aria-labelledby="sejarah-tajuk">
-                        <h2 id="sejarah-tajuk" className="font-heading border-b-2 border-amber pb-2 text-xl font-extrabold text-ink">
+                    <section aria-labelledby="sejarah-tajuk" className="neu-card p-5">
+                        <h2 id="sejarah-tajuk" className="section-title font-heading text-xl font-extrabold text-ink">
                             Sejarah status
                         </h2>
-                        <ol className="mt-3 grid gap-2 text-[15px]">
+                        <ol className="mt-4 grid gap-2 text-[15px]">
                             {order.timeline.map((step) => (
                                 <li key={step.status} className="flex justify-between gap-3">
                                     <span className="font-medium">{step.label}</span>
@@ -355,12 +348,7 @@ export default function OrderShow({ order }: { order: OrderDetail }) {
                         </ol>
                     </section>
 
-                    <a
-                        href={`/pesanan/${order.publicId}`}
-                        target="_blank"
-                        rel="noopener"
-                        className="inline-flex items-center gap-2 text-[15px] font-semibold text-ink-soft underline decoration-rule-strong hover:text-ink"
-                    >
+                    <a href={`/pesanan/${order.publicId}`} target="_blank" rel="noopener" className={buttonClass({ variant: 'quiet', size: 'sm', className: 'justify-self-start' })}>
                         <ArrowSquareOutIcon size={18} weight="bold" aria-hidden />
                         Halaman status pelanggan
                     </a>

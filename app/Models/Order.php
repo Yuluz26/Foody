@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'order_number', 'idempotency_key', 'customer_id', 'customer_name', 'customer_phone',
+    'order_number', 'idempotency_key', 'source', 'created_by', 'customer_id', 'customer_name', 'customer_phone',
     'type', 'table_number', 'notes', 'status', 'subtotal', 'total',
     'payment_method', 'payment_status', 'payment_proof',
 ])]
@@ -29,6 +29,11 @@ class Order extends Model
     public function uniqueIds(): array
     {
         return ['public_id'];
+    }
+
+    public function isPos(): bool
+    {
+        return $this->source === 'pos';
     }
 
     protected function casts(): array

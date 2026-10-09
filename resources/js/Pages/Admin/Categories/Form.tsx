@@ -39,7 +39,7 @@ export default function CategoryForm({ category }: { category: AdminCategory | n
     return (
         <AdminLayout title={category ? `Edit ${category.name}` : 'Tambah kategori'}>
             <form onSubmit={submit} noValidate className="max-w-3xl">
-                <div className="grid gap-6 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5 sm:p-6">
+                <div className="neu-card grid gap-6 p-5 sm:p-6">
                     <Field id="name" label="Nama kategori" error={form.errors.name} hint="Pendek dan jelas, contoh: Mi & Kuey Teow">
                         {(control) => <input {...control} type="text" maxLength={100} value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} className={inputClass} />}
                     </Field>

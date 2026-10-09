@@ -25,6 +25,9 @@ class ProductFactory extends Factory
             'image' => null,
             'is_available' => true,
             'is_featured' => false,
+            'track_stock' => false,
+            'stock_quantity' => 0,
+            'low_stock_threshold' => 5,
             'sort_order' => 0,
         ];
     }
@@ -32,5 +35,10 @@ class ProductFactory extends Factory
     public function unavailable(): static
     {
         return $this->state(['is_available' => false]);
+    }
+
+    public function tracked(int $quantity = 20, int $lowAt = 5): static
+    {
+        return $this->state(['track_stock' => true, 'stock_quantity' => $quantity, 'low_stock_threshold' => $lowAt]);
     }
 }

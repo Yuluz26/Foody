@@ -27,7 +27,7 @@ export function ConfirmButton({ label, title, message, confirmLabel, onConfirm, 
                 <div className="px-5 pb-6 md:px-6">
                     <p className="max-w-[52ch] text-base text-ink-soft">{message}</p>
                     <div className="mt-6 flex flex-wrap justify-end gap-3">
-                        <Button variant="outline" onClick={() => setOpen(false)}>
+                        <Button variant="soft" onClick={() => setOpen(false)}>
                             Tidak
                         </Button>
                         <Button

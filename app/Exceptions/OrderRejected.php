@@ -28,6 +28,11 @@ class OrderRejected extends RuntimeException
         return new self("{$list} sudah habis atau tidak lagi dijual. Sila buang item tersebut dari troli.");
     }
 
+    public static function notEnoughStock(string $productName, int $left): self
+    {
+        return new self("Baki {$productName} tinggal {$left}. Sila kurangkan kuantiti di troli.");
+    }
+
     public static function invalidAddOns(string $productName): self
     {
         return new self("Add-on untuk {$productName} sudah tidak sah. Sila buang dan tambah semula item tersebut.");

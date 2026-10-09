@@ -2,11 +2,17 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Customer;
+use App\Http\Controllers\ManifestController;
 use Illuminate\Support\Facades\Route;
 
+// The name/short_name/description follow the restaurant's own name, so this can't be a static
+// public/ file — it must go through the router on every request.
+Route::get('/manifest.webmanifest', ManifestController::class)->name('manifest');
+
 /*
-| Customer ordering panel — every page needs a diner account, so a customer can
-| track and cancel their own orders.
+| Customer ordering panel — open to everyone: a diner can browse, order and follow an order
+| without an account. An account is optional and only adds an order history, so
+| /pesanan-saya is the one page that needs it.
 */
 Route::middleware('guest:customer')->group(function () {
     Route::get('/log-masuk', [Customer\AuthController::class, 'create'])->name('customer.login');
@@ -17,18 +23,21 @@ Route::middleware('guest:customer')->group(function () {
         ->name('customer.register.store');
 });
 
+Route::get('/', Customer\MenuController::class)->name('menu');
+Route::get('/pesan', [Customer\CheckoutController::class, 'create'])->name('checkout');
+Route::post('/pesanan', [Customer\OrderController::class, 'store'])
+    ->middleware('throttle:orders')
+    ->name('orders.store');
+
+// An order is reached by its unguessable public_id. One placed without an account is open to whoever
+// holds that link; an account's order stays with that account (see OrderController::authorizeAccess()).
+Route::get('/pesanan/{order:public_id}', [Customer\OrderController::class, 'show'])->name('orders.show');
+Route::patch('/pesanan/{order:public_id}/batal', [Customer\OrderController::class, 'cancel'])->name('orders.cancel');
+Route::get('/pesanan/{order:public_id}/resit', [Customer\OrderController::class, 'receipt'])->name('orders.receipt');
+
 Route::middleware('auth:customer')->group(function () {
     Route::post('/log-keluar', [Customer\AuthController::class, 'destroy'])->name('customer.logout');
-
-    Route::get('/', Customer\MenuController::class)->name('menu');
-    Route::get('/pesan', [Customer\CheckoutController::class, 'create'])->name('checkout');
-    Route::post('/pesanan', [Customer\OrderController::class, 'store'])
-        ->middleware('throttle:orders')
-        ->name('orders.store');
     Route::get('/pesanan-saya', [Customer\OrderController::class, 'myOrders'])->name('orders.index');
-    Route::get('/pesanan/{order:public_id}', [Customer\OrderController::class, 'show'])->name('orders.show');
-    Route::patch('/pesanan/{order:public_id}/batal', [Customer\OrderController::class, 'cancel'])->name('orders.cancel');
-    Route::get('/pesanan/{order:public_id}/resit', [Customer\OrderController::class, 'receipt'])->name('orders.receipt');
 });
 
 /*
@@ -48,6 +57,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/', Admin\DashboardController::class)->name('dashboard');
 
+        // The counter: staff key in an order for someone standing in front of them.
+        Route::get('pos', [Admin\PosController::class, 'index'])->name('pos');
+        Route::post('pos', [Admin\PosController::class, 'store'])->name('pos.store');
+
         Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
         Route::post('orders/bulk', [Admin\OrderController::class, 'bulk'])->name('orders.bulk');
         Route::get('orders/receipts', [Admin\OrderController::class, 'receipts'])->name('orders.receipts');
@@ -58,6 +71,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('orders/{order}', [Admin\OrderController::class, 'update'])->name('orders.update');
 
         Route::get('reports', [Admin\ReportController::class, 'index'])->name('reports.index');
+
+        // Counting the shelf is part of running the day, so staff can restock and record waste too.
+        Route::get('stock', [Admin\StockController::class, 'index'])->name('stock.index');
+        Route::post('stock/{product}', [Admin\StockController::class, 'store'])->name('stock.store');
+
+        // Kitchen ingredients: their own list, prices and history. Nothing here touches dish stock.
+        Route::get('ingredients', [Admin\IngredientController::class, 'index'])->name('ingredients.index');
+        Route::post('ingredients', [Admin\IngredientController::class, 'store'])->name('ingredients.store');
+        Route::put('ingredients/{ingredient}', [Admin\IngredientController::class, 'update'])->name('ingredients.update');
+        Route::delete('ingredients/{ingredient}', [Admin\IngredientController::class, 'destroy'])->name('ingredients.destroy');
+        Route::post('ingredients/{ingredient}/adjust', [Admin\IngredientController::class, 'adjust'])->name('ingredients.adjust');
 
         Route::get('profile', [Admin\ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('profile', [Admin\ProfileController::class, 'update'])->name('profile.update');
@@ -80,7 +104,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('banners', [Admin\BannerController::class, 'store'])->name('banners.store');
             Route::delete('banners/{banner}', [Admin\BannerController::class, 'destroy'])->name('banners.destroy');
 
-            Route::get('customers', Admin\CustomerController::class)->name('customers.index');
+            Route::post('customers/bulk', [Admin\CustomerController::class, 'bulk'])->name('customers.bulk');
+            Route::resource('customers', Admin\CustomerController::class)->except('show');
 
             Route::post('staff/bulk', [Admin\StaffController::class, 'bulk'])->name('staff.bulk');
             Route::patch('staff/{staff}/approve', [Admin\StaffController::class, 'approve'])->name('staff.approve');

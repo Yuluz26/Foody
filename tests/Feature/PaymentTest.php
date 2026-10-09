@@ -128,7 +128,7 @@ class PaymentTest extends TestCase
     public function test_admin_can_upload_a_payment_qr_code_and_instructions(): void
     {
         $this->actingAs($this->admin, 'web')->put('/admin/settings', [
-            'name' => 'Foody',
+            'name' => 'Warung',
             'currency' => 'MYR',
             'ordering_enabled' => '1',
             'dine_in_enabled' => '1',
@@ -153,7 +153,7 @@ class PaymentTest extends TestCase
         Storage::disk('public')->put('branding/existing-qr.png', 'fake');
 
         $this->actingAs($this->admin, 'web')->put('/admin/settings', [
-            'name' => 'Foody',
+            'name' => 'Warung',
             'currency' => 'MYR',
             'ordering_enabled' => '1',
             'dine_in_enabled' => '1',

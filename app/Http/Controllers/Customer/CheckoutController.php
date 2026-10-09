@@ -24,7 +24,7 @@ class CheckoutController extends Controller
                 ->get()
                 ->map(fn (Product $product) => [
                     ...MenuPresenter::product($product),
-                    'isAvailable' => $product->is_available && $product->category->is_active,
+                    'isAvailable' => $product->isSellable() && $product->category->is_active,
                 ])
                 ->keyBy('id')
                 ->all(),

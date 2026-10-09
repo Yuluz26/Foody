@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="ms" data-ui="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Warung Handbook</title>
+<meta name="description" content="Warung: sistem pesanan untuk kedai makan. Ciri, tangkapan skrin dan harga. / An ordering system for eateries: features, screenshots and pricing.">
+<meta name="theme-color" content="#fff7e6">
+<style>
+/* Layout: stacked paper sheets. Each band overlaps the one above with rounded top corners; device frames and buttons share one chunky ink outline and a flat offset shadow. */
+@font-face { font-family: 'Fredoka'; font-weight: 500; font-display: swap; src: url(fonts/fredoka-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Fredoka'; font-weight: 600; font-display: swap; src: url(fonts/fredoka-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Fredoka'; font-weight: 700; font-display: swap; src: url(fonts/fredoka-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 500; font-display: swap; src: url(fonts/nunito-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 600; font-display: swap; src: url(fonts/nunito-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 700; font-display: swap; src: url(fonts/nunito-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 800; font-display: swap; src: url(fonts/nunito-latin-800-normal.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 600; font-display: swap; src: url(fonts/ibm-plex-mono-latin-600-normal.woff2) format('woff2'); }
+
+:root {
+  color-scheme: light;
+  --cream: #fff7e6;
+  --paper: #ffffff;
+  --ink: #2a1d12;
+  --ink-soft: #5a4636;
+  --amber: #ff9f3d;
+  --amber-deep: #a65400;
+  --butter: #ffe9ad;
+  --peach: #ffd9c4;
+  --mint: #d2f0df;
+  --module: #211d17;
+  --display: 'Fredoka', 'Nunito', ui-rounded, 'Segoe UI', system-ui, sans-serif;
+  --body: 'Nunito', ui-rounded, 'Segoe UI', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --line: 3px solid var(--ink);
+  --pop: 0 5px 0 var(--ink);
+  --r-sheet: 40px;
+  --r-card: 28px;
+  --r-frame: 18px;
+  --gutter: clamp(18px, 4.5vw, 36px);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+main { overflow-x: clip; }
+img { display: block; max-width: 100%; height: auto; }
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+button { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+
+/* Language: every paired string carries lang="ms" or lang="en". */
+:root[data-ui="en"] [lang="ms"], :root:not([data-ui="en"]) [lang="en"] { display: none; }
+
+.wrap { width: 100%; max-width: 1120px; margin-inline: auto; padding-inline: var(--gutter); }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 12px; top: 12px; z-index: 50; background: var(--paper); padding: 8px 14px; border-radius: 99px; border: var(--line); }
+
+/* ---- type ---- */
+h1, h2, h3, .display { font-family: var(--display); font-weight: 600; letter-spacing: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.3rem, 5.8vw, 3.9rem); line-height: 1.04; }
+h2 { font-size: clamp(1.95rem, 4.6vw, 3rem); line-height: 1.08; }
+h3 { font-size: 1.3rem; line-height: 1.2; }
+.lede { font-size: clamp(1.1rem, 2.2vw, 1.3rem); line-height: 1.5; color: var(--ink-soft); max-width: 36ch; }
+.sub { color: var(--ink-soft); max-width: 52ch; margin-top: 12px; }
+mark { background: linear-gradient(transparent 58%, rgb(255 159 61 / 0.62) 58%); color: inherit; padding-inline: 0.06em; }
+
+/* ---- buttons ---- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+  font-family: var(--display); font-weight: 600; font-size: 1.1rem; line-height: 1;
+  padding: 0.85em 1.45em; border-radius: 99px; border: var(--line);
+  background: var(--amber); color: var(--ink); text-decoration: none; box-shadow: var(--pop);
+  cursor: pointer; transition: transform 0.28s var(--ease-spring), box-shadow 0.2s ease;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--ink); }
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); transition-duration: 0.08s; }
+.btn--ghost { background: var(--paper); }
+.btn--sm { font-size: 0.98rem; padding: 0.65em 1.1em; box-shadow: 0 3px 0 var(--ink); }
+.btn--sm:hover { box-shadow: 0 5px 0 var(--ink); }
+
+/* ---- top bar ---- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: rgb(255 247 230 / 0.92); backdrop-filter: blur(10px); border-bottom: 3px solid var(--ink); }
+.top__in { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; }
+.brand { display: inline-flex; align-items: center; gap: 8px; font-family: var(--display); font-weight: 700; font-size: 1.6rem; text-decoration: none; letter-spacing: -0.02em; }
+.brand::before { content: ''; width: 16px; height: 16px; border-radius: 50%; background: var(--amber); border: 3px solid var(--ink); }
+.top__right { display: flex; align-items: center; gap: 10px; }
+.lang { display: inline-flex; padding: 3px; border: var(--line); border-radius: 99px; background: var(--paper); }
+.lang button { border: 0; background: transparent; font-family: var(--display); font-weight: 600; font-size: 0.95rem; padding: 6px 13px; border-radius: 99px; cursor: pointer; transition: background-color 0.2s ease; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--cream); }
+.top .btn { white-space: nowrap; }
+
+/* ---- bands (stacked sheets) ---- */
+.band { position: relative; border-radius: var(--r-sheet) var(--r-sheet) 0 0; margin-top: calc(var(--r-sheet) * -1); padding-block: calc(var(--r-sheet) + clamp(36px, 7vw, 72px)) clamp(48px, 8vw, 88px); border-top: 3px solid var(--ink); }
+.band--cream { background: var(--cream); }
+.band--peach { background: var(--peach); }
+.band--butter { background: var(--butter); }
+.band--mint { background: var(--mint); }
+.band--amber { background: var(--amber); }
+
+/* ---- hero ---- */
+.hero { padding-block: clamp(28px, 6vw, 64px) calc(var(--r-sheet) + 12px); }
+.hero__in { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+.hero__text { display: grid; gap: 22px; justify-items: start; }
+.hero__cta { display: flex; flex-wrap: wrap; gap: 14px; }
+.hero__art { position: relative; padding-bottom: 12%; padding-left: 6%; }
+
+/* ---- device frames ---- */
+.phone { width: 100%; background: var(--ink); border: var(--line); border-radius: 34px; padding: 7px; box-shadow: 0 7px 0 var(--amber), 0 7px 0 3px var(--ink); }
+.phone img { border-radius: 26px; width: 100%; aspect-ratio: 780 / 1688; object-fit: cover; object-position: top; background: var(--paper); }
+.laptop { background: var(--paper); border: var(--line); border-radius: var(--r-frame); overflow: hidden; box-shadow: var(--pop); }
+.laptop__bar { display: flex; gap: 6px; align-items: center; height: 26px; padding-inline: 12px; background: var(--butter); border-bottom: var(--line); }
+.laptop__bar i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); }
+.laptop img { width: 100%; }
+.paper { background: var(--paper); border: var(--line); border-radius: 14px; box-shadow: var(--pop); overflow: hidden; }
+.hero__laptop { transform: rotate(1.2deg); }
+.hero__phone { position: absolute; left: 0; bottom: 0; width: clamp(118px, 29%, 188px); transform: rotate(-4deg); }
+
+/* ---- chat ---- */
+.chat { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+.bubbles { display: grid; gap: 14px; }
+.bubble { max-width: 28ch; padding: 14px 20px; border: var(--line); border-radius: 24px 24px 24px 6px; background: var(--paper); font-weight: 700; box-shadow: var(--pop); }
+.bubble:nth-child(2) { justify-self: start; margin-left: 28px; }
+.bubble--reply { justify-self: end; background: var(--amber); border-radius: 24px 24px 6px 24px; max-width: 32ch; margin-top: 10px; }
+
+/* ---- flow ---- */
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-top: 36px; counter-reset: none; }
+.step { position: relative; padding-right: 22px; display: grid; gap: 8px; align-content: start; }
+.step__icon { display: grid; place-items: center; width: 62px; height: 62px; border-radius: 50%; background: var(--butter); border: var(--line); font-size: 1.7rem; box-shadow: 0 4px 0 var(--ink); }
+.step h3 { margin-top: 10px; }
+.step p { color: var(--ink-soft); font-size: 1rem; }
+.step:not(:last-child)::after { content: ''; position: absolute; top: 30px; left: 76px; right: 12px; border-top: 3px dashed var(--ink); opacity: 0.45; }
+
+/* ---- customer rail ---- */
+.rail { margin-top: 36px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px max(var(--gutter), calc((100vw - 1120px) / 2 + var(--gutter))) 28px; display: flex; gap: clamp(18px, 3vw, 32px); scrollbar-width: none; overscroll-behavior-x: contain; }
+.rail::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 min(72vw, 268px); scroll-snap-align: center; display: grid; gap: 8px; align-content: start; }
+.slide .phone { margin-bottom: 14px; }
+.slide p { color: var(--ink-soft); font-size: 1rem; }
+.rail__ctrl { display: flex; gap: 12px; margin-top: 4px; }
+.round { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; border: var(--line); background: var(--paper); box-shadow: 0 4px 0 var(--ink); cursor: pointer; font-family: var(--display); font-size: 1.5rem; line-height: 1; transition: transform 0.28s var(--ease-spring), box-shadow 0.2s ease, opacity 0.2s; }
+.round:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 0 var(--ink); }
+.round:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); transition-duration: 0.08s; }
+.round:disabled { opacity: 0.35; cursor: default; }
+
+/* ---- admin features ---- */
+.stack { display: grid; gap: clamp(40px, 7vw, 72px); margin-top: 40px; }
+.cap h3 { margin-bottom: 4px; }
+.cap p { color: var(--ink-soft); max-width: 48ch; }
+.wide { display: grid; gap: 22px; }
+.bento { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(18px, 3vw, 28px); }
+.bento__wide { grid-column: 1 / -1; grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr); align-items: center; }
+.tile { display: grid; gap: 16px; align-content: start; padding: clamp(18px, 2.6vw, 26px); border: var(--line); border-radius: var(--r-card); box-shadow: var(--pop); min-width: 0; }
+.tile--butter { background: var(--butter); }
+.tile--peach { background: var(--peach); }
+.tile--mint { background: var(--mint); }
+.tile .paper { max-width: 320px; justify-self: center; transform: rotate(-1.5deg); }
+
+.group { display: grid; gap: 18px; }
+.group > h3 { font-size: 1.6rem; }
+.tabs { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: clamp(18px, 3vw, 32px); align-items: start; }
+.tabs__list { display: grid; gap: 10px; }
+.tab { text-align: left; padding: 12px 16px; border: var(--line); border-radius: 18px; background: var(--paper); cursor: pointer; font-family: var(--display); font-weight: 600; font-size: 1.1rem; box-shadow: 0 4px 0 var(--ink); transition: transform 0.28s var(--ease-spring), box-shadow 0.2s ease, background-color 0.2s ease; }
+.tab:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--ink); }
+.tab[aria-selected="true"] { background: var(--amber); transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.panel { display: grid; gap: 16px; min-width: 0; }
+.panel[hidden] { display: none; }
+.panel .cap p { max-width: 56ch; }
+
+/* ---- picture viewer ---- */
+.zoomable { cursor: zoom-in; }
+.viewer { border: 0; padding: 0; background: transparent; width: 100%; height: 100%; max-width: none; max-height: none; color: var(--cream); }
+.viewer::backdrop { background: rgb(42 29 18 / 0.86); }
+.viewer__box { position: fixed; inset: 0; display: flex; overflow: auto; padding: 64px 12px 16px; overscroll-behavior: contain; }
+.viewer__box img { margin: auto; flex: none; max-width: none; border: var(--line); border-radius: 14px; background: var(--paper); }
+.viewer__box--wide img { width: min(1400px, 96vw); }
+.viewer__box--tall img { height: min(92dvh, 1180px); width: auto; }
+@media (max-width: 760px) { .viewer__box--wide img { width: 1100px; } }
+.viewer__close { position: fixed; z-index: 2; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; border: var(--line); background: var(--amber); color: var(--ink); font-family: var(--display); font-size: 1.5rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 0 var(--ink); }
+
+/* ---- limits ---- */
+.limits { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); align-items: start; }
+.limits ul { display: grid; gap: 14px; }
+.limits li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; }
+.limits li::before { content: ''; width: 26px; height: 26px; margin-top: 2px; border-radius: 50%; border: 2.5px solid var(--ink); background: linear-gradient(var(--ink), var(--ink)) center / 10px 3px no-repeat, var(--paper); }
+
+/* ---- pricing ---- */
+.plans { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); gap: clamp(18px, 3vw, 32px); align-items: start; margin-top: 36px; }
+.plan { display: grid; gap: 18px; align-content: start; padding: clamp(22px, 3.4vw, 36px); border: var(--line); border-radius: var(--r-card); background: var(--paper); box-shadow: var(--pop); min-width: 0; }
+.plan--main { background: var(--butter); }
+.led { display: inline-block; font-family: var(--mono); font-weight: 600; font-size: clamp(2rem, 5vw, 3rem); line-height: 1; letter-spacing: 0.02em; padding: 0.14em 0.34em; border-radius: 12px; background: var(--module); color: var(--amber); box-shadow: inset 2px 2px 5px rgb(0 0 0 / 0.55), inset -1px -1px 3px rgb(255 255 255 / 0.08); text-shadow: 0 0 1px currentColor; white-space: nowrap; }
+.price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.per { color: var(--ink-soft); font-weight: 700; }
+.months { display: grid; gap: 14px; }
+.months div { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; }
+.months dt { font-weight: 800; max-width: 17ch; }
+.months .led { font-size: clamp(1.7rem, 4.2vw, 2.4rem); }
+.note { padding: 12px 16px; border-radius: 16px; background: var(--paper); border: 2.5px solid var(--ink); font-size: 0.98rem; }
+.ticks { display: grid; gap: 10px; }
+.ticks li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; }
+.ticks li::before { content: '\2713'; display: grid; place-items: center; width: 26px; height: 26px; margin-top: 1px; border-radius: 50%; background: var(--amber); border: 2.5px solid var(--ink); font-weight: 800; font-size: 0.85rem; line-height: 1; }
+.fine { margin-top: 18px; color: var(--ink-soft); font-size: 0.95rem; }
+
+/* ---- call to action ---- */
+.band--amber { overflow: hidden; }
+.cta { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
+.cta__text { display: grid; gap: 22px; justify-items: start; }
+.cta__art { align-self: end; justify-self: center; width: min(100%, 250px); margin-bottom: calc(-1 * clamp(48px, 8vw, 88px) - 150px); }
+.cta p { max-width: 46ch; font-weight: 700; }
+.cta__row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.cta .btn { background: var(--ink); color: var(--cream); box-shadow: 0 5px 0 rgb(42 29 18 / 0.35); }
+.cta .btn--ghost { background: var(--paper); color: var(--ink); }
+.cta .num { font-family: var(--mono); font-weight: 600; font-size: 1.15rem; padding: 12px 18px; border-radius: 99px; background: var(--paper); border: var(--line); user-select: all; }
+
+.foot { background: var(--ink); color: var(--cream); padding-block: 22px calc(22px + env(safe-area-inset-bottom, 0px)); }
+.foot__in { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.foot .lang { background: transparent; border-color: var(--cream); }
+.foot .lang button { color: var(--cream); }
+.foot .lang button[aria-pressed="true"] { background: var(--cream); color: var(--ink); }
+
+/* ---- small screens ---- */
+@media (max-width: 880px) {
+  .hero__in, .chat, .limits, .plans, .bento { grid-template-columns: minmax(0, 1fr); }
+  .bento__wide { grid-template-columns: minmax(0, 1fr); }
+  .tabs { grid-template-columns: minmax(0, 1fr); }
+  .tabs__list { display: flex; overflow-x: auto; padding: 4px 4px 10px; margin-inline: -4px; scrollbar-width: none; }
+  .tabs__list::-webkit-scrollbar { display: none; }
+  .tab { flex: 0 0 auto; white-space: nowrap; }
+  .flow { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .step { grid-template-columns: 62px minmax(0, 1fr); column-gap: 16px; padding-right: 0; }
+  .step__icon { grid-row: span 2; }
+  .step h3 { margin-top: 0; align-self: end; }
+  .step:not(:last-child)::after { display: none; }
+  .bubble:nth-child(2) { margin-left: 0; }
+  .cta { grid-template-columns: minmax(0, 1fr); }
+  .cta__art { display: none; }
+  .hero__text { justify-items: stretch; }
+  .hero__cta .btn { flex: 1 1 auto; }
+}
+@media (max-width: 420px) {
+  .top .btn { display: none; }
+  .brand { font-size: 1.45rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn, .round, .tab { transition: box-shadow 0.15s ease, background-color 0.15s ease; }
+  .btn:hover, .btn:active, .round:hover:not(:disabled), .round:active:not(:disabled), .tab:hover, .tab[aria-selected="true"] { transform: none; }
+}
+
+/* ---- print / PDF: no carousel, no tabs, everything visible ---- */
+@page { size: A4; margin: 12mm; }
+@media print {
+  body { font-size: 11pt; }
+  .top, .rail__ctrl, .tabs__list, .foot .lang, .skip, .viewer { display: none; }
+  .band { break-inside: auto; border-radius: 0; margin-top: 0; padding-block: 28px; border-top: 3px solid var(--ink); }
+  .rail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; padding: 0 var(--gutter); gap: 16px; }
+  .slide { flex: none; break-inside: avoid; }
+  .tabs { display: block; }
+  .panel[hidden] { display: grid; }
+  .panel { break-inside: avoid; margin-bottom: 22px; }
+  .tile, .plan, .cap, .step, .bubble, .laptop, .phone, .paper { break-inside: avoid; }
+  h2, h3, .sub, .cap { break-after: avoid-page; }
+  .band > .wrap:first-child { break-after: avoid-page; }
+  .band--peach, .band--mint, .band--amber, #harga, .band--flow { break-inside: avoid; }
+  .hero { break-after: avoid-page; }
+  .band--peach, .band--butter, .band--admin, .band--mint { break-before: page; }
+  #harga { break-before: page; }
+  .plans { break-inside: avoid; }
+  .btn, .tab, .round { box-shadow: none; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body id="top">
+<script>
+/* Pick the language before first paint: #en or #ms in the link, then the last choice, then Bahasa Melayu. */
+(function () {
+  var ui = 'ms';
+  try { var saved = localStorage.getItem('foody-handbook-lang'); if (saved === 'en' || saved === 'ms') ui = saved; } catch (e) {}
+  if (location.hash === '#en') ui = 'en';
+  if (location.hash === '#ms') ui = 'ms';
+  document.documentElement.dataset.ui = ui;
+  document.documentElement.lang = ui;
+})();
+</script>
+<a class="skip" href="#kandungan"><span lang="ms">Langkau ke kandungan</span><span lang="en">Skip to content</span></a>
+
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="#top" aria-label="Warung">Warung</a>
+    <div class="top__right">
+      <div class="lang" role="group" aria-label="Bahasa / Language">
+        <button type="button" data-set-lang="ms" aria-pressed="true">BM</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="btn btn--sm" data-wa href="https://wa.me/60139558132" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </div>
+</header>
+
+<main id="kandungan">
+
+<section class="hero">
+  <div class="wrap hero__in">
+    <div class="hero__text">
+      <h1><span lang="ms">Pelanggan pesan sendiri. <mark>Dapur terus nampak.</mark></span><span lang="en">Guests order for themselves. <mark>The kitchen sees it right away.</mark></span></h1>
+      <p class="lede"><span lang="ms">Warung ialah sistem pesanan untuk kedai makan. Imbas kod QR di meja, pilih makanan, pesanan terus masuk ke skrin dapur.</span><span lang="en">An ordering system for eateries. Guests scan the QR at the table, pick their food, and the order reaches the kitchen.</span></p>
+      <div class="hero__cta">
+        <a class="btn" data-wa href="https://wa.me/60139558132" target="_blank" rel="noopener"><span lang="ms">Tanya di WhatsApp</span><span lang="en">Ask on WhatsApp</span></a>
+        <a class="btn btn--ghost" href="#harga"><span lang="ms">Lihat harga</span><span lang="en">See pricing</span></a>
+      </div>
+    </div>
+    <div class="hero__art">
+      <figure class="laptop hero__laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/queue.webp" width="2049" height="1290" alt="Skrin pesanan masuk di panel kedai, dengan butang untuk setiap peringkat" data-alt-ms="Skrin pesanan masuk di panel kedai, dengan butang untuk setiap peringkat" data-alt-en="The incoming orders screen in the shop panel, with a button for each stage"></figure>
+      <figure class="phone hero__phone"><img src="shots/menu.webp" width="780" height="1688" alt="Menu kedai di telefon pelanggan" data-alt-ms="Menu kedai di telefon pelanggan" data-alt-en="The shop menu on a guest's phone"></figure>
+    </div>
+  </div>
+</section>
+
+<section class="band band--peach">
+  <div class="wrap chat">
+    <h2><span lang="ms">Biasa dengar ayat ni?</span><span lang="en">Heard any of these before?</span></h2>
+    <div class="bubbles">
+      <p class="bubble"><span lang="ms">Kak, order saya dah siap ke belum?</span><span lang="en">Is my order ready yet?</span></p>
+      <p class="bubble"><span lang="ms">Eh, saya tak minta sambal lebih!</span><span lang="en">I didn't ask for extra sambal!</span></p>
+      <p class="bubble"><span lang="ms">Berapa semua ni, bang?</span><span lang="en">How much is the total?</span></p>
+      <p class="bubble bubble--reply"><span lang="ms">Dengan Warung, pelanggan nampak sendiri status dan jumlah. Anda sambung masak.</span><span lang="en">With Warung, guests see the status and the total themselves. You keep cooking.</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="band band--cream band--flow">
+  <div class="wrap">
+    <h2><span lang="ms">Dari meja ke dapur</span><span lang="en">From the table to the kitchen</span></h2>
+    <ol class="flow">
+      <li class="step"><span class="step__icon" aria-hidden="true">&#128241;</span><h3><span lang="ms">Imbas</span><span lang="en">Scan</span></h3><p><span lang="ms">Pelanggan imbas kod QR di meja. Nombor meja sudah terisi.</span><span lang="en">Guests scan the QR at the table. The table number is already filled in.</span></p></li>
+      <li class="step"><span class="step__icon" aria-hidden="true">&#127835;</span><h3><span lang="ms">Pilih</span><span lang="en">Order</span></h3><p><span lang="ms">Pilih makanan dan tambahan, hantar. Bayar di kaunter atau transfer QR.</span><span lang="en">Pick food and extras, send it. Pay at the counter or by QR transfer.</span></p></li>
+      <li class="step"><span class="step__icon" aria-hidden="true">&#128276;</span><h3><span lang="ms">Masak</span><span lang="en">Cook</span></h3><p><span lang="ms">Pesanan masuk ke skrin anda dengan bunyi. Satu butang untuk setiap peringkat.</span><span lang="en">The order arrives on your screen with a chime. One button for each stage.</span></p></li>
+      <li class="step"><span class="step__icon" aria-hidden="true">&#9989;</span><h3><span lang="ms">Hidang</span><span lang="en">Serve</span></h3><p><span lang="ms">Pelanggan nampak status sampai makanan siap.</span><span lang="en">Guests watch the status until the food is ready.</span></p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="band band--butter" aria-labelledby="h-pelanggan">
+  <div class="wrap">
+    <h2 id="h-pelanggan"><span lang="ms">Apa yang pelanggan nampak</span><span lang="en">What your guests see</span></h2>
+    <p class="sub"><span lang="ms">Semuanya dalam telefon, tanpa pasang aplikasi.</span><span lang="en">All on their phone, with no app to install.</span></p>
+  </div>
+  <div class="rail" id="rail" role="region" aria-label="Skrin pelanggan, leret untuk lihat lagi" data-label-ms="Skrin pelanggan, leret untuk lihat lagi" data-label-en="Guest screens, swipe for more" tabindex="0">
+    <article class="slide"><figure class="phone"><img src="shots/menu.webp" width="780" height="1688" loading="lazy" alt="Menu bergambar dengan kategori dan carian" data-alt-ms="Menu bergambar dengan kategori dan carian" data-alt-en="A menu with pictures, categories and search"></figure><h3><span lang="ms">Menu bergambar</span><span lang="en">A menu with pictures</span></h3><p><span lang="ms">Kategori, carian dan gambar setiap hidangan. Yang habis ditanda terus.</span><span lang="en">Categories, search and a photo for every dish. Sold-out dishes are marked.</span></p></article>
+    <article class="slide"><figure class="phone"><img src="shots/menu-stock.webp" width="780" height="1688" loading="lazy" alt="Menu dengan hidangan yang sudah habis ditanda sendiri" data-alt-ms="Menu dengan hidangan yang sudah habis ditanda sendiri" data-alt-en="A menu where sold-out dishes mark themselves"></figure><h3><span lang="ms">Habis, ditanda sendiri</span><span lang="en">Sold out, marked by itself</span></h3><p><span lang="ms">Bila baki sampai kosong, hidangan ditanda habis tanpa anda sentuh apa-apa. Bila tinggal sedikit, pelanggan nampak "Tinggal 6".</span><span lang="en">When the count hits zero, the dish marks itself sold out without you touching a thing. When only a few are left, guests see "Only 6 left".</span></p></article>
+    <article class="slide"><figure class="phone"><img src="shots/qr-table.webp" width="780" height="1688" loading="lazy" alt="Menu yang tahu pelanggan duduk di meja 9" data-alt-ms="Menu yang tahu pelanggan duduk di meja 9" data-alt-en="A menu that knows the guest is at table 9"></figure><h3><span lang="ms">Kod QR untuk setiap meja</span><span lang="en">A QR code for every table</span></h3><p><span lang="ms">Pautan membawa nombor meja, jadi pelanggan tak perlu menaip.</span><span lang="en">The link carries the table number, so nobody has to type it.</span></p></article>
+    <article class="slide"><figure class="phone"><img src="shots/product.webp" width="780" height="1688" loading="lazy" alt="Hidangan dengan pilihan tambahan seperti telur mata dan sambal" data-alt-ms="Hidangan dengan pilihan tambahan seperti telur mata dan sambal" data-alt-en="A dish with extras such as fried egg and sambal"></figure><h3><span lang="ms">Pilih tambahan</span><span lang="en">Pick the extras</span></h3><p><span lang="ms">Telur mata, sambal lebih, ayam tambah. Anda tetapkan harga setiap satu.</span><span lang="en">Fried egg, extra sambal, more chicken. You set the price of each.</span></p></article>
+    <article class="slide"><figure class="phone"><img src="shots/cart.webp" width="780" height="1688" loading="lazy" alt="Troli dengan jumlah yang dikira terus" data-alt-ms="Troli dengan jumlah yang dikira terus" data-alt-en="A cart with the total worked out as you go"></figure><h3><span lang="ms">Troli yang jelas</span><span lang="en">A clear cart</span></h3><p><span lang="ms">Jumlah dikira terus. Tambah, kurang atau buang sebelum hantar.</span><span lang="en">The total updates as you go. Add, reduce or remove before sending.</span></p></article>
+    <article class="slide"><figure class="phone"><img src="shots/checkout.webp" width="780" height="1688" loading="lazy" alt="Pilihan makan di sini atau bungkus dan pilihan meja" data-alt-ms="Pilihan makan di sini atau bungkus dan pilihan meja" data-alt-en="Dine in or takeaway, with a table picker"></figure><h3><span lang="ms">Makan sini atau bungkus</span><span lang="en">Dine in or takeaway</span></h3><p><span lang="ms">Hanya meja yang kosong dipaparkan. Nota untuk dapur pun boleh.</span><span lang="en">Only free tables are offered. There is a note for the kitchen too.</span></p></article>
+    <article class="slide"><figure class="phone"><img src="shots/payment.webp" width="780" height="1688" loading="lazy" alt="Bayaran dengan kod QR dan muat naik bukti" data-alt-ms="Bayaran dengan kod QR dan muat naik bukti" data-alt-en="Paying with a QR code and uploading proof"></figure><h3><span lang="ms">Bayar di kaunter atau QR</span><span lang="en">Pay at the counter or by QR</span></h3><p><span lang="ms">Transfer ikut kod QR kedai, muat naik bukti, dan staf anda sahkan.</span><span lang="en">Transfer to your shop's QR, upload the proof, and your staff confirm it.</span></p></article>
+    <article class="slide"><figure class="phone"><img src="shots/status.webp" width="780" height="1688" loading="lazy" alt="Status pesanan dari diterima hingga siap" data-alt-ms="Status pesanan dari diterima hingga siap" data-alt-en="Order status from received to ready"></figure><h3><span lang="ms">Status yang bergerak sendiri</span><span lang="en">A status that updates itself</span></h3><p><span lang="ms">Diterima, disahkan, disediakan, siap. Halaman dikemas kini tanpa perlu muat semula.</span><span lang="en">Received, confirmed, preparing, ready. The page refreshes on its own.</span></p></article>
+    <article class="slide"><figure class="phone"><img src="shots/my-orders.webp" width="780" height="1688" loading="lazy" alt="Senarai pesanan lama pelanggan" data-alt-ms="Senarai pesanan lama pelanggan" data-alt-en="A guest's list of past orders"></figure><h3><span lang="ms">Sejarah pesanan</span><span lang="en">Order history</span></h3><p><span lang="ms">Daftar sekali. Pesanan lama dan resit ada dalam akaun pelanggan.</span><span lang="en">Register once. Past orders and receipts live in the guest's account.</span></p></article>
+  </div>
+  <div class="wrap rail__ctrl">
+    <button class="round" type="button" id="rail-prev" aria-label="Sebelumnya" data-label-ms="Sebelumnya" data-label-en="Previous">&larr;</button>
+    <button class="round" type="button" id="rail-next" aria-label="Seterusnya" data-label-ms="Seterusnya" data-label-en="Next">&rarr;</button>
+  </div>
+</section>
+
+<section class="band band--cream band--admin" aria-labelledby="h-admin">
+  <div class="wrap">
+    <h2 id="h-admin"><span lang="ms">Apa yang anda dan staf pegang</span><span lang="en">What you and your staff run</span></h2>
+    <p class="sub"><span lang="ms">Ketik mana-mana gambar untuk besarkan.</span><span lang="en">Tap any picture to enlarge it.</span></p>
+
+    <div class="stack">
+      <div class="wide">
+        <div class="cap"><h3><span lang="ms">Kaunter untuk pelanggan yang datang sendiri</span><span lang="en">A counter for people who walk in</span></h3><p><span lang="ms">Pelanggan di depan kaunter, tiada telefon di tangan. Staf ketik gambar hidangan, pilih bungkus atau meja yang kosong, terima bayaran tunai atau QR dan lihat baki duit untuk dipulangkan. Pesanan terus masuk ke dapur, stok dan bahan turun macam biasa, dan resit boleh dicetak. Nama dan nombor telefon tak wajib. Berfungsi di tablet, telefon dan komputer.</span><span lang="en">The customer is at the counter with no phone out. Staff tap a dish photo, choose takeaway or a free table, take cash or QR and see the change to give back. The order goes straight to the kitchen, stock and ingredients drop as usual, and the receipt can be printed. Name and phone number are optional. Works on a tablet, a phone and a computer.</span></p></div>
+        <figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/pos.webp" width="2049" height="1515" loading="lazy" alt="Skrin kaunter dengan grid hidangan bergambar dan troli di sebelah kanan" data-alt-ms="Skrin kaunter dengan grid hidangan bergambar dan troli di sebelah kanan" data-alt-en="The counter screen with a picture grid of dishes and the basket on the right"></figure>
+      </div>
+
+      <div class="wide">
+        <div class="cap"><h3><span lang="ms">Ringkasan hari ini</span><span lang="en">Today at a glance</span></h3><p><span lang="ms">Pesanan, jualan, purata setiap pesanan dan jam yang paling sibuk. Hidangan dan bahan yang hampir habis turut ditunjuk. Dikemas kini setiap 15 saat.</span><span lang="en">Orders, sales, the average order and your busiest hours. Dishes and ingredients running low are listed too. Refreshes every 15 seconds.</span></p></div>
+        <figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/dashboard.webp" width="2049" height="1290" loading="lazy" alt="Ringkasan hari ini dengan jualan, carta jam dan senarai pesanan" data-alt-ms="Ringkasan hari ini dengan jualan, carta jam dan senarai pesanan" data-alt-en="Today's summary with sales, an hourly chart and the order list"></figure>
+      </div>
+
+      <div class="bento">
+        <div class="tile tile--butter">
+          <div class="cap"><h3><span lang="ms">Pesanan masuk dengan bunyi</span><span lang="en">Orders arrive with a chime</span></h3><p><span lang="ms">Pesanan baru berbunyi dan boleh muncul sebagai notifikasi pelayar. Satu butang untuk sahkan, sediakan dan tandakan siap.</span><span lang="en">New orders sound an alert and can pop up as a browser notification. One button each to confirm, prepare and mark ready.</span></p></div>
+          <figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/queue.webp" width="2049" height="1290" loading="lazy" alt="Senarai pesanan aktif dengan butang tindakan" data-alt-ms="Senarai pesanan aktif dengan butang tindakan" data-alt-en="The active orders list with action buttons"></figure>
+        </div>
+        <div class="tile tile--mint">
+          <div class="cap"><h3><span lang="ms">Cetak resit</span><span lang="en">Print receipts</span></h3><p><span lang="ms">Resit A5 untuk satu pesanan, atau banyak sekali gus dari laporan.</span><span lang="en">An A5 receipt for one order, or many at once from the reports.</span></p></div>
+          <figure class="paper"><img src="shots/receipt.webp" width="923" height="760" loading="lazy" alt="Resit A5 dengan butiran pesanan dan jumlah" data-alt-ms="Resit A5 dengan butiran pesanan dan jumlah" data-alt-en="An A5 receipt with the order details and the total"></figure>
+        </div>
+        <div class="tile tile--peach bento__wide">
+          <div class="cap"><h3><span lang="ms">Semak bayaran, betulkan pesanan</span><span lang="en">Check payment, fix an order</span></h3><p><span lang="ms">Lihat bukti bayaran, sahkan, ubah kuantiti atau nama. Setiap peringkat direkod.</span><span lang="en">See the proof of payment, confirm it, change quantities or names. Every stage is logged.</span></p></div>
+          <figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/order.webp" width="2049" height="1410" loading="lazy" alt="Butiran satu pesanan dengan bukti bayaran dan butang sahkan" data-alt-ms="Butiran satu pesanan dengan bukti bayaran dan butang sahkan" data-alt-en="One order's details with the payment proof and a confirm button"></figure>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span lang="ms">Urus menu</span><span lang="en">Run the menu</span></h3>
+        <div class="tabs" data-tabs>
+          <div class="tabs__list" role="tablist" aria-label="Urus menu" data-label-ms="Urus menu" data-label-en="Run the menu">
+            <button class="tab" role="tab" type="button" id="t-products" aria-controls="p-products" aria-selected="true"><span lang="ms">Produk</span><span lang="en">Products</span></button>
+            <button class="tab" role="tab" type="button" id="t-stock" aria-controls="p-stock" aria-selected="false" tabindex="-1"><span lang="ms">Stok makanan</span><span lang="en">Dish stock</span></button>
+            <button class="tab" role="tab" type="button" id="t-recipe" aria-controls="p-recipe" aria-selected="false" tabindex="-1"><span lang="ms">Resipi dan kos</span><span lang="en">Recipes and cost</span></button>
+            <button class="tab" role="tab" type="button" id="t-ingredients" aria-controls="p-ingredients" aria-selected="false" tabindex="-1"><span lang="ms">Stok bahan</span><span lang="en">Ingredients</span></button>
+            <button class="tab" role="tab" type="button" id="t-form" aria-controls="p-form" aria-selected="false" tabindex="-1"><span lang="ms">Tambah atau edit</span><span lang="en">Add or edit</span></button>
+            <button class="tab" role="tab" type="button" id="t-categories" aria-controls="p-categories" aria-selected="false" tabindex="-1"><span lang="ms">Kategori</span><span lang="en">Categories</span></button>
+            <button class="tab" role="tab" type="button" id="t-banners" aria-controls="p-banners" aria-selected="false" tabindex="-1"><span lang="ms">Slaid promosi</span><span lang="en">Promo slides</span></button>
+          </div>
+          <div>
+            <div class="panel" role="tabpanel" id="p-products" aria-labelledby="t-products"><div class="cap"><h3><span lang="ms">Produk</span><span lang="en">Products</span></h3><p><span lang="ms">Suis ada dijual dan habis. Cari ikut nama, kategori atau ketersediaan.</span><span lang="en">A switch for in stock and sold out. Search by name, category or availability.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/products.webp" width="2049" height="1290" loading="lazy" alt="Senarai produk dalam grid bergambar dengan suis ada dijual" data-alt-ms="Senarai produk dalam grid bergambar dengan suis ada dijual" data-alt-en="The product list as a picture grid with in-stock switches"></figure></div>
+            <div class="panel" role="tabpanel" id="p-stock" aria-labelledby="t-stock" hidden><div class="cap"><h3><span lang="ms">Stok makanan</span><span lang="en">Dish stock</span></h3><p><span lang="ms">Baki ditolak sendiri bila pesanan masuk dan dipulangkan bila dibatalkan. Tambah stok, catat yang terbuang atau betulkan baki lepas kira rak, semuanya tercatat siapa dan bila. Hidangan hampir habis muncul di Ringkasan. Pelanggan nampak terus bila sesuatu sudah habis. Bila sesuatu habis atau hampir habis, panel beri bunyi dan pop-up, walaupun anda sedang di halaman lain.</span><span lang="en">The count drops by itself when an order comes in and returns when it's cancelled. Add stock, log waste or correct the count after checking the shelf, all recorded with who and when. Dishes running low show up on the summary. Guests see at once when something is gone. When something runs out or runs low, the panel chimes and pops up, even if you are on another page.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/stock.webp" width="2049" height="1350" loading="lazy" alt="Halaman stok dengan baki setiap hidangan, amaran hampir habis dan sejarah pergerakan" data-alt-ms="Halaman stok dengan baki setiap hidangan, amaran hampir habis dan sejarah pergerakan" data-alt-en="The stock page with each dish's count, low-stock warnings and a movement history"></figure></div>
+            <div class="panel" role="tabpanel" id="p-recipe" aria-labelledby="t-recipe" hidden><div class="cap"><h3><span lang="ms">Resipi dan kos</span><span lang="en">Recipes and cost</span></h3><p><span lang="ms">Untuk setiap hidangan, tulis berapa beras, ayam atau santan yang digunakan untuk satu hidangan. Bila hidangan dijual, bahan ditolak sendiri daripada stok bahan. Bila pesanan dibatalkan, bahan dipulangkan. Anda juga nampak kos bahan setiap hidangan dan berapa baki selepas bahan, supaya harga jual tak dianggar-anggar.</span><span lang="en">For each dish, write how much rice, chicken or coconut milk goes into one portion. When the dish sells, the ingredients come off the stock by themselves. If the order is cancelled, they go back. You also see what each dish costs in ingredients and what is left after them, so prices stop being guesswork.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/recipe.webp" width="2049" height="1290" loading="lazy" alt="Resipi satu hidangan dengan kos bahan dan baki selepas bahan" data-alt-ms="Resipi satu hidangan dengan kos bahan dan baki selepas bahan" data-alt-en="One dish's recipe with its ingredient cost and what is left after it"></figure></div>
+            <div class="panel" role="tabpanel" id="p-ingredients" aria-labelledby="t-ingredients" hidden><div class="cap"><h3><span lang="ms">Stok bahan</span><span lang="en">Ingredient stock</span></h3><p><span lang="ms">Senarai bahan di dapur dengan harga seunit, baki dan nilai stok. Staf catat bila beli, guna atau terbuang. Bahan yang ada dalam resipi turun sendiri bila hidangan dijual, dan setiap pergerakan ditunjuk bersama nombor pesanannya. Kalau baki jadi negatif, maksudnya bahan sudah dipakai tetapi pembelian belum dicatat.</span><span lang="en">The kitchen's shelf list with a price per unit, the count and the stock value. Staff log what was bought, used or thrown out. Ingredients in a recipe drop by themselves when a dish sells, and every movement shows its order number. A negative count means the ingredient was used but the purchase was never logged.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/ingredients.webp" width="2049" height="1350" loading="lazy" alt="Halaman stok bahan dengan harga seunit, nilai stok dan sejarah pergerakan termasuk jualan" data-alt-ms="Halaman stok bahan dengan harga seunit, nilai stok dan sejarah pergerakan termasuk jualan" data-alt-en="The ingredient page with price per unit, stock value and a history that includes sales"></figure></div>
+            <div class="panel" role="tabpanel" id="p-form" aria-labelledby="t-form" hidden><div class="cap"><h3><span lang="ms">Tambah atau edit</span><span lang="en">Add or edit</span></h3><p><span lang="ms">Gambar, harga, penerangan dan tambahan untuk setiap hidangan. Hidupkan "Jejak stok" untuk hidangan yang anda kira.</span><span lang="en">Photo, price, description and extras for each dish. Switch on "Track stock" for dishes you count.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/product-form.webp" width="2049" height="1920" loading="lazy" alt="Borang edit produk dengan harga dan senarai tambahan" data-alt-ms="Borang edit produk dengan harga dan senarai tambahan" data-alt-en="The product edit form with price and a list of extras"></figure></div>
+            <div class="panel" role="tabpanel" id="p-categories" aria-labelledby="t-categories" hidden><div class="cap"><h3><span lang="ms">Kategori</span><span lang="en">Categories</span></h3><p><span lang="ms">Susun ikut kehendak. Nombor hidangan (01, 02...) mengikut susunan.</span><span lang="en">Arrange them as you like. Dish numbers (01, 02...) follow the order.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/categories.webp" width="2049" height="1170" loading="lazy" alt="Senarai kategori dengan butang naik dan turun" data-alt-ms="Senarai kategori dengan butang naik dan turun" data-alt-en="The category list with up and down buttons"></figure></div>
+            <div class="panel" role="tabpanel" id="p-banners" aria-labelledby="t-banners" hidden><div class="cap"><h3><span lang="ms">Slaid promosi</span><span lang="en">Promo slides</span></h3><p><span lang="ms">Gambar di atas menu pelanggan, dicrop sekata secara automatik.</span><span lang="en">Pictures above the guest menu, cropped to one size automatically.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/banners.webp" width="2049" height="1230" loading="lazy" alt="Pengurusan slaid promosi dengan muat naik gambar" data-alt-ms="Pengurusan slaid promosi dengan muat naik gambar" data-alt-en="Managing promo slides with an image upload"></figure></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3><span lang="ms">Kawal kedai</span><span lang="en">Keep control</span></h3>
+        <div class="tabs" data-tabs>
+          <div class="tabs__list" role="tablist" aria-label="Kawal kedai" data-label-ms="Kawal kedai" data-label-en="Keep control">
+            <button class="tab" role="tab" type="button" id="t-reports" aria-controls="p-reports" aria-selected="true"><span lang="ms">Laporan</span><span lang="en">Reports</span></button>
+            <button class="tab" role="tab" type="button" id="t-customers" aria-controls="p-customers" aria-selected="false" tabindex="-1"><span lang="ms">Pelanggan</span><span lang="en">Customers</span></button>
+            <button class="tab" role="tab" type="button" id="t-staff" aria-controls="p-staff" aria-selected="false" tabindex="-1"><span lang="ms">Kakitangan</span><span lang="en">Staff</span></button>
+            <button class="tab" role="tab" type="button" id="t-settings" aria-controls="p-settings" aria-selected="false" tabindex="-1"><span lang="ms">Tetapan kedai</span><span lang="en">Shop settings</span></button>
+          </div>
+          <div>
+            <div class="panel" role="tabpanel" id="p-reports" aria-labelledby="t-reports"><div class="cap"><h3><span lang="ms">Laporan</span><span lang="en">Reports</span></h3><p><span lang="ms">Pesanan selesai ikut hari, minggu, bulan atau tahun, dengan sejarah yang boleh ditapis.</span><span lang="en">Completed orders by day, week, month or year, with a history you can filter.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/reports.webp" width="2049" height="1500" loading="lazy" alt="Laporan dengan carta pesanan selesai dan sejarah pesanan" data-alt-ms="Laporan dengan carta pesanan selesai dan sejarah pesanan" data-alt-en="A report with a completed-orders chart and order history"></figure></div>
+            <div class="panel" role="tabpanel" id="p-customers" aria-labelledby="t-customers" hidden><div class="cap"><h3><span lang="ms">Pelanggan</span><span lang="en">Customers</span></h3><p><span lang="ms">Siapa yang pesan, berapa kali, dan bila kali terakhir.</span><span lang="en">Who orders, how often, and when they last did.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/customers.webp" width="2049" height="1170" loading="lazy" alt="Senarai pelanggan dengan bilangan pesanan" data-alt-ms="Senarai pelanggan dengan bilangan pesanan" data-alt-en="The customer list with order counts"></figure></div>
+            <div class="panel" role="tabpanel" id="p-staff" aria-labelledby="t-staff" hidden><div class="cap"><h3><span lang="ms">Kakitangan</span><span lang="en">Staff</span></h3><p><span lang="ms">Admin dan staf. Akaun baharu perlu diluluskan, dan boleh digantung serta-merta.</span><span lang="en">Admins and staff. New accounts need approval, and can be suspended instantly.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/staff.webp" width="2049" height="1170" loading="lazy" alt="Senarai kakitangan dengan butang luluskan dan gantung" data-alt-ms="Senarai kakitangan dengan butang luluskan dan gantung" data-alt-en="The staff list with approve and suspend buttons"></figure></div>
+            <div class="panel" role="tabpanel" id="p-settings" aria-labelledby="t-settings" hidden><div class="cap"><h3><span lang="ms">Tetapan kedai</span><span lang="en">Shop settings</span></h3><p><span lang="ms">Waktu buka, bilangan meja, makan sini atau bungkus, kod QR bayaran.</span><span lang="en">Opening hours, number of tables, dine-in or takeaway, payment QR.</span></p></div><figure class="laptop"><div class="laptop__bar"><i></i><i></i><i></i></div><img src="shots/settings.webp" width="2049" height="1500" loading="lazy" alt="Halaman tetapan kedai" data-alt-ms="Halaman tetapan kedai" data-alt-en="The shop settings page"></figure></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band band--mint" aria-labelledby="h-belum">
+  <div class="wrap limits">
+    <h2 id="h-belum"><span lang="ms">Apa yang Warung belum ada</span><span lang="en">What Warung doesn't do yet</span></h2>
+    <ul>
+      <li><span><span lang="ms">Bayaran kad atau FPX automatik. Bayaran QR disahkan oleh staf anda.</span><span lang="en">Automatic card or FPX payments. QR payments are confirmed by your staff.</span></span></li>
+      <li><span><span lang="ms">Satu kedai setiap akaun. Kalau ada dua cawangan, setiap cawangan perlu akaun sendiri.</span><span lang="en">One eatery per account. A second branch needs its own account.</span></span></li>
+      <li><span><span lang="ms">Pesanan perlukan sambungan internet. Skrin pelanggan dan staf dalam Bahasa Melayu.</span><span lang="en">Ordering needs an internet connection. Guest and staff screens are in Bahasa Melayu.</span></span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="band band--cream" id="harga" aria-labelledby="h-harga">
+  <div class="wrap">
+    <h2 id="h-harga"><span lang="ms">Harga</span><span lang="en">Pricing</span></h2>
+    <p class="sub"><span lang="ms">Bayar bulanan. Hosting dan penyelenggaraan sistem saya uruskan.</span><span lang="en">Billed monthly. I take care of hosting and upkeep.</span></p>
+    <div class="plans">
+      <article class="plan">
+        <h3><span lang="ms">Sistem sahaja</span><span lang="en">System only</span></h3>
+        <p class="price"><span class="led">RM199</span><span class="per"><span lang="ms">sebulan</span><span lang="en">a month</span></span></p>
+        <ul class="ticks">
+          <li><span><span lang="ms">Semua ciri Warung di atas.</span><span lang="en">Every Warung feature above.</span></span></li>
+          <li><span><span lang="ms">Tanpa laman jualan.</span><span lang="en">No sales page.</span></span></li>
+        </ul>
+      </article>
+      <article class="plan plan--main">
+        <h3><span lang="ms">Sistem + laman jualan</span><span lang="en">System + sales page</span></h3>
+        <dl class="months">
+          <div><dt><span lang="ms">Bulan pertama</span><span lang="en">First month</span></dt><dd class="led">RM380</dd></div>
+          <div><dt><span lang="ms">Bulan kedua dan seterusnya</span><span lang="en">Month two onwards</span></dt><dd class="led">RM280</dd></div>
+        </dl>
+        <p class="note"><span lang="ms">Bulan pertama termasuk RM100 bayaran sekali sahaja untuk menyediakan laman jualan.</span><span lang="en">The first month includes a one-time RM100 to set up the sales page.</span></p>
+        <ul class="ticks">
+          <li><span><span lang="ms">Semua dalam pakej Sistem.</span><span lang="en">Everything in the System plan.</span></span></li>
+          <li><span><span lang="ms">Satu halaman web untuk kedai anda dengan menu, lokasi, waktu buka dan butang pesan.</span><span lang="en">A web page for your eatery with the menu, location, opening hours and an order button.</span></span></li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="band band--amber" aria-labelledby="h-cta">
+  <div class="wrap cta">
+    <div class="cta__text">
+      <h2 id="h-cta"><span lang="ms">Nak tengok Warung berjalan?</span><span lang="en">Want to see Warung running?</span></h2>
+      <p><span lang="ms">Mesej saya di WhatsApp. Cerita sedikit tentang kedai anda, saya tunjuk bahagian yang paling berguna.</span><span lang="en">Message me on WhatsApp. Tell me a little about your eatery and I'll show you the parts that matter most.</span></p>
+      <div class="cta__row">
+        <a class="btn" data-wa href="https://wa.me/60139558132" target="_blank" rel="noopener"><span lang="ms">WhatsApp Yul</span><span lang="en">WhatsApp Yul</span></a>
+        <span class="num">+60 13-955 8132</span>
+        <button class="btn btn--ghost" type="button" id="copy-num"><span lang="ms">Salin nombor</span><span lang="en">Copy number</span></button>
+      </div>
+    </div>
+    <figure class="phone cta__art"><img src="shots/status.webp" width="780" height="1688" loading="lazy" alt="Status pesanan yang dilihat pelanggan" data-alt-ms="Status pesanan yang dilihat pelanggan" data-alt-en="The order status a guest sees"></figure>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__in">
+    <span class="display">Warung</span>
+    <div class="lang" role="group" aria-label="Bahasa / Language">
+      <button type="button" data-set-lang="ms" aria-pressed="true">BM</button>
+      <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var TITLES = { ms: 'Warung Handbook', en: 'Warung Handbook' };
+  var WA = { ms: 'Hai Yul, saya nak tahu lebih lanjut tentang Warung.', en: 'Hi Yul, I would like to know more about Warung.' };
+
+  function setLang(ui, remember) {
+    root.dataset.ui = ui;
+    root.lang = ui;
+    document.title = TITLES[ui];
+    document.querySelectorAll('[data-set-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.setLang === ui)); });
+    document.querySelectorAll('img[data-alt-ms]').forEach(function (img) { img.alt = img.dataset['alt' + ui.charAt(0).toUpperCase() + ui.slice(1)]; });
+    document.querySelectorAll('[aria-label][data-label-ms]').forEach(function (el) { el.setAttribute('aria-label', el.dataset['label' + ui.charAt(0).toUpperCase() + ui.slice(1)]); });
+    if (typeof zoomLabels === 'function') { zoomLabels(ui); }
+    document.querySelectorAll('[data-wa]').forEach(function (a) { a.href = 'https://wa.me/60139558132?text=' + encodeURIComponent(WA[ui]); });
+    if (remember) { try { localStorage.setItem('foody-handbook-lang', ui); } catch (e) {} }
+  }
+  document.querySelectorAll('[data-set-lang]').forEach(function (b) { b.addEventListener('click', function () { setLang(b.dataset.setLang, true); }); });
+
+  /* Picture viewer: a native dialog, so Escape, focus and the inert page behind come for free. */
+  var viewer = null;
+  function openViewer(img) {
+    if (!viewer) {
+      viewer = document.createElement('dialog');
+      viewer.className = 'viewer';
+      viewer.innerHTML = '<button type="button" class="viewer__close" aria-label="Close">&times;</button><div class="viewer__box"><img alt=""></div>';
+      document.body.appendChild(viewer);
+      viewer.addEventListener('click', function (e) { if (e.target === viewer || e.target.classList.contains('viewer__box') || e.target.closest('.viewer__close')) { viewer.close(); } });
+    }
+    var box = viewer.querySelector('.viewer__box');
+    var big = box.querySelector('img');
+    box.className = 'viewer__box ' + (img.closest('.phone') ? 'viewer__box--tall' : 'viewer__box--wide');
+    big.src = img.currentSrc || img.src;
+    big.alt = img.alt;
+    viewer.querySelector('.viewer__close').setAttribute('aria-label', root.dataset.ui === 'ms' ? 'Tutup' : 'Close');
+    viewer.showModal();
+    box.scrollTo(0, 0);
+  }
+  var zoomables = document.querySelectorAll('.laptop img, .paper img, .phone img');
+  zoomables.forEach(function (img) {
+    img.classList.add('zoomable');
+    img.tabIndex = 0;
+    img.setAttribute('role', 'button');
+    img.addEventListener('click', function () { openViewer(img); });
+    img.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openViewer(img); } });
+  });
+  function zoomLabels(ui) {
+    zoomables.forEach(function (img) { img.setAttribute('aria-label', img.alt + (ui === 'ms' ? '. Besarkan gambar.' : '. Enlarge picture.')); });
+  }
+
+  /* Phone rail */
+  var rail = document.getElementById('rail');
+  var prev = document.getElementById('rail-prev');
+  var next = document.getElementById('rail-next');
+  function step() { var s = rail.querySelector('.slide'); return s ? s.getBoundingClientRect().width + 24 : 280; }
+  function railState() { prev.disabled = rail.scrollLeft < 8; next.disabled = rail.scrollLeft > rail.scrollWidth - rail.clientWidth - 8; }
+  prev.addEventListener('click', function () { rail.scrollBy({ left: -step(), behavior: 'smooth' }); });
+  next.addEventListener('click', function () { rail.scrollBy({ left: step(), behavior: 'smooth' }); });
+  rail.addEventListener('scroll', railState, { passive: true });
+  rail.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight') { next.click(); } if (e.key === 'ArrowLeft') { prev.click(); } });
+  window.addEventListener('resize', railState);
+  railState();
+
+  /* Tabs */
+  document.querySelectorAll('[data-tabs]').forEach(function (box) {
+    var tabs = Array.prototype.slice.call(box.querySelectorAll('[role="tab"]'));
+    function select(tab, focus) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      });
+      if (focus) { tab.focus(); }
+    }
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener('click', function () { select(tab, false); });
+      tab.addEventListener('keydown', function (e) {
+        var j = null;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { j = (i + 1) % tabs.length; }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { j = (i - 1 + tabs.length) % tabs.length; }
+        if (e.key === 'Home') { j = 0; }
+        if (e.key === 'End') { j = tabs.length - 1; }
+        if (j !== null) { e.preventDefault(); select(tabs[j], true); }
+      });
+    });
+  });
+
+  setLang(root.dataset.ui || 'ms', false);
+
+  /* Copy number: the number stays visible as text, so a refused clipboard still leaves it selectable. */
+  var copy = document.getElementById('copy-num');
+  copy.addEventListener('click', function () {
+    var number = '+60139558132';
+    function done() {
+      var label = copy.querySelector('[lang="' + root.dataset.ui + '"]');
+      var original = label.textContent;
+      label.textContent = root.dataset.ui === 'ms' ? 'Disalin' : 'Copied';
+      setTimeout(function () { label.textContent = original; }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(number).then(done, function () {
+        var sel = window.getSelection(); var r = document.createRange(); r.selectNodeContents(document.querySelector('.cta .num')); sel.removeAllRanges(); sel.addRange(r);
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -19,15 +19,15 @@ export function MenuSection({ category, startIndex, canOrder, quantities, onOpen
     const headingId = `tajuk-${category.slug}`;
 
     return (
-        <section id={`kategori-${category.slug}`} data-category-id={category.id} aria-labelledby={headingId} className="scroll-mt-16 pt-10 first:pt-8">
-            <header className="border-b-2 border-amber pb-2.5">
-                <h2 id={headingId} tabIndex={-1} className="min-w-0 text-2xl font-extrabold text-ink focus-visible:outline-none sm:text-3xl">
+        <section id={`kategori-${category.slug}`} data-category-id={category.id} aria-labelledby={headingId} className="scroll-mt-20 pt-12 first:pt-8">
+            <header>
+                <h2 id={headingId} tabIndex={-1} className="section-title min-w-0 text-2xl font-extrabold text-ink focus-visible:outline-none sm:text-3xl">
                     {category.name}
                 </h2>
-                {category.description && <p className="mt-1.5 text-[15px] text-ink-muted">{category.description}</p>}
+                {category.description && <p className="mt-3 text-[15px] text-ink-muted">{category.description}</p>}
             </header>
 
-            <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-5">
+            <ul className="mt-6 grid grid-cols-2 gap-4 gap-y-8 sm:grid-cols-3 sm:gap-5 sm:gap-y-9">
                 {coded.map(({ product, code }) => (
                     <DishCard
                         key={product.id}

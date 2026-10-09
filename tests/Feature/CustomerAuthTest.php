@@ -76,7 +76,7 @@ class CustomerAuthTest extends TestCase
             ->assertRedirect('/');
         $this->assertAuthenticatedAs($customer, 'customer');
 
-        $this->post('/log-keluar')->assertRedirect('/log-masuk');
+        $this->post('/log-keluar')->assertRedirect('/');
         $this->assertGuest('customer');
     }
 
@@ -102,10 +102,15 @@ class CustomerAuthTest extends TestCase
         $this->assertGuest('customer');
     }
 
-    public function test_guests_are_sent_to_the_login_page(): void
+    public function test_signing_in_is_optional_for_browsing_and_checking_out(): void
     {
-        $this->get('/')->assertRedirect('/log-masuk');
-        $this->get('/pesan')->assertRedirect('/log-masuk');
+        $this->get('/')->assertOk();
+        $this->get('/pesan')->assertOk();
+        $this->assertGuest('customer');
+    }
+
+    public function test_only_the_order_history_needs_an_account(): void
+    {
         $this->get('/pesanan-saya')->assertRedirect('/log-masuk');
     }
 
@@ -113,7 +118,7 @@ class CustomerAuthTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $this->actingAs($admin)->get('/')->assertRedirect('/log-masuk');
+        $this->actingAs($admin)->get('/pesanan-saya')->assertRedirect('/log-masuk');
     }
 
     public function test_a_customer_session_alone_is_still_a_guest_on_the_admin_guard(): void

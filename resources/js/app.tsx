@@ -1,7 +1,7 @@
 import { createInertiaApp } from '@inertiajs/react';
 
 createInertiaApp({
-    title: (title) => title || 'Foody',
+    title: (title) => title || 'Warung',
     progress: {
         color: '#ff9f3d',
         delay: 250,

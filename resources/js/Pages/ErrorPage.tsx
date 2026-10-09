@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { DigitDisplay } from '@/components/DigitDisplay';
+import { buttonClass } from '@/components/ui/Button';
 
 const COPY: Record<number, { title: string; body: string }> = {
     403: { title: 'Akses tidak dibenarkan', body: 'Halaman ini hanya untuk kakitangan kedai. Log masuk dengan akaun admin untuk meneruskan.' },
@@ -15,21 +16,14 @@ export default function ErrorPage({ status }: { status: number }) {
         <>
             <Head title={copy.title} />
             <main id="kandungan" className="grid min-h-dvh place-items-center bg-ground px-5 py-16">
-                <div className="w-full max-w-md rounded-(--radius-panel) border-2 border-rule-strong bg-panel shadow-(--shadow-lift)">
-                    <div className="rounded-t-(--radius-panel) bg-module px-7 pt-6 pb-5">
-                        <DigitDisplay value={String(status)} size="xl" label={`Ralat ${status}`} />
-                    </div>
-                    <div className="p-7">
-                        <h1 className="text-3xl font-extrabold text-balance text-ink">{copy.title}</h1>
-                        <p className="mt-2 text-base text-ink-soft">{copy.body}</p>
-                        {/* A full page load leaves the error context cleanly. */}
-                        <a
-                            href="/"
-                            className="mt-6 inline-flex h-12 items-center rounded-(--radius-control) bg-ink px-5 font-semibold text-white transition-[transform,background-color] duration-150 hover:bg-ink-soft active:scale-[0.97]"
-                        >
-                            Kembali ke menu
-                        </a>
-                    </div>
+                <div className="neu-card w-full max-w-md p-7">
+                    <DigitDisplay value={String(status)} size="xl" label={`Ralat ${status}`} />
+                    <h1 className="mt-6 text-3xl font-extrabold text-balance text-ink">{copy.title}</h1>
+                    <p className="mt-2 text-base text-ink-soft">{copy.body}</p>
+                    {/* A full page load leaves the error context cleanly. */}
+                    <a href="/" className={buttonClass({ variant: 'ink', className: 'mt-6' })}>
+                        Kembali ke menu
+                    </a>
                 </div>
             </main>
         </>

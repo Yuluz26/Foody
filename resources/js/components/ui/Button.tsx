@@ -1,35 +1,29 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/format';
 
-type Variant = 'ink' | 'amber' | 'leaf' | 'outline' | 'quiet' | 'alert';
-type Size = 'sm' | 'md' | 'lg';
+export type ButtonVariant = 'ink' | 'amber' | 'leaf' | 'soft' | 'quiet' | 'alert';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
-const variants: Record<Variant, string> = {
-    ink: 'bg-ink text-white hover:bg-ink-soft',
-    amber: 'bg-amber text-ink hover:bg-amber-deep',
-    leaf: 'bg-leaf text-white hover:bg-leaf-deep',
-    outline: 'border-2 border-ink bg-transparent text-ink hover:bg-ink hover:text-white',
-    quiet: 'bg-transparent text-ink hover:bg-rule/70',
-    alert: 'bg-alert text-white hover:bg-alert/85',
+type ButtonStyle = {
+    variant?: ButtonVariant;
+    size?: ButtonSize;
+    /** Round, label-less button (close, row action). Pair with an aria-label. */
+    icon?: boolean;
+    className?: string;
 };
 
-// A de-emphasised text action (quiet) stays flat; every real action gets a little lift to reach for.
-const LIFTS: Record<Variant, boolean> = { ink: true, amber: true, leaf: true, outline: true, quiet: false, alert: true };
+/** The look of a button, for anything that navigates (<Link>, <a>) but should read as one. The surface itself lives in app.css (.btn). */
+export function buttonClass({ variant = 'ink', size = 'md', icon = false, className }: ButtonStyle = {}): string {
+    return cn('btn', `btn-${variant}`, `btn-${size}`, icon && 'btn-icon', className);
+}
 
-const sizes: Record<Size, string> = {
-    sm: 'h-10 px-3 text-sm',
-    md: 'h-12 px-4 text-[15px]',
-    lg: 'h-14 px-5 text-base',
-};
-
-export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-    variant?: Variant;
-    size?: Size;
-    loading?: boolean;
-};
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+    ButtonStyle & {
+        loading?: boolean;
+    };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-    { variant = 'ink', size = 'md', loading = false, className, disabled, type = 'button', children, ...props },
+    { variant, size, icon, loading = false, className, disabled, type = 'button', children, ...props },
     ref,
 ) {
     return (
@@ -38,17 +32,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
             type={type}
             disabled={disabled || loading}
             aria-busy={loading || undefined}
-            className={cn(
-                'inline-flex touch-manipulation items-center justify-center gap-2 rounded-(--radius-control) font-semibold whitespace-nowrap select-none',
-                'transition-[transform,background-color,color,box-shadow] duration-150 ease-out active:scale-[0.97]',
-                'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:active:scale-100',
-                LIFTS[variant] && 'hover:-translate-y-0.5 hover:shadow-(--shadow-lift)',
-                variants[variant],
-                sizes[size],
-                className,
-            )}
+            className={buttonClass({ variant, size, icon, className })}
             {...props}
         >
+            {loading && (
+                <span className="btn-dots" aria-hidden>
+                    <i />
+                    <i />
+                    <i />
+                </span>
+            )}
             {children}
         </button>
     );

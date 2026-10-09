@@ -3,11 +3,11 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-        <meta name="theme-color" content="#FBF6EC">
+        <meta name="theme-color" content="#efe7d7">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
-        <meta name="apple-mobile-web-app-title" content="Foody">
+        <meta name="apple-mobile-web-app-title" content="{{ \App\Models\RestaurantSetting::current()->name }}">
         <link rel="manifest" href="/manifest.webmanifest">
         <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
         <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -20,12 +20,9 @@
     </head>
     <body class="min-h-dvh bg-ground font-sans text-ink antialiased">
         <!--
-        THESIS: The product reads like the digital number board above a hawker stall: every number it owns glows as a real LED digit. It refuses the category default of white rounded cards with an orange accent.
-        OWN-WORLD: Warm cream shopfront ground; a dark instrument module glows amber digits for order numbers, table numbers, prices, counts and KPIs, a ghost "8" behind every unlit position; leaf green for ready/open, alert red for errors only; Inter for reading text, IBM Plex Mono for every digit; rounded panels, no pills.
-        STORY: The diner sees the shop's open state glow, browses numbered dishes, adds to cart, checks out, then watches their order number count through status on a glowing readout. Staff read the same digits on a busier operator console.
-        FIRST VIEWPORT: Cream header with Foody's name; a small dark module glowing the table number and open state beside it; category tabs below; the first dish as a large photo with its number and price set in digits.
-        FORM: Papan Digit Gerai, fused from the seven-segment/signals-instruments challenger over the dealt "kedai kopi" direction, seed 43a8cb4c; replaces Papan Menu Kedai Makan (seed e979aa04) by user request.
-        FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+        THESIS: The product reads like the digital number board above a hawker stall: every number it owns glows as a real LED digit.
+        OWN-WORLD: Papan Digit Gerai, soft edition. One warm clay tone for the page and everything raised from it, lit from the top left; fields, wells and tracks are pressed in. A dark instrument module glows amber digits for order numbers, table numbers, prices, counts and KPIs; real actions are solid colour so the main path never depends on a soft shadow. Leaf green for ready/open, alert red for errors only. Inter for reading text, Nunito for admin headings, IBM Plex Mono for every digit.
+        FORM: Neomorphism, restrained: raised = interactive or grouped, pressed = chosen or an input. See DESIGN.md.
         -->
         <x-inertia::app />
     </body>

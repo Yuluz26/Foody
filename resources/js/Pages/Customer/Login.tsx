@@ -1,7 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import { AuthSplitScreen } from '@/components/auth/AuthSplitScreen';
-import { Button } from '@/components/ui/Button';
+import { Button, buttonClass } from '@/components/ui/Button';
 import { Field, inputClass } from '@/components/ui/Field';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 
@@ -26,10 +26,10 @@ export default function Login() {
                     imageAlt="Penjaja memasak di gerai malam dengan api dan bunga api, gaya hawker Malaysia"
                     brandName={restaurantName}
                     heroTitle="Rasa gerai kegemaran anda, sedia menanti."
-                    heroSubtitle="Log masuk untuk terus memesan hidangan segar hari ini."
+                    heroSubtitle="Pesan hidangan segar hari ini, dengan atau tanpa akaun."
                 >
                     <h1 className="text-2xl font-extrabold text-ink">Log masuk</h1>
-                    <p className="mt-1 text-[15px] text-ink-muted">Untuk melihat menu dan memesan.</p>
+                    <p className="mt-1 text-[15px] text-ink-muted">Tak wajib. Log masuk untuk lihat sejarah pesanan anda.</p>
                     <form onSubmit={submit} className="mt-6 grid gap-5" noValidate>
                         <Field id="email" label="Emel" error={form.errors.email}>
                             {(control) => (
@@ -60,7 +60,6 @@ export default function Login() {
                                 type="checkbox"
                                 checked={form.data.remember}
                                 onChange={(event) => form.setData('remember', event.target.checked)}
-                                className="size-5 accent-ink"
                             />
                             Kekal log masuk pada peranti ini
                         </label>
@@ -74,6 +73,9 @@ export default function Login() {
                             </Link>
                         </p>
                     </form>
+                    <Link href="/" className={buttonClass({ variant: 'soft', size: 'lg', className: 'mt-5 w-full' })}>
+                        Teruskan tanpa akaun
+                    </Link>
                 </AuthSplitScreen>
             </main>
         </>

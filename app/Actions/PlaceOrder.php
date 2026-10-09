@@ -13,8 +13,10 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\RestaurantSetting;
+use App\Models\User;
 use App\Support\ImageUpload;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +27,8 @@ use Throwable;
 
 class PlaceOrder
 {
+    public function __construct(private readonly StockLedger $stock, private readonly IngredientLedger $ingredients) {}
+
     /**
      * Create an order from validated checkout data.
      *
@@ -40,13 +44,36 @@ class PlaceOrder
      *     customer_phone: string,
      *     notes?: string|null,
      *     payment_method: string,
-     *     payment_proof?: \Illuminate\Http\UploadedFile|null,
+     *     payment_proof?: UploadedFile|null,
      *     items: list<array{product_id: int|string, quantity: int|string, add_on_ids?: list<int|string>}>
      * }  $data
      *
      * @throws OrderRejected
      */
     public function handle(array $data): Order
+    {
+        return $this->place($data, null);
+    }
+
+    /**
+     * An order keyed in at the counter by staff. Same pricing, stock and table rules as a guest order, but
+     * it is not tied to a customer account, ignores opening hours and the online dine-in/takeaway
+     * switches (the person is standing there), skips the guest and staff emails, and starts Confirmed.
+     * Pass `paid => true` when the money has already changed hands.
+     *
+     * @param  array<string, mixed>  $data
+     *
+     * @throws OrderRejected
+     */
+    public function handleForStaff(array $data, User $staff): Order
+    {
+        return $this->place($data, $staff);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function place(array $data, ?User $staff): Order
     {
         if ($existing = $this->findExisting($data['idempotency_key'])) {
             return $existing;
@@ -55,20 +82,22 @@ class PlaceOrder
         $settings = RestaurantSetting::current();
         $type = OrderType::from($data['type']);
 
-        if (! $settings->isAcceptingOrders()) {
-            throw OrderRejected::closed();
-        }
+        if ($staff === null) {
+            if (! $settings->isAcceptingOrders()) {
+                throw OrderRejected::closed();
+            }
 
-        if (($type === OrderType::DineIn && ! $settings->dine_in_enabled)
-            || ($type === OrderType::Takeaway && ! $settings->takeaway_enabled)) {
-            throw OrderRejected::typeDisabled($type);
+            if (($type === OrderType::DineIn && ! $settings->dine_in_enabled)
+                || ($type === OrderType::Takeaway && ! $settings->takeaway_enabled)) {
+                throw OrderRejected::typeDisabled($type);
+            }
         }
 
         // Merge repeated lines for the same product with the same add-ons.
         $groups = $this->groupItems($data['items']);
 
         try {
-            $order = DB::transaction(fn () => $this->create($data, $type, $groups));
+            $order = DB::transaction(fn () => $this->create($data, $type, $groups, $staff));
         } catch (UniqueConstraintViolationException $exception) {
             // Two identical submits raced past the first check; return the winner.
             if ($existing = $this->findExisting($data['idempotency_key'])) {
@@ -78,18 +107,25 @@ class PlaceOrder
             throw $exception;
         }
 
-        $this->sendPlacedNotifications($order);
+        if ($staff === null) {
+            $this->sendPlacedNotifications($order);
+        }
 
         return $order;
     }
 
-    /** Never let a mail hiccup (or a blocked SMTP AUTH setting) fail an order that's already saved. */
+    /**
+     * Never let a mail hiccup (or a blocked SMTP AUTH setting) fail an order that's already saved.
+     * A diner ordering without an account leaves no email address, so only the shop is told.
+     */
     private function sendPlacedNotifications(Order $order): void
     {
-        try {
-            Mail::to($order->customer)->send(new OrderPlacedCustomerMail($order));
-        } catch (Throwable $exception) {
-            Log::error('Failed to send order-placed customer email', ['order_id' => $order->id, 'error' => $exception->getMessage()]);
+        if ($order->customer?->email !== null) {
+            try {
+                Mail::to($order->customer)->send(new OrderPlacedCustomerMail($order));
+            } catch (Throwable $exception) {
+                Log::error('Failed to send order-placed customer email', ['order_id' => $order->id, 'error' => $exception->getMessage()]);
+            }
         }
 
         try {
@@ -126,13 +162,14 @@ class PlaceOrder
      * @param  array<string, mixed>  $data
      * @param  Collection<string, array{product_id: int, quantity: int, add_on_ids: list<int>}>  $groups
      */
-    private function create(array $data, OrderType $type, Collection $groups): Order
+    private function create(array $data, OrderType $type, Collection $groups, ?User $staff = null): Order
     {
         $productIds = $groups->pluck('product_id')->unique()->all();
 
         $products = Product::query()
             ->orderable()
             ->whereKey($productIds)
+            ->lockForUpdate()
             ->with('addOns')
             ->get()
             ->keyBy('id');
@@ -143,6 +180,16 @@ class PlaceOrder
             throw OrderRejected::unavailable(
                 Product::query()->whereKey($missingIds)->pluck('name')->all()
             );
+        }
+
+        // Same dish on several lines (different add-ons) draws from the same stock.
+        foreach ($groups->groupBy('product_id') as $productId => $productGroups) {
+            $product = $products[$productId];
+            $wanted = (int) $productGroups->sum('quantity');
+
+            if ($product->track_stock && $wanted > $product->stock_quantity) {
+                throw OrderRejected::notEnoughStock($product->name, $product->stock_quantity);
+            }
         }
 
         $lines = [];
@@ -192,34 +239,38 @@ class PlaceOrder
             }
         }
 
-        $phone = Customer::normalizePhone($data['customer_phone']);
-        $name = trim($data['customer_name']);
+        $phone = Customer::normalizePhone($data['customer_phone'] ?? '');
+        $name = trim((string) ($data['customer_name'] ?? '')) ?: 'Pelanggan kaunter';
 
-        // The checkout route is auth:customer-gated, so a real account always exists here.
-        // Don't look a customer up by phone anymore — two different accounts could share one
-        // (a shared family line, a typo), and matching on phone would silently attach an
-        // order (and rewrite the name) onto the wrong account.
-        $customer = auth('customer')->user();
-        $customer->update(['last_order_at' => now()]);
+        // A signed-in diner's order is tied to their account; anyone else orders as a guest and the order
+        // keeps just the name and phone typed at checkout. Never look a customer up by phone — two
+        // different accounts could share one (a shared family line, a typo), and matching on phone
+        // would silently attach an order (and rewrite the name) onto the wrong account.
+        $customer = $staff ? null : auth('customer')->user();
+        $customer?->update(['last_order_at' => now()]);
 
         $paymentMethod = PaymentMethod::from($data['payment_method']);
         $paymentProof = $paymentMethod === PaymentMethod::Qr
             ? ImageUpload::replace($data['payment_proof'] ?? null, null, false, 'payment-proofs')
             : null;
-        $paymentStatus = $paymentMethod === PaymentMethod::Qr
-            ? PaymentStatus::PendingVerification
-            : PaymentStatus::Unpaid;
+        $paymentStatus = match (true) {
+            $staff !== null && ($data['paid'] ?? false) => PaymentStatus::Paid,
+            $paymentMethod === PaymentMethod::Qr && $staff === null => PaymentStatus::PendingVerification,
+            default => PaymentStatus::Unpaid,
+        };
 
         $order = Order::query()->create([
             'order_number' => 'TMP-'.Str::random(12),
             'idempotency_key' => $data['idempotency_key'],
-            'customer_id' => $customer->id,
+            'source' => $staff ? 'pos' : 'online',
+            'created_by' => $staff?->id,
+            'customer_id' => $customer?->id,
             'customer_name' => $name,
             'customer_phone' => $phone,
             'type' => $type,
             'table_number' => $tableNumber,
             'notes' => filled($data['notes'] ?? null) ? trim($data['notes']) : null,
-            'status' => OrderStatus::Pending,
+            'status' => $staff ? OrderStatus::Confirmed : OrderStatus::Pending,
             'subtotal' => $subtotal,
             // No service charge or tax in MVP; total equals subtotal.
             'total' => $subtotal,
@@ -232,6 +283,11 @@ class PlaceOrder
         // notification mail below reads $order->customer — it's already in memory right here.
         $order->setRelation('customer', $customer);
 
+        if ($staff) {
+            $order->confirmed_at = now();
+            $order->save();
+        }
+
         $order->update(['order_number' => self::formatNumber($order->id)]);
 
         $items = $order->items()->createMany(array_map(fn (array $line) => Arr::except($line, 'add_ons'), $lines));
@@ -241,6 +297,9 @@ class PlaceOrder
                 $item->addOns()->createMany($lines[$index]['add_ons']);
             }
         }
+
+        $this->stock->sell($order, $lines);
+        $this->ingredients->sell($order, $lines);
 
         Log::info('Order placed', [
             'order_id' => $order->id,
@@ -260,6 +319,6 @@ class PlaceOrder
 
     public static function formatNumber(int $id): string
     {
-        return 'FD'.str_pad((string) $id, 4, '0', STR_PAD_LEFT);
+        return 'WR'.str_pad((string) $id, 4, '0', STR_PAD_LEFT);
     }
 }

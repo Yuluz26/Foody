@@ -1,7 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import { AuthSplitScreen } from '@/components/auth/AuthSplitScreen';
-import { Button } from '@/components/ui/Button';
+import { Button, buttonClass } from '@/components/ui/Button';
 import { Field, inputClass } from '@/components/ui/Field';
 import { PasswordInput } from '@/components/ui/PasswordInput';
 import { cn } from '@/lib/format';
@@ -27,10 +27,10 @@ export default function Register() {
                     imageAlt="Penjaja satay memanggang di gerai jalanan, gaya hawker Malaysia"
                     brandName={restaurantName}
                     heroTitle="Sertai kami, nikmati setiap hidangan."
-                    heroSubtitle="Daftar akaun percuma untuk mula memesan dan menjejak pesanan anda."
+                    heroSubtitle="Daftar akaun percuma untuk simpan sejarah pesanan anda di satu tempat."
                 >
                     <h1 className="text-2xl font-extrabold text-ink">Daftar akaun</h1>
-                    <p className="mt-1 text-[15px] text-ink-muted">Untuk mula memesan dan menjejak pesanan.</p>
+                    <p className="mt-1 text-[15px] text-ink-muted">Tak wajib. Anda boleh memesan tanpa akaun.</p>
                     <form onSubmit={submit} className="mt-6 grid gap-5" noValidate>
                         <Field id="name" label="Nama" error={form.errors.name}>
                             {(control) => (
@@ -104,6 +104,9 @@ export default function Register() {
                             </Link>
                         </p>
                     </form>
+                    <Link href="/" className={buttonClass({ variant: 'soft', size: 'lg', className: 'mt-5 w-full' })}>
+                        Teruskan tanpa akaun
+                    </Link>
                 </AuthSplitScreen>
             </main>
         </>

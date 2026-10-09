@@ -17,7 +17,7 @@ type AuthSplitScreenProps = {
 
 /**
  * Cinematic split-screen shared by the customer login/register pages: a full-height hawker-stall
- * photo carrying the restaurant identity on one side, the form on a warm cream panel on the
+ * photo carrying the restaurant identity on one side, the form on a soft clay panel on the
  * other. Stacks (photo on top, shorter) below `lg`, where a 50/50 side-by-side split would
  * otherwise squeeze the form unusably narrow.
  */
@@ -48,7 +48,7 @@ export function AuthSplitScreen({ imageUrl, imageAlt, brandName, homeHref, heroT
             <div className="flex items-center justify-center px-5 py-10 sm:px-10 lg:px-16">
                 <div className="w-full max-w-sm">
                     {flash.error && (
-                        <p role="alert" className="mb-6 flex gap-2 rounded-(--radius-panel) border-2 border-alert bg-alert-tint p-4 text-[15px] font-semibold text-alert">
+                        <p role="alert" className="mb-6 flex gap-2 rounded-(--radius-panel) bg-alert-tint p-4 text-[15px] font-semibold text-alert shadow-(--shadow-inset-sm)">
                             <WarningCircleIcon size={22} weight="bold" className="shrink-0" aria-hidden />
                             {flash.error}
                         </p>

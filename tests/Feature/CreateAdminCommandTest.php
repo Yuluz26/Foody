@@ -30,7 +30,7 @@ class CreateAdminCommandTest extends TestCase
 
     public function test_it_recovers_a_locked_out_account(): void
     {
-        $user = User::factory()->staff()->inactive()->create(['email' => 'pemilik@example.com']);
+        $user = User::factory()->chef()->inactive()->create(['email' => 'pemilik@example.com']);
 
         $this->artisan('app:create-admin', ['--email' => 'pemilik@example.com'])
             ->expectsConfirmation('Akaun pemilik@example.com sudah wujud. Tetapkan semula kata laluannya dan jadikan admin aktif?', 'yes')

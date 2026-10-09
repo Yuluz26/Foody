@@ -4,27 +4,29 @@
 @source '../../storage/framework/views/*.php';
 
 /*
- * Papan Digit Gerai (Stall Digit Board)
- * Warm cream shopfront ground. Every number the product owns — order number, table,
- * price, count, KPI — glows as a real LED digit inside a dark instrument module.
- * Everything else reads in a plain, confident grotesk. Digits are the ornament;
- * nothing else imitates them.
+ * Papan Digit Gerai, soft edition.
+ * Every surface is cut from one warm clay tone: raised parts catch light from the top left,
+ * wells and fields are pressed in. Two things keep it from going mushy:
+ *   1. Every number the product owns still glows as an LED digit inside a dark recessed module.
+ *   2. Real actions (amber, ink, leaf, alert) are solid colour, so the primary path never
+ *      depends on a soft shadow to be seen.
  */
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    /* Rounded terminals for the admin panel's headings — warmer than the plain grotesk, still legible at speed. */
+    /* Rounded terminals for headings: friendlier than the plain grotesk, still legible at speed. */
     --font-heading: 'Nunito', 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-    --color-ground: #fbf6ec;
-    --color-ground-deep: #f3ead4;
-    --color-panel: #ffffff;
+    /* One clay tone for the page and everything raised from it; wells sit slightly deeper. */
+    --color-ground: #efe7d7;
+    --color-ground-deep: #e8dfcc;
+    --color-panel: #efe7d7;
     --color-ink: #211d17;
-    --color-ink-soft: #5b5549;
-    /* Darkened from a first pass (#8d8574, ~3.4:1) to clear 4.5:1 on both cream and white. */
-    --color-ink-muted: #6f6858;
-    --color-rule: #e8e0cd;
-    --color-rule-strong: #d4c9ac;
+    --color-ink-soft: #4f493b;
+    /* Re-checked against the clay tone (and the deeper well): both clear 4.5:1. */
+    --color-ink-muted: #5f5848;
+    --color-rule: #d9cdb2;
+    --color-rule-strong: #bfb294;
 
     /* The instrument module: dark housing behind every glowing digit. */
     --color-module: #211d17;
@@ -32,32 +34,56 @@
 
     --color-amber: #ff9f3d;
     --color-amber-deep: #e07f1e;
-    --color-amber-tint: #fff2de;
+    --color-amber-tint: #fbe6c6;
 
     --color-leaf: #2fa562;
     --color-leaf-deep: #227a49;
-    --color-leaf-tint: #e8f6ee;
+    --color-leaf-tint: #dcefdf;
 
     --color-alert: #d6432b;
-    --color-alert-tint: #fbeae5;
+    --color-alert-tint: #f6ddd3;
 
-    --radius-control: 12px;
-    --radius-panel: 16px;
-    --radius-module: 8px;
+    /* Soft family: tiles and fields 16, cards 24, the digit housing stays the tight one. */
+    --radius-control: 16px;
+    --radius-panel: 24px;
+    --radius-module: 10px;
 
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
     --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+    /* A small overshoot: the springy "squish back" of a button after it is pressed. */
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    --shadow-sheet: 0 -12px 32px -12px rgb(20 17 13 / 0.28);
-    --shadow-lift: 0 10px 28px -14px rgb(20 17 13 / 0.32);
-    --shadow-module: 0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 -1px 0 0 rgb(0 0 0 / 0.3) inset;
+    /* Light from the top left. Shadows are tinted to the clay, never pure black. */
+    --shadow-raised: 10px 10px 22px var(--neu-dark), -10px -10px 22px var(--neu-light);
+    --shadow-raised-sm: 6px 6px 13px var(--neu-dark), -6px -6px 13px var(--neu-light);
+    --shadow-raised-xs: 3px 3px 7px var(--neu-dark), -3px -3px 7px var(--neu-light);
+    /* Small enough to live inside a scrolling track without being clipped (the segmented-control thumb). */
+    --shadow-raised-2xs: 2px 2px 5px var(--neu-dark), -2px -2px 5px var(--neu-light);
+    --shadow-inset: inset 6px 6px 12px var(--neu-dark), inset -6px -6px 12px var(--neu-light);
+    --shadow-inset-sm: inset 3px 3px 7px var(--neu-dark), inset -3px -3px 7px var(--neu-light);
+
+    /* Existing names kept so floating layers keep working: they now read as raised surfaces. */
+    --shadow-lift: 8px 12px 26px -6px var(--neu-dark), -6px -6px 16px var(--neu-light);
+    --shadow-sheet: 0 -14px 30px -10px rgb(60 44 20 / 0.35);
+    --shadow-module:
+        inset 2px 2px 5px rgb(0 0 0 / 0.6), inset -1px -1px 3px rgb(255 255 255 / 0.07), 1.5px 1.5px 2px var(--neu-light), -1px -1px 2px var(--neu-dark);
 }
 
 @layer base {
+    :root {
+        --neu-light: rgb(255 253 246 / 0.95);
+        --neu-dark: rgb(158 133 88 / 0.42);
+    }
+
     html {
         -webkit-tap-highlight-color: transparent;
         scrollbar-color: var(--color-rule-strong) transparent;
+    }
+
+    body {
+        background: var(--color-ground);
+        color: var(--color-ink);
     }
 
     ::selection {
@@ -67,7 +93,7 @@
 
     :focus-visible {
         outline: 3px solid var(--color-ink);
-        outline-offset: 2px;
+        outline-offset: 3px;
     }
 
     /* Inside a dark instrument module the ring switches to amber, the module's own light. */
@@ -89,9 +115,377 @@
         cursor: pointer;
     }
 
+    /* Every checkbox in the product: pressed in when empty, raised amber with a springy tick when chosen. */
+    input[type='checkbox'] {
+        appearance: none;
+        display: inline-grid;
+        place-content: center;
+        flex-shrink: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 0.5rem;
+        background: var(--color-ground-deep);
+        box-shadow: var(--shadow-inset-sm);
+        transition:
+            background-color 150ms var(--ease-out),
+            box-shadow 150ms var(--ease-out);
+    }
+
+    input[type='checkbox']::after {
+        content: '';
+        width: 0.8rem;
+        height: 0.8rem;
+        background: var(--color-ink);
+        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        transform: scale(0);
+        transition: transform 260ms var(--ease-spring);
+    }
+
+    input[type='checkbox']:checked {
+        background: var(--color-amber);
+        box-shadow: var(--shadow-raised-2xs);
+    }
+
+    input[type='checkbox']:checked::after {
+        transform: scale(1);
+    }
+
+    input[type='checkbox']:disabled {
+        opacity: 0.5;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        input[type='checkbox']::after {
+            transition: none;
+        }
+    }
+
     @media (prefers-reduced-motion: reduce) {
         html {
             scroll-behavior: auto;
+        }
+    }
+}
+
+/* Surfaces. Combine with nothing else: radius and shadow come with them. */
+@utility neu-card {
+    background: var(--neu-bg, var(--color-panel));
+    border-radius: var(--neu-radius, var(--radius-panel));
+    box-shadow: var(--shadow-raised);
+}
+
+@utility neu-tile {
+    background: var(--neu-bg, var(--color-panel));
+    border-radius: var(--neu-radius, var(--radius-control));
+    box-shadow: var(--shadow-raised-sm);
+}
+
+@utility neu-well {
+    background: var(--neu-bg, var(--color-ground-deep));
+    border-radius: var(--neu-radius, var(--radius-panel));
+    box-shadow: var(--shadow-inset);
+}
+
+@utility neu-well-sm {
+    background: var(--neu-bg, var(--color-ground-deep));
+    border-radius: var(--neu-radius, var(--radius-control));
+    box-shadow: var(--shadow-inset-sm);
+}
+
+/* Text fields, selects and textareas: pressed into the surface. The thin edge keeps the control findable without relying on shadow alone. */
+@utility neu-field {
+    background: var(--neu-bg, var(--color-ground-deep));
+    border: 1px solid rgb(33 29 23 / 0.26);
+    border-radius: var(--neu-radius, var(--radius-control));
+    box-shadow: var(--shadow-inset-sm);
+    transition:
+        box-shadow 180ms var(--ease-out),
+        border-color 150ms var(--ease-out);
+
+    &:hover:not(:disabled) {
+        border-color: rgb(33 29 23 / 0.45);
+    }
+
+    &:focus {
+        border-color: var(--color-ink);
+        box-shadow: var(--shadow-inset);
+    }
+
+    &[aria-invalid='true'] {
+        border-color: var(--color-alert);
+        background: var(--color-alert-tint);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+/* A pressable tile (list rows, tabs, option cards): lifts on hover, sinks when pressed or selected. */
+@utility neu-press {
+    background: var(--neu-bg, var(--color-panel));
+    border-radius: var(--neu-radius, var(--radius-control));
+    box-shadow: var(--shadow-raised-sm);
+    transition:
+        transform 320ms var(--ease-spring),
+        box-shadow 200ms var(--ease-out);
+
+    &:hover:not(:disabled, [aria-disabled='true'], [aria-current='true'], [aria-pressed='true'], [data-selected='true']) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-raised);
+    }
+
+    &:active:not(:disabled, [aria-disabled='true']),
+    &[aria-current='true'],
+    &[aria-pressed='true'],
+    &[data-selected='true'] {
+        transform: none;
+        background: var(--color-ground-deep);
+        box-shadow: var(--shadow-inset-sm);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: box-shadow 150ms var(--ease-out);
+
+        &:hover:not(:disabled, [aria-disabled='true']) {
+            transform: none;
+        }
+    }
+}
+
+/*
+ * Buttons. One base, one fill per variant, one size per height. Hover lifts, press sinks into the
+ * surface and springs back, solid fills catch a single light sweep. Nothing animates under reduced motion
+ * except the shadow swap, so the press still reads.
+ */
+@layer components {
+    .btn {
+        --btn-fill: var(--color-panel);
+        --btn-ink: var(--color-ink);
+        --btn-pressed: inset 4px 4px 9px var(--neu-dark), inset -4px -4px 9px var(--neu-light);
+
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: var(--radius-control);
+        background: var(--btn-fill);
+        color: var(--btn-ink);
+        font-weight: 600;
+        white-space: nowrap;
+        user-select: none;
+        touch-action: manipulation;
+        box-shadow: var(--shadow-raised-sm);
+        transition:
+            transform 360ms var(--ease-spring),
+            box-shadow 220ms var(--ease-out),
+            color 150ms var(--ease-out);
+    }
+
+    .btn:hover:not(:disabled, [aria-disabled='true']) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-raised);
+    }
+
+    .btn:disabled,
+    .btn[aria-disabled='true'] {
+        cursor: not-allowed;
+        opacity: 0.55;
+        box-shadow: var(--shadow-raised-xs);
+    }
+
+    /* Icons lean in a little on hover; a glyph beside the label, not a decoration on its own. */
+    .btn > svg {
+        flex-shrink: 0;
+        transition: transform 360ms var(--ease-spring);
+    }
+
+    .btn:hover:not(:disabled) > svg:first-child {
+        transform: rotate(-8deg) scale(1.12);
+    }
+
+    /* Solid fills: a convex gradient, a lit top edge, and one slow light sweep on hover. */
+    .btn-ink,
+    .btn-amber,
+    .btn-leaf,
+    .btn-alert {
+        background: var(--btn-fill);
+        box-shadow:
+            var(--shadow-raised-sm),
+            inset 0 1px 0 rgb(255 255 255 / 0.28);
+    }
+
+    .btn-ink:hover:not(:disabled),
+    .btn-amber:hover:not(:disabled),
+    .btn-leaf:hover:not(:disabled),
+    .btn-alert:hover:not(:disabled) {
+        box-shadow:
+            var(--shadow-raised),
+            inset 0 1px 0 rgb(255 255 255 / 0.32);
+    }
+
+    .btn-ink::after,
+    .btn-amber::after,
+    .btn-leaf::after,
+    .btn-alert::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.32) 50%, transparent 65%);
+        transform: translateX(-120%);
+        transition: transform 700ms var(--ease-out);
+        pointer-events: none;
+    }
+
+    .btn-ink:hover:not(:disabled)::after,
+    .btn-amber:hover:not(:disabled)::after,
+    .btn-leaf:hover:not(:disabled)::after,
+    .btn-alert:hover:not(:disabled)::after {
+        transform: translateX(120%);
+    }
+
+    .btn-ink {
+        --btn-fill: linear-gradient(150deg, #403a31, #1d1a15);
+        --btn-ink: #fff;
+        --btn-pressed: inset 4px 4px 10px rgb(0 0 0 / 0.6), inset -3px -3px 8px rgb(255 255 255 / 0.1);
+    }
+
+    .btn-amber {
+        --btn-fill: linear-gradient(150deg, #ffb760, #f48f26);
+        --btn-ink: var(--color-ink);
+        --btn-pressed: inset 4px 4px 10px rgb(150 70 0 / 0.55), inset -3px -3px 8px rgb(255 214 150 / 0.55);
+    }
+
+    .btn-leaf {
+        --btn-fill: linear-gradient(150deg, #3bb870, #23803f);
+        --btn-ink: #fff;
+        --btn-pressed: inset 4px 4px 10px rgb(0 60 25 / 0.55), inset -3px -3px 8px rgb(150 240 180 / 0.35);
+    }
+
+    .btn-alert {
+        --btn-fill: linear-gradient(150deg, #e2573e, #b8341d);
+        --btn-ink: #fff;
+        --btn-pressed: inset 4px 4px 10px rgb(90 10 0 / 0.55), inset -3px -3px 8px rgb(255 160 140 / 0.4);
+    }
+
+    /* Soft: the same clay as the page. The signature neumorphic button. */
+    .btn-soft {
+        --btn-fill: var(--color-panel);
+        --btn-ink: var(--color-ink);
+    }
+
+    /* Quiet: no surface until you reach for it. */
+    .btn-quiet {
+        --btn-fill: transparent;
+        --btn-ink: var(--color-ink-soft);
+        box-shadow: none;
+    }
+
+    .btn-quiet:hover:not(:disabled) {
+        --btn-ink: var(--color-ink);
+        box-shadow: var(--shadow-raised-xs);
+        transform: none;
+    }
+
+    /* Declared after every hover rule above so a press always wins over a hover. */
+    .btn:active:not(:disabled, [aria-disabled='true']) {
+        transform: translateY(1px) scale(0.96);
+        box-shadow: var(--btn-pressed);
+        transition-duration: 90ms;
+    }
+
+    .btn-sm {
+        height: 2.5rem;
+        padding-inline: 0.9rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-md {
+        height: 3rem;
+        padding-inline: 1.15rem;
+        font-size: 0.9375rem;
+    }
+
+    .btn-lg {
+        height: 3.5rem;
+        padding-inline: 1.5rem;
+        font-size: 1rem;
+    }
+
+    /* Round icon button: close, steppers, row actions. */
+    .btn-icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        padding: 0;
+        border-radius: 9999px;
+    }
+
+    .btn-icon.btn-sm {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    /* Loading: three small dots take the label's place. */
+    .btn-dots {
+        display: inline-flex;
+        gap: 0.25rem;
+    }
+
+    .btn-dots > i {
+        width: 0.4rem;
+        height: 0.4rem;
+        border-radius: 9999px;
+        background: currentColor;
+        animation: btn-bounce 900ms var(--ease-spring) infinite;
+    }
+
+    .btn-dots > i:nth-child(2) {
+        animation-delay: 120ms;
+    }
+
+    .btn-dots > i:nth-child(3) {
+        animation-delay: 240ms;
+    }
+
+    @keyframes btn-bounce {
+        0%,
+        60%,
+        100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-0.35rem);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .btn {
+            transition:
+                box-shadow 150ms var(--ease-out),
+                color 150ms var(--ease-out);
+        }
+
+        .btn:hover:not(:disabled),
+        .btn:active:not(:disabled),
+        .btn:hover:not(:disabled) > svg:first-child {
+            transform: none;
+        }
+
+        .btn-ink::after,
+        .btn-amber::after,
+        .btn-leaf::after,
+        .btn-alert::after {
+            display: none;
+        }
+
+        .btn-dots > i {
+            animation: none;
         }
     }
 }
@@ -101,9 +495,48 @@
         font-variant-numeric: tabular-nums;
     }
 
-    /* Admin headings only — page titles and section heads. Body copy, controls and the digit face stay as they are. */
+    /* Admin headings only: page titles and section heads. Body copy, controls and the digit face stay as they are. */
     .font-heading {
         font-family: var(--font-heading);
+    }
+
+    /* Tables sit inside a raised card: hairlines between rows, a soft wash under the row you are reading. */
+    .data-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .data-table th {
+        border-bottom: 1px solid rgb(33 29 23 / 0.14);
+    }
+
+    .data-table tbody tr + tr > * {
+        border-top: 1px solid rgb(33 29 23 / 0.08);
+    }
+
+    .data-table tbody tr:hover > * {
+        background: color-mix(in srgb, var(--color-ground-deep) 65%, transparent);
+    }
+
+    .data-table tbody tr:hover > :first-child {
+        border-start-start-radius: 0.75rem;
+        border-end-start-radius: 0.75rem;
+    }
+
+    .data-table tbody tr:hover > :last-child {
+        border-start-end-radius: 0.75rem;
+        border-end-end-radius: 0.75rem;
+    }
+
+    /* Section heading with the amber rule beneath it: the one place amber is used as a line. */
+    .section-title::after {
+        content: '';
+        display: block;
+        width: 3rem;
+        height: 4px;
+        margin-top: 0.6rem;
+        border-radius: 9999px;
+        background: var(--color-amber);
     }
 
     /* The signature primitive: an LED-style digit readout. See DigitDisplay.tsx. */

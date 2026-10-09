@@ -14,7 +14,7 @@ class DashboardController extends Controller
     public function __invoke(): Response
     {
         $today = Order::query()->today()
-            ->selectRaw("count(*) as orders_count")
+            ->selectRaw('count(*) as orders_count')
             ->selectRaw("coalesce(sum(case when status <> 'cancelled' then total else 0 end), 0) as revenue")
             ->selectRaw("sum(case when status <> 'cancelled' then 1 else 0 end) as billable_count")
             ->selectRaw("sum(case when status = 'pending' then 1 else 0 end) as pending_count")

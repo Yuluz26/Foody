@@ -1,13 +1,13 @@
 import { Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/Button';
+import { Button, buttonClass } from '@/components/ui/Button';
 
 /** Save and cancel, pinned to the bottom of long forms on small screens. */
 export function FormFooter({ cancelHref, processing, isDirty, saveLabel = 'Simpan' }: { cancelHref?: string; processing: boolean; isDirty: boolean; saveLabel?: string }) {
     return (
-        <div className="sticky bottom-0 z-20 -mx-4 mt-8 flex items-center justify-end gap-3 border-t-2 border-ink bg-ground/95 px-4 py-3 pb-safe sm:mx-0 sm:px-0 lg:static lg:bg-transparent lg:pb-3">
+        <div className="sticky bottom-0 z-20 -mx-4 mt-8 flex items-center justify-end gap-3 rounded-t-(--radius-panel) bg-ground/95 px-4 py-3 pb-safe shadow-[0_-12px_18px_-14px_var(--neu-dark)] backdrop-blur-sm sm:mx-0 sm:px-0 lg:static lg:rounded-none lg:bg-transparent lg:pb-3 lg:shadow-none lg:backdrop-blur-none">
             {isDirty && !processing && <p className="mr-auto text-sm font-semibold text-ink-muted">Ada perubahan belum disimpan</p>}
             {cancelHref && (
-                <Link href={cancelHref} className="flex h-12 items-center rounded-(--radius-control) px-4 font-semibold text-ink-soft hover:bg-rule/60 hover:text-ink">
+                <Link href={cancelHref} className={buttonClass({ variant: 'quiet' })}>
                     Batal
                 </Link>
             )}

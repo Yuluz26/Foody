@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Actions\IngredientLedger;
 use App\Actions\PlaceOrder;
+use App\Actions\StockLedger;
 use App\Enums\OrderStatus;
 use App\Exceptions\OrderRejected;
 use App\Http\Controllers\Controller;
@@ -12,6 +14,7 @@ use App\Models\Order;
 use App\Models\RestaurantSetting;
 use App\Support\MenuPresenter;
 use App\Support\ReceiptPdf;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Log;
@@ -38,7 +41,7 @@ class OrderController extends Controller
 
     public function show(Order $order): Response
     {
-        $this->authorizeOwner($order);
+        $this->authorizeAccess($order);
 
         $settings = RestaurantSetting::current();
 
@@ -65,9 +68,9 @@ class OrderController extends Controller
     }
 
     /** Self-service cancel stops once the kitchen has acted — past that, the customer calls the stall instead. */
-    public function cancel(Order $order): RedirectResponse
+    public function cancel(Order $order, StockLedger $stock, IngredientLedger $ingredients): RedirectResponse
     {
-        $this->authorizeOwner($order);
+        $this->authorizeAccess($order);
 
         abort_unless(
             in_array($order->status, [OrderStatus::Pending, OrderStatus::Confirmed], true),
@@ -82,6 +85,9 @@ class OrderController extends Controller
         $order->cancelled_by_customer = true;
         $order->save();
 
+        $stock->syncOrder($order);
+        $ingredients->syncOrder($order);
+
         try {
             Mail::to(config('mail.from.address'))->send(new OrderCancelledStaffMail($order));
         } catch (Throwable $exception) {
@@ -93,13 +99,26 @@ class OrderController extends Controller
 
     public function receipt(Order $order): HttpResponse
     {
-        $this->authorizeOwner($order);
+        $this->authorizeAccess($order);
 
         return ReceiptPdf::for($order)->download("resit-{$order->order_number}.pdf");
     }
 
-    private function authorizeOwner(Order $order): void
+    /**
+     * An order placed without an account belongs to whoever holds its link: the public id in the URL is an
+     * unguessable ULID, so the link is the key. An account's order stays with that account — someone signed
+     * out is sent to log in and brought back here, someone signed in as another account is refused.
+     */
+    private function authorizeAccess(Order $order): void
     {
+        if ($order->customer_id === null) {
+            return;
+        }
+
+        if (! auth('customer')->check()) {
+            throw new AuthenticationException('Unauthenticated.', ['customer'], route('customer.login'));
+        }
+
         abort_unless($order->customer_id === auth('customer')->id(), 403, 'Pesanan ini bukan milik anda.');
     }
 }

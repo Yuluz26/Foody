@@ -1,16 +1,18 @@
 import { Link, useForm } from '@inertiajs/react';
-import { ForkKnifeIcon, PlusIcon, TrashIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { ForkKnifeIcon, PlusIcon, SquaresFourIcon, TrashIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { FormEvent } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { FormFooter } from '@/components/admin/FormFooter';
 import { ImageInput } from '@/components/admin/ImageInput';
-import { Button } from '@/components/ui/Button';
+import { newRecipeKey, RecipeEditor, type RecipeField } from '@/components/admin/RecipeEditor';
+import { Button, buttonClass } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Field, inputClass } from '@/components/ui/Field';
 import { Switch } from '@/components/ui/Switch';
 import { cn } from '@/lib/format';
 import { duration, ease } from '@/lib/motion';
-import type { AdminProduct, Option } from '@/types';
+import type { AdminProduct, IngredientOption, Option } from '@/types';
 
 type AddOnField = {
     /** Client-only, so React and the row-removal logic have a stable key even before the row is saved. */
@@ -27,6 +29,10 @@ type ProductFields = {
     price: string;
     is_available: boolean;
     is_featured: boolean;
+    track_stock: boolean;
+    stock_quantity: string;
+    low_stock_threshold: string;
+    recipe: RecipeField[];
     image: File | null;
     remove_image: boolean;
     add_ons: AddOnField[];
@@ -43,21 +49,21 @@ function AddOnsEditor({ rows, errors, onChange }: { rows: AddOnField[]; errors: 
     const removeRow = (key: string) => onChange(rows.filter((row) => row.key !== key));
 
     return (
-        <div className="grid content-start gap-4 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5 sm:p-6 lg:col-span-2">
+        <div className="neu-card grid content-start gap-4 p-5 sm:p-6 lg:col-span-2">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 className="text-lg font-bold text-ink">Add-on</h2>
                     <p className="mt-0.5 text-sm text-ink-muted">Pilihan tambahan seperti telur atau sambal extra. Kosongkan jika produk ini tiada add-on.</p>
                 </div>
-                <Button type="button" variant="outline" size="sm" onClick={addRow}>
+                <Button type="button" variant="soft" size="sm" onClick={addRow}>
                     <PlusIcon size={16} weight="bold" aria-hidden />
                     Tambah add-on
                 </Button>
             </div>
 
             {rows.length === 0 ? (
-                <div className="flex items-center gap-3 rounded-(--radius-control) border-2 border-dashed border-rule-strong px-4 py-3.5 text-sm text-ink-muted">
-                    <ForkKnifeIcon size={20} weight="bold" className="shrink-0 text-rule-strong" aria-hidden />
+                <div className="neu-well-sm flex items-center gap-3 px-4 py-3.5 text-sm text-ink-muted">
+                    <ForkKnifeIcon size={20} weight="bold" className="shrink-0" aria-hidden />
                     Tiada add-on lagi. Produk ini akan dipaparkan tanpa pilihan tambahan di panel pelanggan.
                 </div>
             ) : (
@@ -128,7 +134,7 @@ function AddOnsEditor({ rows, errors, onChange }: { rows: AddOnField[]; errors: 
                                         type="button"
                                         onClick={() => removeRow(row.key)}
                                         aria-label={`Buang add-on ${row.name || index + 1}`}
-                                        className="grid size-12 shrink-0 place-items-center rounded-(--radius-control) text-ink-muted transition-[transform,background-color,color] duration-150 ease-out hover:bg-alert-tint hover:text-alert active:scale-90"
+                                        className={buttonClass({ variant: 'quiet', icon: true, className: 'hover:text-alert' })}
                                     >
                                         <TrashIcon size={18} weight="bold" aria-hidden />
                                     </button>
@@ -142,7 +148,54 @@ function AddOnsEditor({ rows, errors, onChange }: { rows: AddOnField[]; errors: 
     );
 }
 
-export default function ProductForm({ product, categories }: { product: AdminProduct | null; categories: Option[] }) {
+type StockPanelProps = {
+    product: AdminProduct | null;
+    tracked: boolean;
+    quantity: string;
+    threshold: string;
+    errors: Record<string, string | undefined>;
+    onTrackedChange: (checked: boolean) => void;
+    onQuantityChange: (value: string) => void;
+    onThresholdChange: (value: string) => void;
+};
+
+/** Opening count only while tracking is being switched on; after that every change goes through the Stok page so it is logged. */
+function StockPanel({ product, tracked, quantity, threshold, errors, onTrackedChange, onQuantityChange, onThresholdChange }: StockPanelProps) {
+    const alreadyTracked = product?.trackStock ?? false;
+
+    return (
+        <div className="neu-card grid content-start gap-5 p-5 sm:p-6 lg:col-span-2">
+            <Switch
+                checked={tracked}
+                onChange={onTrackedChange}
+                label="Jejak stok"
+                description="Baki ditolak sendiri bila pesanan masuk. Bila sampai kosong, hidangan ditanda habis dengan sendirinya."
+            />
+            {tracked && (
+                <div className="grid gap-4 border-t border-ink/10 pt-5 sm:grid-cols-2">
+                    {alreadyTracked ? (
+                        <div className="grid content-start gap-1.5">
+                            <p className="text-[15px] font-semibold text-ink">Baki sekarang</p>
+                            <p className="font-mono text-2xl font-semibold text-ink tabular-nums">{product?.stockQuantity}</p>
+                            <Link href="/admin/stock" className="inline-flex min-h-10 w-fit items-center text-sm font-semibold text-ink-soft underline-offset-2 hover:underline">
+                                Tambah atau betulkan di halaman Stok
+                            </Link>
+                        </div>
+                    ) : (
+                        <Field id="stock_quantity" label="Baki permulaan" hint="Berapa yang ada sekarang." error={errors.stock_quantity}>
+                            {(control) => <input {...control} type="number" inputMode="numeric" min={0} step={1} value={quantity} onChange={(event) => onQuantityChange(event.target.value)} className={cn(inputClass, 'max-w-40 tabular')} />}
+                        </Field>
+                    )}
+                    <Field id="low_stock_threshold" label="Beri amaran bila baki" hint="Hidangan muncul sebagai hampir habis pada atau bawah angka ini." error={errors.low_stock_threshold}>
+                        {(control) => <input {...control} type="number" inputMode="numeric" min={0} step={1} value={threshold} onChange={(event) => onThresholdChange(event.target.value)} className={cn(inputClass, 'max-w-40 tabular')} />}
+                    </Field>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default function ProductForm({ product, categories, ingredients }: { product: AdminProduct | null; categories: Option[]; ingredients: IngredientOption[] }) {
     const form = useForm<ProductFields>({
         category_id: product ? String(product.categoryId) : String(categories[0]?.id ?? ''),
         name: product?.name ?? '',
@@ -150,6 +203,10 @@ export default function ProductForm({ product, categories }: { product: AdminPro
         price: product ? (product.price / 100).toFixed(2) : '',
         is_available: product?.isAvailable ?? true,
         is_featured: product?.isFeatured ?? false,
+        track_stock: product?.trackStock ?? false,
+        stock_quantity: '',
+        low_stock_threshold: String(product?.lowStockThreshold ?? 5),
+        recipe: (product?.recipe ?? []).map((line) => ({ key: newRecipeKey(), ingredientId: String(line.ingredientId), quantity: String(line.quantity) })),
         image: null,
         remove_image: false,
         add_ons: (product?.addOns ?? []).map((addOn) => ({ key: newAddOnKey(), id: addOn.id, name: addOn.name, price: (addOn.price / 100).toFixed(2) })),
@@ -159,25 +216,24 @@ export default function ProductForm({ product, categories }: { product: AdminPro
     const submit = (event: FormEvent) => {
         event.preventDefault();
 
-        if (product) {
+        form.transform((data) => ({
+            ...data,
+            recipe: data.recipe.map((row) => ({ ingredient_id: row.ingredientId, quantity: row.quantity })),
             // Files need multipart POST; Laravel reads the intended verb from _method.
-            form.transform((data) => ({ ...data, _method: 'put' }));
-            form.post(`/admin/products/${product.id}`, { forceFormData: true, preserveScroll: true });
-        } else {
-            form.post('/admin/products', { forceFormData: true, preserveScroll: true });
-        }
+            ...(product ? { _method: 'put' } : {}),
+        }));
+
+        form.post(product ? `/admin/products/${product.id}` : '/admin/products', { forceFormData: true, preserveScroll: true });
     };
 
     if (categories.length === 0) {
         return (
             <AdminLayout title="Tambah produk">
-                <div className="border-2 border-dashed border-rule-strong p-8">
-                    <p className="text-lg font-semibold">Tambah kategori dahulu</p>
-                    <p className="mt-1 text-[15px] text-ink-muted">Setiap produk mesti berada dalam satu kategori, contohnya Nasi atau Minuman.</p>
-                    <Link href="/admin/categories/create" className="mt-4 inline-flex h-12 items-center rounded-(--radius-control) bg-ink px-4 font-semibold text-white hover:bg-ink-soft">
+                <EmptyState Icon={SquaresFourIcon} title="Tambah kategori dahulu" description="Setiap produk mesti berada dalam satu kategori, contohnya Nasi atau Minuman.">
+                    <Link href="/admin/categories/create" className={buttonClass()}>
                         Tambah kategori
                     </Link>
-                </div>
+                </EmptyState>
             </AdminLayout>
         );
     }
@@ -186,7 +242,7 @@ export default function ProductForm({ product, categories }: { product: AdminPro
         <AdminLayout title={product ? `Edit ${product.name}` : 'Tambah produk'}>
             <form onSubmit={submit} noValidate>
                 <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-                    <div className="grid content-start gap-5 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5 sm:p-6">
+                    <div className="neu-card grid content-start gap-5 p-5 sm:p-6">
                         <Field id="name" label="Nama produk" error={form.errors.name}>
                             {(control) => (
                                 <input {...control} type="text" maxLength={120} value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} className={inputClass} />
@@ -236,7 +292,7 @@ export default function ProductForm({ product, categories }: { product: AdminPro
                         </Field>
                     </div>
 
-                    <div className="grid content-start gap-6 rounded-(--radius-panel) border-2 border-rule-strong bg-panel p-5 sm:p-6">
+                    <div className="neu-card grid content-start gap-6 p-5 sm:p-6">
                         <ImageInput
                             label="Gambar"
                             currentUrl={product?.imageUrl ?? null}
@@ -246,7 +302,7 @@ export default function ProductForm({ product, categories }: { product: AdminPro
                             onRemovedChange={(removed) => form.setData('remove_image', removed)}
                             error={form.errors.image}
                         />
-                        <div className="grid gap-4 border-t border-rule pt-5">
+                        <div className="grid gap-4 border-t border-ink/10 pt-5">
                             <Switch
                                 checked={form.data.is_available}
                                 onChange={(checked) => form.setData('is_available', checked)}
@@ -261,6 +317,25 @@ export default function ProductForm({ product, categories }: { product: AdminPro
                             />
                         </div>
                     </div>
+
+                    <StockPanel
+                        product={product}
+                        tracked={form.data.track_stock}
+                        quantity={form.data.stock_quantity}
+                        threshold={form.data.low_stock_threshold}
+                        errors={errors}
+                        onTrackedChange={(checked) => form.setData('track_stock', checked)}
+                        onQuantityChange={(value) => form.setData('stock_quantity', value)}
+                        onThresholdChange={(value) => form.setData('low_stock_threshold', value)}
+                    />
+
+                    <RecipeEditor
+                        rows={form.data.recipe}
+                        ingredients={ingredients}
+                        priceInSen={Math.round((Number.parseFloat(form.data.price) || 0) * 100)}
+                        errors={errors}
+                        onChange={(rows) => form.setData('recipe', rows)}
+                    />
 
                     <AddOnsEditor rows={form.data.add_ons} errors={errors} onChange={(rows) => form.setData('add_ons', rows)} />
                 </div>

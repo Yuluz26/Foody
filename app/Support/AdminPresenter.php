@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Enums\OrderStatus;
 use App\Models\Category;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductAddOn;
@@ -18,6 +19,7 @@ class AdminPresenter
             'id' => $order->id,
             'number' => $order->order_number,
             'publicId' => $order->public_id,
+            'source' => $order->source,
             'customerName' => $order->customer_name,
             'customerPhone' => $order->customer_phone,
             'type' => $order->type->value,
@@ -79,6 +81,13 @@ class AdminPresenter
             'imageUrl' => $product->image_url,
             'isAvailable' => $product->is_available,
             'isFeatured' => $product->is_featured,
+            'trackStock' => $product->track_stock,
+            'stockQuantity' => $product->stock_quantity,
+            'lowStockThreshold' => $product->low_stock_threshold,
+            'stockState' => self::stockState($product),
+            'recipe' => $product->relationLoaded('recipeItems')
+                ? $product->recipeItems->map(fn ($item) => ['ingredientId' => $item->ingredient_id, 'quantity' => $item->quantity])->all()
+                : [],
             'sortOrder' => $product->sort_order,
             'addOns' => $product->addOns->map(fn (ProductAddOn $addOn) => [
                 'id' => $addOn->id,
@@ -86,6 +95,17 @@ class AdminPresenter
                 'price' => $addOn->price,
             ])->all(),
         ];
+    }
+
+    /** @return 'untracked'|'out'|'low'|'ok' */
+    public static function stockState(Product $product): string
+    {
+        return match (true) {
+            ! $product->track_stock => 'untracked',
+            ! $product->isInStock() => 'out',
+            $product->isLowOnStock() => 'low',
+            default => 'ok',
+        };
     }
 
     /** @return array<string, mixed> */
@@ -99,6 +119,20 @@ class AdminPresenter
             'isActive' => $category->is_active,
             'sortOrder' => $category->sort_order,
             'productsCount' => $category->products_count ?? null,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public static function customer(Customer $customer): array
+    {
+        return [
+            'id' => $customer->id,
+            'name' => $customer->name,
+            'email' => $customer->email,
+            'phone' => $customer->phone,
+            'ordersCount' => $customer->orders_count ?? null,
+            'lastOrderAt' => $customer->last_order_at?->toIso8601String(),
+            'createdAt' => $customer->created_at->toIso8601String(),
         ];
     }
 

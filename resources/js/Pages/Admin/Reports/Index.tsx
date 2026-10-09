@@ -5,12 +5,14 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { ConfirmButton } from '@/components/ConfirmButton';
 import { CompletedOrdersChart, TrendSummary, type TrendPoint } from '@/components/admin/CompletedOrdersChart';
 import { EmptyOrdersState, OrderFilterBar, SelectionToolbar } from '@/components/admin/OrderListControls';
-import { ADMIN_STATUS, StatusBadge } from '@/components/admin/StatusBadge';
-import { PaymentBadge } from '@/components/admin/PaymentBadge';
+import { ORDER_STATUS, StatusBadge } from '@/components/StatusBadge';
+import { PaymentBadge } from '@/components/PaymentBadge';
 import { useFilters } from '@/components/admin/useFilters';
 import { useRowSelection } from '@/components/admin/useRowSelection';
 import { DigitDisplay } from '@/components/DigitDisplay';
 import { Pagination } from '@/components/Pagination';
+import { buttonClass } from '@/components/ui/Button';
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs';
 import { cn, formatDateTime, formatPrice } from '@/lib/format';
 import type { AdminOrderRow, Paginated, StatusOption } from '@/types';
 
@@ -34,10 +36,10 @@ const PERIODS = [
 
 function ReportOrderRow({ order, selected, onToggleSelect }: { order: AdminOrderRow; selected: boolean; onToggleSelect: (id: number) => void }) {
     return (
-        <li className={cn('grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 px-4 py-4 transition-colors duration-150', selected ? 'bg-amber-tint' : 'hover:bg-ground')}>
+        <li className={cn('neu-tile grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 px-4 py-4 [--neu-radius:var(--radius-panel)]', selected && 'shadow-(--shadow-inset-sm)')}>
             <label className="flex h-11 items-center">
                 <span className="sr-only">Pilih pesanan {order.number}</span>
-                <input type="checkbox" checked={selected} onChange={() => onToggleSelect(order.id)} className="size-5 shrink-0 rounded-sm border-2 border-rule-strong accent-ink" />
+                <input type="checkbox" checked={selected} onChange={() => onToggleSelect(order.id)} />
             </label>
             <div className="min-w-0">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -55,10 +57,7 @@ function ReportOrderRow({ order, selected, onToggleSelect }: { order: AdminOrder
                     <PaymentBadge status={order.paymentStatus} />
                     <span className="tabular font-semibold">{formatPrice(order.total)}</span>
                 </div>
-                <a
-                    href={`/admin/orders/${order.id}/receipt`}
-                    className="mt-2 inline-flex h-9 items-center gap-1.5 rounded-(--radius-control) px-2.5 text-sm font-semibold text-ink-soft hover:bg-rule/60 hover:text-ink"
-                >
+                <a href={`/admin/orders/${order.id}/receipt`} className={buttonClass({ variant: 'quiet', size: 'sm', className: 'mt-2 -ml-3' })}>
                     <PrinterIcon size={16} weight="bold" aria-hidden />
                     Cetak resit
                 </a>
@@ -88,7 +87,7 @@ export default function ReportsIndex({ orders, filters: initial, statusOptions, 
     const tabs = [
         { value: 'completed', label: 'Selesai' },
         { value: 'all', label: 'Semua' },
-        ...statusOptions.filter((option) => option.value !== 'completed').map((option) => ({ value: option.value, label: ADMIN_STATUS[option.value].label })),
+        ...statusOptions.filter((option) => option.value !== 'completed').map((option) => ({ value: option.value, label: ORDER_STATUS[option.value].label })),
     ];
 
     const filtered = filters.q !== '' || filters.type !== '' || filters.date_from !== '' || filters.date_to !== '' || filters.status !== 'completed';
@@ -97,54 +96,18 @@ export default function ReportsIndex({ orders, filters: initial, statusOptions, 
         <AdminLayout title="Laporan">
             <div className="grid gap-4 sm:flex sm:items-center sm:justify-between">
                 <p className="text-[15px] text-ink-muted">Prestasi pesanan selesai, mengikut tempoh.</p>
-                <div role="tablist" aria-label="Tempoh carta" className="flex gap-0.5 self-start rounded-(--radius-control) border-2 border-rule-strong bg-ground p-0.5">
-                    {PERIODS.map((option) => (
-                        <button
-                            key={option.value}
-                            type="button"
-                            role="tab"
-                            aria-selected={filters.period === option.value}
-                            onClick={() => set('period', option.value)}
-                            className={cn(
-                                'h-9 rounded-(--radius-module) px-3 text-sm font-semibold transition-colors duration-150',
-                                filters.period === option.value ? 'bg-amber text-ink' : 'text-ink-soft hover:text-ink',
-                            )}
-                        >
-                            {option.label}
-                        </button>
-                    ))}
-                </div>
+                <SegmentedTabs label="Tempoh carta" tabs={PERIODS} value={filters.period} onChange={(period) => set('period', period)} className="self-start" />
             </div>
 
-            <div className="mt-4 grid gap-6">
+            <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-6">
                 <TrendSummary trend={trend} />
                 <CompletedOrdersChart trend={trend} />
             </div>
 
-            <div className="mt-10 border-t-2 border-rule pt-8">
-                <h2 className="font-heading text-2xl font-extrabold text-ink">Sejarah pesanan</h2>
+            <div className="mt-12">
+                <h2 className="section-title font-heading text-2xl font-extrabold text-ink">Sejarah pesanan</h2>
 
-                <div role="tablist" aria-label="Tapis status" className="no-scrollbar -mx-4 mt-4 flex gap-1 overflow-x-auto border-b-2 border-rule px-4 sm:mx-0 sm:px-0">
-                    {tabs.map((tab) => {
-                        const isSelected = filters.status === tab.value;
-
-                        return (
-                            <button
-                                key={tab.value}
-                                type="button"
-                                role="tab"
-                                aria-selected={isSelected}
-                                onClick={() => set('status', tab.value)}
-                                className={cn(
-                                    'relative h-12 shrink-0 px-3 font-semibold whitespace-nowrap transition-colors duration-150',
-                                    isSelected ? 'text-ink after:absolute after:inset-x-2 after:-bottom-0.5 after:h-1 after:rounded-full after:bg-amber' : 'text-ink-soft hover:text-ink',
-                                )}
-                            >
-                                {tab.label}
-                            </button>
-                        );
-                    })}
-                </div>
+                <SegmentedTabs label="Tapis status" tabs={tabs} value={filters.status} onChange={(status) => set('status', status)} className="mt-6" />
 
                 <OrderFilterBar filters={filters} onChange={set} />
 
@@ -158,12 +121,7 @@ export default function ReportsIndex({ orders, filters: initial, statusOptions, 
                 ) : (
                     <>
                         <SelectionToolbar count={selected.size} allSelected={allSelected} bulkPending={bulkPending} onToggleAll={toggleSelectAll} onClear={clear}>
-                            <a
-                                href={bulkReceiptsHref}
-                                target="_blank"
-                                rel="noopener"
-                                className="inline-flex h-10 touch-manipulation items-center justify-center gap-2 rounded-(--radius-control) border-2 border-ink px-3 text-sm font-semibold text-ink transition-[transform,background-color,color,box-shadow] duration-150 ease-out hover:-translate-y-0.5 hover:bg-ink hover:text-white hover:shadow-(--shadow-lift) active:translate-y-0 active:scale-[0.97]"
-                            >
+                            <a href={bulkReceiptsHref} target="_blank" rel="noopener" className={buttonClass({ variant: 'soft', size: 'sm' })}>
                                 <PrinterIcon size={16} weight="bold" aria-hidden />
                                 Cetak resit
                             </a>
@@ -180,16 +138,17 @@ export default function ReportsIndex({ orders, filters: initial, statusOptions, 
                             )}
                         </SelectionToolbar>
 
-                        <ul className="divide-y divide-rule border-y border-rule bg-panel sm:hidden">
+                        <ul className="mt-4 grid gap-3 sm:hidden">
                             {orders.data.map((order) => (
                                 <ReportOrderRow key={order.id} order={order} selected={selected.has(order.id)} onToggleSelect={toggleSelect} />
                             ))}
                         </ul>
 
-                        <div className="hidden overflow-x-auto border-y border-rule sm:block">
-                            <table className="w-full min-w-[760px] text-left text-[15px]">
-                                <thead className="bg-ground">
-                                    <tr className="border-b-2 border-rule-strong text-sm text-ink-muted">
+                        <div className="neu-card mt-4 hidden p-3 sm:block">
+                          <div className="overflow-x-auto">
+                            <table className="data-table w-full min-w-[760px] text-left text-[15px]">
+                                <thead>
+                                    <tr className="text-sm text-ink-muted">
                                         <th scope="col" className="w-12 py-3 pl-4">
                                             <span className="sr-only">Pilih</span>
                                         </th>
@@ -216,9 +175,9 @@ export default function ReportsIndex({ orders, filters: initial, statusOptions, 
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-rule bg-panel">
+                                <tbody>
                                     {orders.data.map((order) => (
-                                        <tr key={order.id} className={cn('transition-colors duration-150 hover:bg-amber-tint/40', selected.has(order.id) && 'bg-amber-tint/60')}>
+                                        <tr key={order.id} className={cn(selected.has(order.id) && '[&>*]:bg-amber-tint/60')}>
                                             <td className="py-3 pl-4">
                                                 <label>
                                                     <span className="sr-only">Pilih pesanan {order.number}</span>
@@ -226,7 +185,6 @@ export default function ReportsIndex({ orders, filters: initial, statusOptions, 
                                                         type="checkbox"
                                                         checked={selected.has(order.id)}
                                                         onChange={() => toggleSelect(order.id)}
-                                                        className="size-5 rounded-sm border-2 border-rule-strong accent-ink"
                                                     />
                                                 </label>
                                             </td>
@@ -248,7 +206,7 @@ export default function ReportsIndex({ orders, filters: initial, statusOptions, 
                                                 </p>
                                             </td>
                                             <td className="py-3 pr-4 text-ink-muted whitespace-nowrap">{formatDateTime(order.createdAt)}</td>
-                                            <td className="tabular py-3 pr-4 text-right font-semibold">{formatPrice(order.total)}</td>
+                                            <td className="tabular py-3 pr-4 text-right font-semibold whitespace-nowrap">{formatPrice(order.total)}</td>
                                             <td className="py-3 pr-4">
                                                 <PaymentBadge status={order.paymentStatus} />
                                             </td>
@@ -256,10 +214,7 @@ export default function ReportsIndex({ orders, filters: initial, statusOptions, 
                                                 <StatusBadge status={order.status} />
                                             </td>
                                             <td className="py-3 pr-4 text-right">
-                                                <a
-                                                    href={`/admin/orders/${order.id}/receipt`}
-                                                    className="inline-flex h-9 items-center gap-1.5 rounded-(--radius-control) px-2.5 text-sm font-semibold text-ink-soft hover:bg-rule/60 hover:text-ink"
-                                                >
+                                                <a href={`/admin/orders/${order.id}/receipt`} className={buttonClass({ variant: 'quiet', size: 'sm' })}>
                                                     <PrinterIcon size={16} weight="bold" aria-hidden />
                                                     Resit
                                                 </a>
@@ -268,6 +223,7 @@ export default function ReportsIndex({ orders, filters: initial, statusOptions, 
                                     ))}
                                 </tbody>
                             </table>
+                          </div>
                         </div>
                     </>
                 )}
