@@ -1,6 +1,7 @@
-import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
+import { EyeIcon, EyeSlashIcon, type Icon } from '@phosphor-icons/react';
 import { useId, useState } from 'react';
 import { inputClass } from '@/components/ui/Field';
+import { FieldIcon } from '@/components/ui/IconInput';
 import { cn } from '@/lib/format';
 
 type ControlProps = {
@@ -14,22 +15,25 @@ type PasswordInputProps = {
     value: string;
     onChange: (value: string) => void;
     autoComplete: 'current-password' | 'new-password';
+    /** Optional leading icon tile, matching <IconInput>. */
+    icon?: Icon;
 };
 
 /** A password field with a show/hide toggle — expected in every modern login/register form. */
-export function PasswordInput({ control, value, onChange, autoComplete }: PasswordInputProps) {
+export function PasswordInput({ control, value, onChange, autoComplete, icon }: PasswordInputProps) {
     const [revealed, setRevealed] = useState(false);
     const toggleId = useId();
 
     return (
-        <div className="relative">
+        <div className="group relative">
+            {icon && <FieldIcon icon={icon} />}
             <input
                 {...control}
                 type={revealed ? 'text' : 'password'}
                 autoComplete={autoComplete}
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
-                className={cn(inputClass, 'pr-12')}
+                className={cn(inputClass, 'pr-12', icon && 'pl-14')}
             />
             <button
                 type="button"
