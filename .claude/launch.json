@@ -14,6 +14,14 @@
             "runtimeArgs": ["artisan", "serve", "--host=127.0.0.1", "--port=8129"],
             "port": 8129,
             "autoPort": false
+        },
+        {
+            "name": "foody-tunnel",
+            "runtimeExecutable": "C:\\laragon\\bin\\php\\php-8.3.14\\php.exe",
+            "runtimeArgs": ["artisan", "serve", "--host=127.0.0.1", "--port=8130", "--no-reload"],
+            "env": { "APP_DEBUG": "false", "TRUSTED_PROXIES": "*" },
+            "port": 8130,
+            "autoPort": false
         }
     ]
 }
